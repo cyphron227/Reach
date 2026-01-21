@@ -45,10 +45,11 @@ export default function SettingsPage() {
       .single()
 
     if (settingsData) {
-      setSettings(settingsData)
-      setNotificationsEnabled(settingsData.notifications_enabled)
-      setNotificationTime(settingsData.notification_time)
-      setWeeklyReflectionEnabled(settingsData.weekly_reflection_enabled)
+      const settings = settingsData as UserSettings
+      setSettings(settings)
+      setNotificationsEnabled(settings.notifications_enabled)
+      setNotificationTime(settings.notification_time)
+      setWeeklyReflectionEnabled(settings.weekly_reflection_enabled)
     } else {
       // Create default settings
       const { data: newSettings } = await supabase
@@ -63,7 +64,7 @@ export default function SettingsPage() {
         .single()
 
       if (newSettings) {
-        setSettings(newSettings)
+        setSettings(newSettings as UserSettings)
       }
     }
 

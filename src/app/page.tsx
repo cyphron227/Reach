@@ -10,7 +10,6 @@ import AddConnectionModal from '@/components/AddConnectionModal'
 import EditConnectionModal from '@/components/EditConnectionModal'
 import ConnectionDetailModal from '@/components/ConnectionDetailModal'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
 
 const CONNECTIONS_TO_SHOW = 3
 
@@ -24,7 +23,6 @@ export default function TodayPage() {
   const [showEditModal, setShowEditModal] = useState(false)
   const [showDetailModal, setShowDetailModal] = useState(false)
   const [selectedConnection, setSelectedConnection] = useState<Connection | null>(null)
-  const router = useRouter()
 
   const supabase = createClient()
 
@@ -41,24 +39,22 @@ export default function TodayPage() {
     return data
   }, [supabase])
 
-  const fetchConnections = useCallback(async () => {
+  const fetchConnections = useCallback(async (): Promise<Connection[]> => {
     const { data: { user: authUser } } = await supabase.auth.getUser()
     if (!authUser) return []
 
     // Get connections with the oldest last_interaction_date
     // Null dates (never contacted) come first, then oldest dates
-    const query = supabase
+    const { data } = await supabase
       .from('connections')
       .select('*')
       .eq('user_id', authUser.id)
       .order('last_interaction_date', { ascending: true, nullsFirst: true })
 
-    const { data } = await query
-
     if (!data || data.length === 0) return []
 
     // Filter out skipped connections and take up to CONNECTIONS_TO_SHOW
-    const visibleConnections = data
+    const visibleConnections = (data as Connection[])
       .filter(c => !skippedIds.has(c.id))
       .slice(0, CONNECTIONS_TO_SHOW)
 
@@ -81,7 +77,7 @@ export default function TodayPage() {
   }, [loadData])
 
   const handleSkip = (connectionId: string) => {
-    setSkippedIds(prev => new Set([...prev, connectionId]))
+    setSkippedIds(prev => new Set(Array.from(prev).concat(connectionId)))
   }
 
   const handleLogInteraction = (connection: Connection) => {
@@ -121,12 +117,6 @@ export default function TodayPage() {
   const handleEditSuccess = () => {
     setSelectedConnection(null)
     loadData()
-  }
-
-  const handleSignOut = async () => {
-    await supabase.auth.signOut()
-    router.push('/login')
-    router.refresh()
   }
 
   if (loading) {

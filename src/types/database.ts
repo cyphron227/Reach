@@ -31,6 +31,7 @@ export interface Database {
           created_at?: string
           updated_at?: string
         }
+        Relationships: []
       }
       connections: {
         Row: {
@@ -66,6 +67,7 @@ export interface Database {
           created_at?: string
           updated_at?: string
         }
+        Relationships: []
       }
       interactions: {
         Row: {
@@ -95,6 +97,7 @@ export interface Database {
           interaction_date?: string
           created_at?: string
         }
+        Relationships: []
       }
       user_settings: {
         Row: {
@@ -124,7 +127,11 @@ export interface Database {
           created_at?: string
           updated_at?: string
         }
+        Relationships: []
       }
+    }
+    CompositeTypes: {
+      [_ in never]: never
     }
     Views: {
       [_ in never]: never
