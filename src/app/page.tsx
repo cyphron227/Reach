@@ -1,5 +1,7 @@
 'use client'
 
+export const dynamic = 'force-dynamic'
+
 import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { Connection, User } from '@/types/database'
@@ -14,6 +16,59 @@ import { useRouter } from 'next/navigation'
 
 const CONNECTIONS_TO_SHOW = 3
 
+// Helper functions for priority calculation
+const frequencyToDays: Record<string, number> = {
+  weekly: 7,
+  biweekly: 14,
+  monthly: 30,
+  quarterly: 90,
+  biannually: 180,
+}
+
+function getDaysSince(dateString: string | null): number | null {
+  if (!dateString) return null
+  const date = new Date(dateString)
+  const today = new Date()
+  const diffTime = today.getTime() - date.getTime()
+  const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24))
+  return diffDays
+}
+
+function getDaysUntil(dateString: string | null): number | null {
+  if (!dateString) return null
+  const date = new Date(dateString)
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  date.setHours(0, 0, 0, 0)
+  const diffTime = date.getTime() - today.getTime()
+  const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24))
+  return diffDays
+}
+
+// Calculate priority score for sorting - lower number = higher priority (more urgent)
+// Negative numbers = overdue, positive = days until due, large positive = not urgent
+function calculatePriorityScore(connection: Connection): number {
+  // If there's an explicit next_catchup_date, use that
+  if (connection.next_catchup_date) {
+    const daysUntil = getDaysUntil(connection.next_catchup_date)
+    return daysUntil !== null ? daysUntil : 999999
+  }
+
+  // If never contacted, low priority (show last)
+  if (!connection.last_interaction_date) {
+    return 999999
+  }
+
+  // Calculate based on last interaction + frequency
+  const daysSince = getDaysSince(connection.last_interaction_date)
+  if (daysSince === null) return 999999
+
+  const frequencyDays = frequencyToDays[connection.catchup_frequency] || 30
+  const daysUntilDue = frequencyDays - daysSince
+
+  return daysUntilDue
+}
+
 export default function TodayPage() {
   const [user, setUser] = useState<User | null>(null)
   const [connections, setConnections] = useState<Connection[]>([])
@@ -24,6 +79,7 @@ export default function TodayPage() {
   const [showEditModal, setShowEditModal] = useState(false)
   const [showDetailModal, setShowDetailModal] = useState(false)
   const [selectedConnection, setSelectedConnection] = useState<Connection | null>(null)
+  const [showAllConnections, setShowAllConnections] = useState(false)
 
   const supabase = createClient()
   const router = useRouter()
@@ -48,20 +104,20 @@ export default function TodayPage() {
     const { data: { user: authUser } } = await supabase.auth.getUser()
     if (!authUser) return []
 
-    // Get connections with the oldest last_interaction_date
-    // Null dates (never contacted) come first, then oldest dates
+    // Get all connections
     const { data } = await supabase
       .from('connections')
       .select('*')
       .eq('user_id', authUser.id)
-      .order('last_interaction_date', { ascending: true, nullsFirst: true })
 
     if (!data || data.length === 0) return []
 
-    // Filter out skipped connections and take up to CONNECTIONS_TO_SHOW
-    const visibleConnections = (data as Connection[])
-      .filter(c => !skippedIds.has(c.id))
-      .slice(0, CONNECTIONS_TO_SHOW)
+    // Sort by priority (soonest catch-up needed first)
+    const sortedConnections = (data as Connection[])
+      .sort((a, b) => calculatePriorityScore(a) - calculatePriorityScore(b))
+
+    // Filter out skipped connections
+    const visibleConnections = sortedConnections.filter(c => !skippedIds.has(c.id))
 
     return visibleConnections
   }, [supabase, skippedIds])
@@ -112,6 +168,7 @@ export default function TodayPage() {
   const handleLogSuccess = () => {
     setSkippedIds(new Set())
     setSelectedConnection(null)
+    setShowAllConnections(false)
     loadData()
   }
 
@@ -162,18 +219,30 @@ export default function TodayPage() {
 
         {/* Connection Cards or Empty State */}
         {connections.length > 0 ? (
-          <div className="space-y-4">
-            {connections.map((conn) => (
-              <ConnectionCard
-                key={conn.id}
-                connection={conn}
-                onLogInteraction={() => handleLogInteraction(conn)}
-                onSkip={() => handleSkip(conn.id)}
-                onEdit={() => handleEdit(conn)}
-                onViewDetails={() => handleViewDetails(conn)}
-              />
-            ))}
-          </div>
+          <>
+            <div className="space-y-4">
+              {(showAllConnections ? connections : connections.slice(0, CONNECTIONS_TO_SHOW)).map((conn) => (
+                <ConnectionCard
+                  key={conn.id}
+                  connection={conn}
+                  onLogInteraction={() => handleLogInteraction(conn)}
+                  onSkip={() => handleSkip(conn.id)}
+                  onEdit={() => handleEdit(conn)}
+                  onViewDetails={() => handleViewDetails(conn)}
+                />
+              ))}
+            </div>
+
+            {/* Show all button */}
+            {connections.length > CONNECTIONS_TO_SHOW && !showAllConnections && (
+              <button
+                onClick={() => setShowAllConnections(true)}
+                className="mt-4 w-full py-3 px-4 bg-lavender-100 hover:bg-lavender-200 text-lavender-600 font-medium rounded-xl transition-colors"
+              >
+                Show all ({connections.length} connections)
+              </button>
+            )}
+          </>
         ) : skippedIds.size > 0 ? (
           /* All caught up state */
           <div className="bg-white rounded-2xl p-8 shadow-sm border border-lavender-100 text-center">
