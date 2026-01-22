@@ -2,9 +2,18 @@
 
 export const dynamic = 'force-dynamic'
 
-import { useState } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
+
+// Rate limiting configuration
+const EMAIL_RATE_LIMIT_SECONDS = 60
+const RATE_LIMIT_STORAGE_KEY = 'email_rate_limit'
+
+interface RateLimitData {
+  lastEmailSent: number
+  email: string
+}
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
@@ -16,8 +25,73 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [message, setMessage] = useState<string | null>(null)
+  const [rateLimitSecondsRemaining, setRateLimitSecondsRemaining] = useState(0)
   const router = useRouter()
   const supabase = createClient()
+
+  const checkRateLimit = useCallback(() => {
+    if (!email) {
+      setRateLimitSecondsRemaining(0)
+      return
+    }
+
+    try {
+      const storedData = localStorage.getItem(RATE_LIMIT_STORAGE_KEY)
+      if (!storedData) {
+        setRateLimitSecondsRemaining(0)
+        return
+      }
+
+      const rateLimitData: RateLimitData = JSON.parse(storedData)
+
+      // Check if the rate limit is for the same email
+      if (rateLimitData.email !== email) {
+        setRateLimitSecondsRemaining(0)
+        return
+      }
+
+      const now = Date.now()
+      const timeSinceLastEmail = Math.floor((now - rateLimitData.lastEmailSent) / 1000)
+      const remainingSeconds = EMAIL_RATE_LIMIT_SECONDS - timeSinceLastEmail
+
+      if (remainingSeconds > 0) {
+        setRateLimitSecondsRemaining(remainingSeconds)
+      } else {
+        setRateLimitSecondsRemaining(0)
+      }
+    } catch {
+      // If there's any error parsing, clear the rate limit
+      setRateLimitSecondsRemaining(0)
+    }
+  }, [email])
+
+  // Check rate limit on mount and when email changes
+  useEffect(() => {
+    checkRateLimit()
+  }, [email, checkRateLimit])
+
+  // Countdown timer for rate limit
+  useEffect(() => {
+    if (rateLimitSecondsRemaining > 0) {
+      const timer = setTimeout(() => {
+        setRateLimitSecondsRemaining(rateLimitSecondsRemaining - 1)
+      }, 1000)
+      return () => clearTimeout(timer)
+    }
+  }, [rateLimitSecondsRemaining])
+
+  const setRateLimit = (emailAddress: string) => {
+    const rateLimitData: RateLimitData = {
+      lastEmailSent: Date.now(),
+      email: emailAddress,
+    }
+    localStorage.setItem(RATE_LIMIT_STORAGE_KEY, JSON.stringify(rateLimitData))
+    setRateLimitSecondsRemaining(EMAIL_RATE_LIMIT_SECONDS)
+  }
+
+  const isRateLimited = () => {
+    return rateLimitSecondsRemaining > 0
+  }
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -27,6 +101,13 @@ export default function LoginPage() {
 
     try {
       if (isSignUp) {
+        // Check rate limit before sending email
+        if (isRateLimited()) {
+          setError(`Please wait ${rateLimitSecondsRemaining} seconds before requesting another confirmation email.`)
+          setLoading(false)
+          return
+        }
+
         const { error } = await supabase.auth.signUp({
           email,
           password,
@@ -37,7 +118,18 @@ export default function LoginPage() {
             },
           },
         })
-        if (error) throw error
+
+        if (error) {
+          // Handle Supabase rate limit errors
+          if (error.message.includes('email_rate_limit') || error.message.includes('rate limit')) {
+            setRateLimit(email)
+            throw new Error('Too many email requests. Please wait a minute before trying again.')
+          }
+          throw error
+        }
+
+        // Set rate limit after successful email send
+        setRateLimit(email)
         setMessage('Check your email for a confirmation link.')
       } else {
         const { error } = await supabase.auth.signInWithPassword({
@@ -70,10 +162,28 @@ export default function LoginPage() {
     setMessage(null)
 
     try {
+      // Check rate limit before sending email
+      if (isRateLimited()) {
+        setError(`Please wait ${rateLimitSecondsRemaining} seconds before requesting another password reset email.`)
+        setLoading(false)
+        return
+      }
+
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: `${window.location.origin}/auth/update-password`,
       })
-      if (error) throw error
+
+      if (error) {
+        // Handle Supabase rate limit errors
+        if (error.message.includes('email_rate_limit') || error.message.includes('rate limit')) {
+          setRateLimit(email)
+          throw new Error('Too many email requests. Please wait a minute before trying again.')
+        }
+        throw error
+      }
+
+      // Set rate limit after successful email send
+      setRateLimit(email)
       setMessage('Check your email for a password reset link.')
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred')
@@ -217,12 +327,18 @@ export default function LoginPage() {
               <p className="text-muted-teal-600 text-sm bg-muted-teal-50 p-3 rounded-lg">{message}</p>
             )}
 
+            {rateLimitSecondsRemaining > 0 && (
+              <p className="text-amber-600 text-sm bg-amber-50 p-3 rounded-lg">
+                Please wait {rateLimitSecondsRemaining} second{rateLimitSecondsRemaining !== 1 ? 's' : ''} before requesting another email.
+              </p>
+            )}
+
             <button
               type="submit"
-              disabled={loading}
+              disabled={loading || rateLimitSecondsRemaining > 0}
               className="w-full py-3 px-4 bg-muted-teal-500 hover:bg-muted-teal-600 text-white font-medium rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {loading ? 'Sending...' : 'Send reset link'}
+              {loading ? 'Sending...' : rateLimitSecondsRemaining > 0 ? `Wait ${rateLimitSecondsRemaining}s` : 'Send reset link'}
             </button>
           </form>
         </div>
@@ -326,12 +442,18 @@ export default function LoginPage() {
             <p className="text-muted-teal-600 text-sm bg-muted-teal-50 p-3 rounded-lg">{message}</p>
           )}
 
+          {isSignUp && rateLimitSecondsRemaining > 0 && (
+            <p className="text-amber-600 text-sm bg-amber-50 p-3 rounded-lg">
+              Please wait {rateLimitSecondsRemaining} second{rateLimitSecondsRemaining !== 1 ? 's' : ''} before requesting another confirmation email.
+            </p>
+          )}
+
           <button
             type="submit"
-            disabled={loading}
+            disabled={loading || (isSignUp && rateLimitSecondsRemaining > 0)}
             className="w-full py-3 px-4 bg-muted-teal-500 hover:bg-muted-teal-600 text-white font-medium rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {loading ? 'Loading...' : isSignUp ? 'Create account' : 'Sign in'}
+            {loading ? 'Loading...' : isSignUp && rateLimitSecondsRemaining > 0 ? `Wait ${rateLimitSecondsRemaining}s` : isSignUp ? 'Create account' : 'Sign in'}
           </button>
         </form>
 
