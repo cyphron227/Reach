@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 
@@ -8,11 +8,56 @@ export default function UpdatePasswordPage() {
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [loading, setLoading] = useState(false)
+  const [checking, setChecking] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [message, setMessage] = useState<string | null>(null)
+  const [linkExpired, setLinkExpired] = useState(false)
 
   const router = useRouter()
   const supabase = createClient()
+
+  useEffect(() => {
+    const handleRecovery = async () => {
+      // Check for hash fragment (Supabase sends tokens in URL hash for recovery)
+      const hash = window.location.hash
+      if (hash) {
+        const hashParams = new URLSearchParams(hash.substring(1))
+        const accessToken = hashParams.get('access_token')
+        const refreshToken = hashParams.get('refresh_token')
+        const type = hashParams.get('type')
+
+        if (accessToken && type === 'recovery') {
+          // Set the session from the recovery tokens
+          const { error } = await supabase.auth.setSession({
+            access_token: accessToken,
+            refresh_token: refreshToken || '',
+          })
+
+          if (error) {
+            setLinkExpired(true)
+            setChecking(false)
+            return
+          }
+
+          // Clear the hash from URL for cleaner look
+          window.history.replaceState(null, '', window.location.pathname)
+          setChecking(false)
+          return
+        }
+      }
+
+      // No hash fragment, check if user has a valid session
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) {
+        // No session and no recovery token, redirect to login
+        router.push('/login')
+        return
+      }
+      setChecking(false)
+    }
+
+    handleRecovery()
+  }, [supabase, router])
 
   const handleUpdatePassword = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -49,6 +94,36 @@ export default function UpdatePasswordPage() {
     } finally {
       setLoading(false)
     }
+  }
+
+  if (checking) {
+    return (
+      <main className="min-h-screen bg-lavender-50 flex items-center justify-center">
+        <div className="text-lavender-400">Loading...</div>
+      </main>
+    )
+  }
+
+  if (linkExpired) {
+    return (
+      <main className="min-h-screen bg-lavender-50 flex flex-col items-center justify-center p-6">
+        <div className="w-full max-w-sm text-center">
+          <div className="text-4xl mb-4">😕</div>
+          <h1 className="text-2xl font-semibold text-lavender-800 mb-2">
+            Link Expired
+          </h1>
+          <p className="text-lavender-500 mb-6">
+            This password reset link is invalid or has expired. Please request a new one.
+          </p>
+          <button
+            onClick={() => router.push('/login')}
+            className="w-full py-3 px-4 bg-muted-teal-500 hover:bg-muted-teal-600 text-white font-medium rounded-xl transition-colors"
+          >
+            Back to Login
+          </button>
+        </div>
+      </main>
+    )
   }
 
   return (
