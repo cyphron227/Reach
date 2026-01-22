@@ -43,6 +43,7 @@ function formatRelativeDate(dateString: string): string {
 export default function LogInteractionModal({ connection, isOpen, onClose, onSuccess }: LogInteractionModalProps) {
   const [interactionType, setInteractionType] = useState<InteractionType>('call')
   const [memory, setMemory] = useState('')
+  const [interactionDate, setInteractionDate] = useState(new Date().toISOString().split('T')[0])
   const [planNextCatchup, setPlanNextCatchup] = useState(false)
   const [nextCatchupDate, setNextCatchupDate] = useState('')
   const [loading, setLoading] = useState(false)
@@ -89,14 +90,14 @@ export default function LogInteractionModal({ connection, isOpen, onClose, onSuc
           user_id: user.id,
           interaction_type: interactionType,
           memory: memory || null,
-          interaction_date: new Date().toISOString().split('T')[0],
+          interaction_date: interactionDate,
         })
 
       if (interactionError) throw interactionError
 
       // Update the connection's last_interaction_date and optionally next_catchup_date
       const updateData: { last_interaction_date: string; next_catchup_date?: string | null } = {
-        last_interaction_date: new Date().toISOString().split('T')[0],
+        last_interaction_date: interactionDate,
       }
 
       if (planNextCatchup && nextCatchupDate) {
@@ -115,6 +116,7 @@ export default function LogInteractionModal({ connection, isOpen, onClose, onSuc
       // Reset form and close
       setInteractionType('call')
       setMemory('')
+      setInteractionDate(new Date().toISOString().split('T')[0])
       setPlanNextCatchup(false)
       setNextCatchupDate('')
       onSuccess()
@@ -159,6 +161,21 @@ export default function LogInteractionModal({ connection, isOpen, onClose, onSuc
           )}
 
           <form onSubmit={handleSubmit} className="space-y-5">
+            {/* Interaction Date */}
+            <div>
+              <label htmlFor="interactionDate" className="block text-sm font-medium text-warmgray-700 mb-2">
+                When did you connect?
+              </label>
+              <input
+                id="interactionDate"
+                type="date"
+                value={interactionDate}
+                onChange={(e) => setInteractionDate(e.target.value)}
+                max={new Date().toISOString().split('T')[0]}
+                className="w-full px-4 py-3 rounded-xl border border-warmgray-200 bg-white text-warmgray-800 focus:outline-none focus:ring-2 focus:ring-sage-400 focus:border-transparent transition-all"
+              />
+            </div>
+
             {/* Interaction Type */}
             <div>
               <label className="block text-sm font-medium text-warmgray-700 mb-2">
