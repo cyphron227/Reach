@@ -135,12 +135,12 @@ export default function LogInteractionModal({ connection, isOpen, onClose, onSuc
       <div className="bg-white rounded-2xl w-full max-w-md max-h-[90vh] overflow-y-auto shadow-xl">
         <div className="p-6">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-semibold text-warmgray-800">
+            <h2 className="text-xl font-semibold text-lavender-800">
               Log interaction with {connection.name}
             </h2>
             <button
               onClick={onClose}
-              className="text-warmgray-400 hover:text-warmgray-600 transition-colors"
+              className="text-lavender-400 hover:text-lavender-600 transition-colors"
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -150,11 +150,11 @@ export default function LogInteractionModal({ connection, isOpen, onClose, onSuc
 
           {/* Last Memory Resurface */}
           {!loadingLastInteraction && lastInteraction?.memory && (
-            <div className="mb-6 p-4 bg-sage-50 rounded-xl border border-sage-100">
-              <div className="text-xs font-medium text-sage-600 mb-2">
+            <div className="mb-6 p-4 bg-muted-teal-50 rounded-xl border border-muted-teal-100">
+              <div className="text-xs font-medium text-muted-teal-600 mb-2">
                 From your last {interactionTypeLabels[lastInteraction.interaction_type]} {formatRelativeDate(lastInteraction.interaction_date)}
               </div>
-              <p className="text-sm text-warmgray-700 italic">
+              <p className="text-sm text-lavender-700 italic">
                 &ldquo;{lastInteraction.memory}&rdquo;
               </p>
             </div>
@@ -163,7 +163,7 @@ export default function LogInteractionModal({ connection, isOpen, onClose, onSuc
           <form onSubmit={handleSubmit} className="space-y-5">
             {/* Interaction Date */}
             <div>
-              <label htmlFor="interactionDate" className="block text-sm font-medium text-warmgray-700 mb-2">
+              <label htmlFor="interactionDate" className="block text-sm font-medium text-lavender-700 mb-2">
                 When did you connect?
               </label>
               <input
@@ -172,13 +172,13 @@ export default function LogInteractionModal({ connection, isOpen, onClose, onSuc
                 value={interactionDate}
                 onChange={(e) => setInteractionDate(e.target.value)}
                 max={new Date().toISOString().split('T')[0]}
-                className="w-full px-4 py-3 rounded-xl border border-warmgray-200 bg-white text-warmgray-800 focus:outline-none focus:ring-2 focus:ring-sage-400 focus:border-transparent transition-all"
+                className="w-full px-4 py-3 rounded-xl border border-lavender-200 bg-white text-lavender-800 focus:outline-none focus:ring-2 focus:ring-muted-teal-400 focus:border-transparent transition-all"
               />
             </div>
 
             {/* Interaction Type */}
             <div>
-              <label className="block text-sm font-medium text-warmgray-700 mb-2">
+              <label className="block text-sm font-medium text-lavender-700 mb-2">
                 How did you connect?
               </label>
               <div className="grid grid-cols-4 gap-2">
@@ -189,8 +189,8 @@ export default function LogInteractionModal({ connection, isOpen, onClose, onSuc
                     onClick={() => setInteractionType(type.value)}
                     className={`py-3 px-2 rounded-xl text-center transition-all ${
                       interactionType === type.value
-                        ? 'bg-sage-400 text-white'
-                        : 'bg-warmgray-50 text-warmgray-600 hover:bg-warmgray-100'
+                        ? 'bg-muted-teal-400 text-white'
+                        : 'bg-lavender-50 text-lavender-600 hover:bg-lavender-100'
                     }`}
                   >
                     <div className="text-xl mb-1">{type.icon}</div>
@@ -202,7 +202,7 @@ export default function LogInteractionModal({ connection, isOpen, onClose, onSuc
 
             {/* Memory */}
             <div>
-              <label htmlFor="memory" className="block text-sm font-medium text-warmgray-700 mb-2">
+              <label htmlFor="memory" className="block text-sm font-medium text-lavender-700 mb-2">
                 Anything you want to remember?
               </label>
               <textarea
@@ -210,7 +210,7 @@ export default function LogInteractionModal({ connection, isOpen, onClose, onSuc
                 value={memory}
                 onChange={(e) => setMemory(e.target.value)}
                 rows={3}
-                className="w-full px-4 py-3 rounded-xl border border-warmgray-200 bg-white text-warmgray-800 placeholder-warmgray-400 focus:outline-none focus:ring-2 focus:ring-sage-400 focus:border-transparent transition-all resize-none"
+                className="w-full px-4 py-3 rounded-xl border border-lavender-200 bg-white text-lavender-800 placeholder-lavender-400 focus:outline-none focus:ring-2 focus:ring-muted-teal-400 focus:border-transparent transition-all resize-none"
                 placeholder="e.g., They're moving to a new apartment next month..."
               />
             </div>
@@ -227,8 +227,8 @@ export default function LogInteractionModal({ connection, isOpen, onClose, onSuc
                   />
                   <div className={`w-5 h-5 rounded border-2 transition-all ${
                     planNextCatchup
-                      ? 'bg-sage-400 border-sage-400'
-                      : 'border-warmgray-300'
+                      ? 'bg-muted-teal-400 border-muted-teal-400'
+                      : 'border-lavender-300'
                   }`}>
                     {planNextCatchup && (
                       <svg className="w-full h-full text-white p-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -237,7 +237,7 @@ export default function LogInteractionModal({ connection, isOpen, onClose, onSuc
                     )}
                   </div>
                 </div>
-                <span className="text-sm font-medium text-warmgray-700">Plan next catch-up</span>
+                <span className="text-sm font-medium text-lavender-700">Plan next catch-up</span>
               </label>
 
               {planNextCatchup && (
@@ -247,7 +247,7 @@ export default function LogInteractionModal({ connection, isOpen, onClose, onSuc
                     value={nextCatchupDate}
                     onChange={(e) => setNextCatchupDate(e.target.value)}
                     min={new Date().toISOString().split('T')[0]}
-                    className="w-full px-4 py-3 rounded-xl border border-warmgray-200 bg-white text-warmgray-800 focus:outline-none focus:ring-2 focus:ring-sage-400 focus:border-transparent transition-all"
+                    className="w-full px-4 py-3 rounded-xl border border-lavender-200 bg-white text-lavender-800 focus:outline-none focus:ring-2 focus:ring-muted-teal-400 focus:border-transparent transition-all"
                   />
                 </div>
               )}
@@ -261,7 +261,7 @@ export default function LogInteractionModal({ connection, isOpen, onClose, onSuc
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3 px-4 bg-sage-400 hover:bg-sage-500 text-white font-medium rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full py-3 px-4 bg-muted-teal-500 hover:bg-muted-teal-600 text-white font-medium rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? 'Saving...' : 'Save interaction'}
             </button>

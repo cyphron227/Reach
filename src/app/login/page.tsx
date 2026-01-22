@@ -10,6 +10,7 @@ export default function LoginPage() {
   const [fullName, setFullName] = useState('')
   const [isSignUp, setIsSignUp] = useState(false)
   const [showAuth, setShowAuth] = useState(false)
+  const [showResetPassword, setShowResetPassword] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [message, setMessage] = useState<string | null>(null)
@@ -55,8 +56,28 @@ export default function LoginPage() {
   const handleGetStarted = (signUp: boolean) => {
     setIsSignUp(signUp)
     setShowAuth(true)
+    setShowResetPassword(false)
     setError(null)
     setMessage(null)
+  }
+
+  const handleResetPassword = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setLoading(true)
+    setError(null)
+    setMessage(null)
+
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/auth/callback`,
+      })
+      if (error) throw error
+      setMessage('Check your email for a password reset link.')
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An error occurred')
+    } finally {
+      setLoading(false)
+    }
   }
 
   // Hero Landing Page
@@ -141,6 +162,72 @@ export default function LoginPage() {
     )
   }
 
+  // Password Reset Form
+  if (showResetPassword) {
+    return (
+      <main className="min-h-screen bg-lavender-50 flex flex-col items-center justify-center p-6">
+        <div className="w-full max-w-sm">
+          {/* Back button */}
+          <button
+            onClick={() => {
+              setShowResetPassword(false)
+              setError(null)
+              setMessage(null)
+            }}
+            className="mb-6 text-lavender-400 hover:text-lavender-600 text-sm transition-colors flex items-center gap-1"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+            Back to sign in
+          </button>
+
+          <div className="text-center mb-8">
+            <h1 className="text-3xl font-semibold text-lavender-800 mb-2">
+              Reset Password
+            </h1>
+            <p className="text-lavender-500">
+              Enter your email to receive a reset link
+            </p>
+          </div>
+
+          <form onSubmit={handleResetPassword} className="space-y-4">
+            <div>
+              <label htmlFor="reset-email" className="block text-sm font-medium text-lavender-700 mb-1">
+                Email
+              </label>
+              <input
+                id="reset-email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                className="w-full px-4 py-3 rounded-xl border border-lavender-200 bg-white text-lavender-800 placeholder-lavender-400 focus:outline-none focus:ring-2 focus:ring-muted-teal-400 focus:border-transparent transition-all"
+                placeholder="you@example.com"
+              />
+            </div>
+
+            {error && (
+              <p className="text-red-600 text-sm bg-red-50 p-3 rounded-lg">{error}</p>
+            )}
+
+            {message && (
+              <p className="text-muted-teal-600 text-sm bg-muted-teal-50 p-3 rounded-lg">{message}</p>
+            )}
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full py-3 px-4 bg-muted-teal-500 hover:bg-muted-teal-600 text-white font-medium rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {loading ? 'Sending...' : 'Send reset link'}
+            </button>
+          </form>
+        </div>
+      </main>
+    )
+  }
+
   // Auth Form
   return (
     <main className="min-h-screen bg-lavender-50 flex flex-col items-center justify-center p-6">
@@ -212,6 +299,22 @@ export default function LoginPage() {
               placeholder="••••••••"
             />
           </div>
+
+          {!isSignUp && (
+            <div className="text-right">
+              <button
+                type="button"
+                onClick={() => {
+                  setShowResetPassword(true)
+                  setError(null)
+                  setMessage(null)
+                }}
+                className="text-muted-teal-600 hover:text-muted-teal-700 text-sm transition-colors"
+              >
+                Forgot password?
+              </button>
+            </div>
+          )}
 
           {error && (
             <p className="text-red-600 text-sm bg-red-50 p-3 rounded-lg">{error}</p>

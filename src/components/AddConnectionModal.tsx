@@ -20,7 +20,6 @@ const frequencyOptions: { value: CatchupFrequency; label: string }[] = [
 
 export default function AddConnectionModal({ isOpen, onClose, onSuccess }: AddConnectionModalProps) {
   const [name, setName] = useState('')
-  const [relationship, setRelationship] = useState('')
   const [frequency, setFrequency] = useState<CatchupFrequency>('monthly')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -41,14 +40,12 @@ export default function AddConnectionModal({ isOpen, onClose, onSuccess }: AddCo
         .insert({
           user_id: user.id,
           name: name.trim(),
-          relationship: relationship.trim() || null,
           catchup_frequency: frequency,
         })
 
       if (insertError) throw insertError
 
       setName('')
-      setRelationship('')
       setFrequency('monthly')
       onSuccess()
       onClose()
@@ -92,20 +89,6 @@ export default function AddConnectionModal({ isOpen, onClose, onSuccess }: AddCo
                 required
                 className="w-full px-4 py-3 rounded-xl border border-lavender-200 bg-white text-lavender-800 placeholder-lavender-400 focus:outline-none focus:ring-2 focus:ring-muted-teal-400 focus:border-transparent transition-all"
                 placeholder="e.g., Sarah"
-              />
-            </div>
-
-            <div>
-              <label htmlFor="relationship" className="block text-sm font-medium text-lavender-700 mb-1">
-                How do you know them? <span className="text-lavender-400">(optional)</span>
-              </label>
-              <input
-                id="relationship"
-                type="text"
-                value={relationship}
-                onChange={(e) => setRelationship(e.target.value)}
-                className="w-full px-4 py-3 rounded-xl border border-lavender-200 bg-white text-lavender-800 placeholder-lavender-400 focus:outline-none focus:ring-2 focus:ring-muted-teal-400 focus:border-transparent transition-all"
-                placeholder="e.g., College friend, Cousin, Coworker"
               />
             </div>
 

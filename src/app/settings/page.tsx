@@ -14,6 +14,9 @@ export default function SettingsPage() {
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
 
   // Form state
+  const [fullName, setFullName] = useState('')
+  const [editingName, setEditingName] = useState(false)
+  const [savingName, setSavingName] = useState(false)
   const [notificationsEnabled, setNotificationsEnabled] = useState(true)
   const [notificationTime, setNotificationTime] = useState('18:00')
   const [weeklyReflectionEnabled, setWeeklyReflectionEnabled] = useState(true)
@@ -36,6 +39,7 @@ export default function SettingsPage() {
       .single()
 
     setUser(userData)
+    setFullName(userData?.full_name || '')
 
     // Fetch or create user settings
     const { data: settingsData } = await supabase
@@ -100,6 +104,29 @@ export default function SettingsPage() {
     setSaving(false)
   }
 
+  const handleSaveName = async () => {
+    if (!user) return
+
+    setSavingName(true)
+    setMessage(null)
+
+    const { error } = await supabase
+      .from('users')
+      .update({ full_name: fullName.trim() })
+      .eq('id', user.id)
+
+    if (error) {
+      setMessage({ type: 'error', text: 'Failed to update name' })
+    } else {
+      setUser({ ...user, full_name: fullName.trim() })
+      setMessage({ type: 'success', text: 'Name updated' })
+      setEditingName(false)
+      setTimeout(() => setMessage(null), 3000)
+    }
+
+    setSavingName(false)
+  }
+
   const handleSignOut = async () => {
     await supabase.auth.signOut()
     router.push('/login')
@@ -137,10 +164,46 @@ export default function SettingsPage() {
           <h2 className="text-sm font-medium text-lavender-500 uppercase tracking-wide mb-4">
             Profile
           </h2>
-          <div className="space-y-3">
+          <div className="space-y-4">
             <div>
-              <div className="text-xs text-lavender-400">Name</div>
-              <div className="text-lavender-800">{user?.full_name || 'Not set'}</div>
+              <div className="text-xs text-lavender-400 mb-1">Name</div>
+              {editingName ? (
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={fullName}
+                    onChange={(e) => setFullName(e.target.value)}
+                    className="flex-1 px-3 py-2 rounded-lg border border-lavender-200 bg-white text-lavender-800 focus:outline-none focus:ring-2 focus:ring-muted-teal-400 focus:border-transparent transition-all text-sm"
+                    placeholder="Your name"
+                  />
+                  <button
+                    onClick={handleSaveName}
+                    disabled={savingName || !fullName.trim()}
+                    className="px-3 py-2 bg-muted-teal-500 hover:bg-muted-teal-600 text-white text-sm font-medium rounded-lg transition-colors disabled:opacity-50"
+                  >
+                    {savingName ? 'Saving...' : 'Save'}
+                  </button>
+                  <button
+                    onClick={() => {
+                      setEditingName(false)
+                      setFullName(user?.full_name || '')
+                    }}
+                    className="px-3 py-2 bg-lavender-100 hover:bg-lavender-200 text-lavender-600 text-sm font-medium rounded-lg transition-colors"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              ) : (
+                <div className="flex items-center justify-between">
+                  <div className="text-lavender-800">{user?.full_name || 'Not set'}</div>
+                  <button
+                    onClick={() => setEditingName(true)}
+                    className="text-muted-teal-600 hover:text-muted-teal-700 text-sm font-medium transition-colors"
+                  >
+                    Edit
+                  </button>
+                </div>
+              )}
             </div>
             <div>
               <div className="text-xs text-lavender-400">Email</div>
