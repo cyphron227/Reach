@@ -108,50 +108,50 @@ export default function SettingsPage() {
 
   if (loading) {
     return (
-      <main className="min-h-screen bg-cream flex items-center justify-center">
-        <div className="text-warmgray-400">Loading...</div>
+      <main className="min-h-screen bg-lavender-50 flex items-center justify-center">
+        <div className="text-lavender-400">Loading...</div>
       </main>
     )
   }
 
   return (
-    <main className="min-h-screen bg-cream">
+    <main className="min-h-screen bg-lavender-50">
       <div className="max-w-lg mx-auto px-6 py-8">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <Link
             href="/"
-            className="text-warmgray-400 hover:text-warmgray-600 text-sm transition-colors flex items-center gap-1"
+            className="text-lavender-400 hover:text-lavender-600 text-sm transition-colors flex items-center gap-1"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
             Back
           </Link>
-          <div className="text-sage-500 font-semibold text-lg">Settings</div>
+          <div className="text-muted-teal-500 font-semibold text-lg">Settings</div>
           <div className="w-12" />
         </div>
 
         {/* Profile Section */}
-        <div className="bg-white rounded-2xl p-6 shadow-sm border border-warmgray-100 mb-6">
-          <h2 className="text-sm font-medium text-warmgray-500 uppercase tracking-wide mb-4">
+        <div className="bg-white rounded-2xl p-6 shadow-sm border border-lavender-100 mb-6">
+          <h2 className="text-sm font-medium text-lavender-500 uppercase tracking-wide mb-4">
             Profile
           </h2>
           <div className="space-y-3">
             <div>
-              <div className="text-xs text-warmgray-400">Name</div>
-              <div className="text-warmgray-800">{user?.full_name || 'Not set'}</div>
+              <div className="text-xs text-lavender-400">Name</div>
+              <div className="text-lavender-800">{user?.full_name || 'Not set'}</div>
             </div>
             <div>
-              <div className="text-xs text-warmgray-400">Email</div>
-              <div className="text-warmgray-800">{user?.email}</div>
+              <div className="text-xs text-lavender-400">Email</div>
+              <div className="text-lavender-800">{user?.email}</div>
             </div>
           </div>
         </div>
 
         {/* Notifications Section */}
-        <div className="bg-white rounded-2xl p-6 shadow-sm border border-warmgray-100 mb-6">
-          <h2 className="text-sm font-medium text-warmgray-500 uppercase tracking-wide mb-4">
+        <div className="bg-white rounded-2xl p-6 shadow-sm border border-lavender-100 mb-6">
+          <h2 className="text-sm font-medium text-lavender-500 uppercase tracking-wide mb-4">
             Notifications
           </h2>
 
@@ -159,13 +159,13 @@ export default function SettingsPage() {
             {/* Daily Reminder Toggle */}
             <div className="flex items-center justify-between">
               <div>
-                <div className="text-warmgray-800 font-medium">Daily reminder</div>
-                <div className="text-sm text-warmgray-500">Get a gentle nudge to reach out</div>
+                <div className="text-lavender-800 font-medium">Daily reminder</div>
+                <div className="text-sm text-lavender-500">Get a gentle nudge to reach out</div>
               </div>
               <button
                 onClick={() => setNotificationsEnabled(!notificationsEnabled)}
                 className={`relative w-12 h-7 rounded-full transition-colors ${
-                  notificationsEnabled ? 'bg-sage-400' : 'bg-warmgray-200'
+                  notificationsEnabled ? 'bg-muted-teal-400' : 'bg-lavender-200'
                 }`}
               >
                 <div
@@ -179,11 +179,11 @@ export default function SettingsPage() {
             {/* Notification Time */}
             {notificationsEnabled && (
               <div>
-                <div className="text-warmgray-800 font-medium mb-2">Reminder time</div>
+                <div className="text-lavender-800 font-medium mb-2">Reminder time</div>
                 <select
                   value={notificationTime}
                   onChange={(e) => setNotificationTime(e.target.value)}
-                  className="w-full px-4 py-3 rounded-xl border border-warmgray-200 bg-white text-warmgray-800 focus:outline-none focus:ring-2 focus:ring-sage-400 focus:border-transparent transition-all"
+                  className="w-full px-4 py-3 rounded-xl border border-lavender-200 bg-white text-lavender-800 focus:outline-none focus:ring-2 focus:ring-muted-teal-400 focus:border-transparent transition-all"
                 >
                   <option value="08:00">8:00 AM</option>
                   <option value="09:00">9:00 AM</option>
@@ -202,20 +202,20 @@ export default function SettingsPage() {
         </div>
 
         {/* Weekly Reflection Section */}
-        <div className="bg-white rounded-2xl p-6 shadow-sm border border-warmgray-100 mb-6">
-          <h2 className="text-sm font-medium text-warmgray-500 uppercase tracking-wide mb-4">
+        <div className="bg-white rounded-2xl p-6 shadow-sm border border-lavender-100 mb-6">
+          <h2 className="text-sm font-medium text-lavender-500 uppercase tracking-wide mb-4">
             Weekly Reflection
           </h2>
 
           <div className="flex items-center justify-between">
             <div>
-              <div className="text-warmgray-800 font-medium">Weekly check-in</div>
-              <div className="text-sm text-warmgray-500">Reflect on your connections each week</div>
+              <div className="text-lavender-800 font-medium">Weekly check-in</div>
+              <div className="text-sm text-lavender-500">Reflect on your connections each week</div>
             </div>
             <button
               onClick={() => setWeeklyReflectionEnabled(!weeklyReflectionEnabled)}
               className={`relative w-12 h-7 rounded-full transition-colors ${
-                weeklyReflectionEnabled ? 'bg-sage-400' : 'bg-warmgray-200'
+                weeklyReflectionEnabled ? 'bg-muted-teal-400' : 'bg-lavender-200'
               }`}
             >
               <div
@@ -231,7 +231,7 @@ export default function SettingsPage() {
         <button
           onClick={handleSave}
           disabled={saving}
-          className="w-full py-3 px-4 bg-sage-400 hover:bg-sage-500 text-white font-medium rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed mb-4"
+          className="w-full py-3 px-4 bg-muted-teal-500 hover:bg-muted-teal-600 text-white font-medium rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed mb-4"
         >
           {saving ? 'Saving...' : 'Save changes'}
         </button>
@@ -240,7 +240,7 @@ export default function SettingsPage() {
         {message && (
           <div className={`p-3 rounded-xl text-center text-sm mb-4 ${
             message.type === 'success'
-              ? 'bg-sage-50 text-sage-700'
+              ? 'bg-muted-teal-50 text-muted-teal-700'
               : 'bg-red-50 text-red-700'
           }`}>
             {message.text}
@@ -248,12 +248,12 @@ export default function SettingsPage() {
         )}
 
         {/* Privacy Note */}
-        <div className="bg-warmgray-50 rounded-xl p-4 mb-6">
+        <div className="bg-lavender-100 rounded-xl p-4 mb-6">
           <div className="flex items-start gap-3">
             <span className="text-lg">🔒</span>
             <div>
-              <div className="text-sm font-medium text-warmgray-700">Your data is private</div>
-              <div className="text-xs text-warmgray-500">
+              <div className="text-sm font-medium text-lavender-700">Your data is private</div>
+              <div className="text-xs text-lavender-500">
                 All your connections and interactions are stored securely and only visible to you.
               </div>
             </div>
@@ -263,7 +263,7 @@ export default function SettingsPage() {
         {/* Sign Out */}
         <button
           onClick={handleSignOut}
-          className="w-full py-3 px-4 bg-warmgray-100 hover:bg-warmgray-200 text-warmgray-600 font-medium rounded-xl transition-colors"
+          className="w-full py-3 px-4 bg-lavender-100 hover:bg-lavender-200 text-lavender-600 font-medium rounded-xl transition-colors"
         >
           Sign out
         </button>

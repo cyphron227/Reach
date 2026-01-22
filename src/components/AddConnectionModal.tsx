@@ -66,12 +66,12 @@ export default function AddConnectionModal({ isOpen, onClose, onSuccess }: AddCo
       <div className="bg-white rounded-2xl w-full max-w-md shadow-xl">
         <div className="p-6">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-semibold text-warmgray-800">
+            <h2 className="text-xl font-semibold text-lavender-800">
               Add someone to reach
             </h2>
             <button
               onClick={onClose}
-              className="text-warmgray-400 hover:text-warmgray-600 transition-colors"
+              className="text-lavender-400 hover:text-lavender-600 transition-colors"
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -81,7 +81,7 @@ export default function AddConnectionModal({ isOpen, onClose, onSuccess }: AddCo
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label htmlFor="name" className="block text-sm font-medium text-warmgray-700 mb-1">
+              <label htmlFor="name" className="block text-sm font-medium text-lavender-700 mb-1">
                 Their name
               </label>
               <input
@@ -90,34 +90,34 @@ export default function AddConnectionModal({ isOpen, onClose, onSuccess }: AddCo
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 required
-                className="w-full px-4 py-3 rounded-xl border border-warmgray-200 bg-white text-warmgray-800 placeholder-warmgray-400 focus:outline-none focus:ring-2 focus:ring-sage-400 focus:border-transparent transition-all"
+                className="w-full px-4 py-3 rounded-xl border border-lavender-200 bg-white text-lavender-800 placeholder-lavender-400 focus:outline-none focus:ring-2 focus:ring-muted-teal-400 focus:border-transparent transition-all"
                 placeholder="e.g., Sarah"
               />
             </div>
 
             <div>
-              <label htmlFor="relationship" className="block text-sm font-medium text-warmgray-700 mb-1">
-                How do you know them? <span className="text-warmgray-400">(optional)</span>
+              <label htmlFor="relationship" className="block text-sm font-medium text-lavender-700 mb-1">
+                How do you know them? <span className="text-lavender-400">(optional)</span>
               </label>
               <input
                 id="relationship"
                 type="text"
                 value={relationship}
                 onChange={(e) => setRelationship(e.target.value)}
-                className="w-full px-4 py-3 rounded-xl border border-warmgray-200 bg-white text-warmgray-800 placeholder-warmgray-400 focus:outline-none focus:ring-2 focus:ring-sage-400 focus:border-transparent transition-all"
+                className="w-full px-4 py-3 rounded-xl border border-lavender-200 bg-white text-lavender-800 placeholder-lavender-400 focus:outline-none focus:ring-2 focus:ring-muted-teal-400 focus:border-transparent transition-all"
                 placeholder="e.g., College friend, Cousin, Coworker"
               />
             </div>
 
             <div>
-              <label htmlFor="frequency" className="block text-sm font-medium text-warmgray-700 mb-1">
+              <label htmlFor="frequency" className="block text-sm font-medium text-lavender-700 mb-1">
                 How often do you want to catch up?
               </label>
               <select
                 id="frequency"
                 value={frequency}
                 onChange={(e) => setFrequency(e.target.value as CatchupFrequency)}
-                className="w-full px-4 py-3 rounded-xl border border-warmgray-200 bg-white text-warmgray-800 focus:outline-none focus:ring-2 focus:ring-sage-400 focus:border-transparent transition-all"
+                className="w-full px-4 py-3 rounded-xl border border-lavender-200 bg-white text-lavender-800 focus:outline-none focus:ring-2 focus:ring-muted-teal-400 focus:border-transparent transition-all"
               >
                 {frequencyOptions.map((option) => (
                   <option key={option.value} value={option.value}>
@@ -134,7 +134,7 @@ export default function AddConnectionModal({ isOpen, onClose, onSuccess }: AddCo
             <button
               type="submit"
               disabled={loading || !name.trim()}
-              className="w-full py-3 px-4 bg-sage-400 hover:bg-sage-500 text-white font-medium rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full py-3 px-4 bg-muted-teal-500 hover:bg-muted-teal-600 text-white font-medium rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? 'Adding...' : 'Add connection'}
             </button>

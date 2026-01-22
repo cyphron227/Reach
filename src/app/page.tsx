@@ -10,6 +10,7 @@ import AddConnectionModal from '@/components/AddConnectionModal'
 import EditConnectionModal from '@/components/EditConnectionModal'
 import ConnectionDetailModal from '@/components/ConnectionDetailModal'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 
 const CONNECTIONS_TO_SHOW = 3
 
@@ -25,10 +26,14 @@ export default function TodayPage() {
   const [selectedConnection, setSelectedConnection] = useState<Connection | null>(null)
 
   const supabase = createClient()
+  const router = useRouter()
 
   const fetchUser = useCallback(async () => {
     const { data: { user: authUser } } = await supabase.auth.getUser()
-    if (!authUser) return null
+    if (!authUser) {
+      router.push('/login')
+      return null
+    }
 
     const { data } = await supabase
       .from('users')
@@ -37,7 +42,7 @@ export default function TodayPage() {
       .single()
 
     return data
-  }, [supabase])
+  }, [supabase, router])
 
   const fetchConnections = useCallback(async (): Promise<Connection[]> => {
     const { data: { user: authUser } } = await supabase.auth.getUser()
@@ -121,28 +126,28 @@ export default function TodayPage() {
 
   if (loading) {
     return (
-      <main className="min-h-screen bg-cream flex items-center justify-center">
-        <div className="text-warmgray-400">Loading...</div>
+      <main className="min-h-screen bg-lavender-50 flex items-center justify-center">
+        <div className="text-lavender-400">Loading...</div>
       </main>
     )
   }
 
   return (
-    <main className="min-h-screen bg-cream">
+    <main className="min-h-screen bg-lavender-50">
       <div className="max-w-lg mx-auto px-6 py-8">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
-          <div className="text-sage-500 font-semibold text-lg">Reach</div>
+          <div className="text-muted-teal-500 font-semibold text-lg">Reach</div>
           <div className="flex items-center gap-4">
             <Link
               href="/forest"
-              className="text-warmgray-400 hover:text-sage-600 text-sm transition-colors flex items-center gap-1"
+              className="text-lavender-400 hover:text-muted-teal-600 text-sm transition-colors flex items-center gap-1"
             >
               <span>🌳</span> Forest
             </Link>
             <Link
               href="/settings"
-              className="text-warmgray-400 hover:text-warmgray-600 transition-colors"
+              className="text-lavender-400 hover:text-lavender-600 transition-colors"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
@@ -171,34 +176,34 @@ export default function TodayPage() {
           </div>
         ) : skippedIds.size > 0 ? (
           /* All caught up state */
-          <div className="bg-white rounded-2xl p-8 shadow-sm border border-warmgray-100 text-center">
+          <div className="bg-white rounded-2xl p-8 shadow-sm border border-lavender-100 text-center">
             <div className="text-4xl mb-4">✨</div>
-            <h2 className="text-lg font-semibold text-warmgray-800 mb-2">
+            <h2 className="text-lg font-semibold text-lavender-800 mb-2">
               All caught up for now
             </h2>
-            <p className="text-warmgray-500 mb-6">
+            <p className="text-lavender-500 mb-6">
               You&apos;ve gone through everyone. Check back later or add more connections.
             </p>
             <button
               onClick={() => setSkippedIds(new Set())}
-              className="py-3 px-6 bg-warmgray-100 hover:bg-warmgray-200 text-warmgray-600 font-medium rounded-xl transition-colors"
+              className="py-3 px-6 bg-lavender-100 hover:bg-lavender-200 text-lavender-600 font-medium rounded-xl transition-colors"
             >
               Start over
             </button>
           </div>
         ) : (
           /* No connections empty state */
-          <div className="bg-white rounded-2xl p-8 shadow-sm border border-warmgray-100 text-center">
+          <div className="bg-white rounded-2xl p-8 shadow-sm border border-lavender-100 text-center">
             <div className="text-4xl mb-4">🌱</div>
-            <h2 className="text-lg font-semibold text-warmgray-800 mb-2">
+            <h2 className="text-lg font-semibold text-lavender-800 mb-2">
               No connections yet
             </h2>
-            <p className="text-warmgray-500 mb-6">
+            <p className="text-lavender-500 mb-6">
               Add someone you&apos;d like to stay in touch with.
             </p>
             <button
               onClick={() => setShowAddModal(true)}
-              className="py-3 px-6 bg-sage-400 hover:bg-sage-500 text-white font-medium rounded-xl transition-colors"
+              className="py-3 px-6 bg-muted-teal-500 hover:bg-muted-teal-600 text-white font-medium rounded-xl transition-colors"
             >
               Add your first connection
             </button>
@@ -209,7 +214,7 @@ export default function TodayPage() {
         {(connections.length > 0 || skippedIds.size > 0) && (
           <button
             onClick={() => setShowAddModal(true)}
-            className="mt-6 w-full py-3 px-4 border-2 border-dashed border-warmgray-200 hover:border-sage-300 text-warmgray-500 hover:text-sage-600 font-medium rounded-xl transition-colors"
+            className="mt-6 w-full py-3 px-4 border-2 border-dashed border-lavender-200 hover:border-muted-teal-300 text-lavender-500 hover:text-muted-teal-600 font-medium rounded-xl transition-colors"
           >
             + Add another connection
           </button>
@@ -219,13 +224,13 @@ export default function TodayPage() {
         {connections.length > 0 && (
           <Link
             href="/reflect"
-            className="mt-6 block bg-sage-50 rounded-xl p-4 border border-sage-100 hover:bg-sage-100 transition-colors"
+            className="mt-6 block bg-muted-teal-50 rounded-xl p-4 border border-muted-teal-100 hover:bg-muted-teal-100 transition-colors"
           >
             <div className="flex items-center gap-3">
               <span className="text-2xl">💭</span>
               <div>
-                <div className="text-sm font-medium text-sage-700">Weekly reflection</div>
-                <div className="text-xs text-sage-600">Take a moment to reflect on your connections</div>
+                <div className="text-sm font-medium text-muted-teal-700">Weekly reflection</div>
+                <div className="text-xs text-muted-teal-600">Take a moment to reflect on your connections</div>
               </div>
             </div>
           </Link>

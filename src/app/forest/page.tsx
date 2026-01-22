@@ -93,13 +93,13 @@ function Tree({ connection, health, onClick }: TreeProps) {
       </div>
 
       {/* Name */}
-      <div className="text-sm font-medium text-warmgray-800 text-center mb-1">
+      <div className="text-sm font-medium text-lavender-800 text-center mb-1">
         {connection.name}
       </div>
 
       {/* Status */}
       <div className={`text-xs text-center ${
-        health === 'needs_attention' ? 'text-amber-600' : 'text-warmgray-500'
+        health === 'needs_attention' ? 'text-amber-600' : 'text-lavender-500'
       }`}>
         {getTimeAgoText(connection.last_interaction_date)}
       </div>
@@ -148,68 +148,68 @@ export default function ForestPage() {
 
   if (loading) {
     return (
-      <main className="min-h-screen bg-cream flex items-center justify-center">
-        <div className="text-warmgray-400">Loading your forest...</div>
+      <main className="min-h-screen bg-lavender-50 flex items-center justify-center">
+        <div className="text-lavender-400">Loading your forest...</div>
       </main>
     )
   }
 
   return (
-    <main className="min-h-screen bg-cream">
+    <main className="min-h-screen bg-lavender-50">
       <div className="max-w-2xl mx-auto px-6 py-8">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <Link
             href="/"
-            className="text-warmgray-400 hover:text-warmgray-600 text-sm transition-colors flex items-center gap-1"
+            className="text-lavender-400 hover:text-lavender-600 text-sm transition-colors flex items-center gap-1"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
             Today
           </Link>
-          <div className="text-sage-500 font-semibold text-lg">Your Forest</div>
+          <div className="text-muted-teal-500 font-semibold text-lg">Your Forest</div>
           <div className="w-12" /> {/* Spacer for centering */}
         </div>
 
         {/* Forest Stats */}
         <div className="grid grid-cols-3 gap-4 mb-8">
-          <div className="bg-white rounded-xl p-4 text-center shadow-sm border border-warmgray-100">
+          <div className="bg-white rounded-xl p-4 text-center shadow-sm border border-lavender-100">
             <div className="text-2xl mb-1">🌳</div>
-            <div className="text-2xl font-semibold text-sage-600">{healthyCount}</div>
-            <div className="text-xs text-warmgray-500">Healthy</div>
+            <div className="text-2xl font-semibold text-muted-teal-600">{healthyCount}</div>
+            <div className="text-xs text-lavender-500">Healthy</div>
           </div>
-          <div className="bg-white rounded-xl p-4 text-center shadow-sm border border-warmgray-100">
+          <div className="bg-white rounded-xl p-4 text-center shadow-sm border border-lavender-100">
             <div className="text-2xl mb-1">🍂</div>
             <div className="text-2xl font-semibold text-amber-600">{needsAttentionCount}</div>
-            <div className="text-xs text-warmgray-500">Need attention</div>
+            <div className="text-xs text-lavender-500">Need attention</div>
           </div>
-          <div className="bg-white rounded-xl p-4 text-center shadow-sm border border-warmgray-100">
+          <div className="bg-white rounded-xl p-4 text-center shadow-sm border border-lavender-100">
             <div className="text-2xl mb-1">🌱</div>
-            <div className="text-2xl font-semibold text-warmgray-600">{seedlingCount}</div>
-            <div className="text-xs text-warmgray-500">Seedlings</div>
+            <div className="text-2xl font-semibold text-lavender-600">{seedlingCount}</div>
+            <div className="text-xs text-lavender-500">Seedlings</div>
           </div>
         </div>
 
         {/* Forest Grid */}
         {connections.length === 0 ? (
-          <div className="bg-white rounded-2xl p-8 shadow-sm border border-warmgray-100 text-center">
+          <div className="bg-white rounded-2xl p-8 shadow-sm border border-lavender-100 text-center">
             <div className="text-4xl mb-4">🌿</div>
-            <h2 className="text-lg font-semibold text-warmgray-800 mb-2">
+            <h2 className="text-lg font-semibold text-lavender-800 mb-2">
               Your forest is empty
             </h2>
-            <p className="text-warmgray-500 mb-6">
+            <p className="text-lavender-500 mb-6">
               Add connections to start growing your relationship forest.
             </p>
             <Link
               href="/"
-              className="inline-block py-3 px-6 bg-sage-400 hover:bg-sage-500 text-white font-medium rounded-xl transition-colors"
+              className="inline-block py-3 px-6 bg-muted-teal-500 hover:bg-muted-teal-600 text-white font-medium rounded-xl transition-colors"
             >
               Go to Today
             </Link>
           </div>
         ) : (
-          <div className="bg-white rounded-2xl p-6 shadow-sm border border-warmgray-100">
+          <div className="bg-white rounded-2xl p-6 shadow-sm border border-lavender-100">
             <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
               {connections.map((connection) => (
                 <Tree
@@ -224,7 +224,7 @@ export default function ForestPage() {
         )}
 
         {/* Legend */}
-        <div className="mt-6 flex justify-center gap-6 text-xs text-warmgray-500">
+        <div className="mt-6 flex justify-center gap-6 text-xs text-lavender-500">
           <div className="flex items-center gap-1">
             <span>🌳</span> Healthy
           </div>
@@ -249,17 +249,17 @@ export default function ForestPage() {
                   {getTreeHealth(selectedConnection) === 'needs_attention' && '🍂'}
                 </span>
                 <div>
-                  <h2 className="text-lg font-semibold text-warmgray-800">
+                  <h2 className="text-lg font-semibold text-lavender-800">
                     {selectedConnection.name}
                   </h2>
                   {selectedConnection.relationship && (
-                    <p className="text-sm text-warmgray-500">{selectedConnection.relationship}</p>
+                    <p className="text-sm text-lavender-500">{selectedConnection.relationship}</p>
                   )}
                 </div>
               </div>
               <button
                 onClick={() => setSelectedConnection(null)}
-                className="text-warmgray-400 hover:text-warmgray-600 transition-colors"
+                className="text-lavender-400 hover:text-lavender-600 transition-colors"
               >
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -267,13 +267,13 @@ export default function ForestPage() {
               </button>
             </div>
 
-            <div className="space-y-2 mb-6 text-sm text-warmgray-600">
+            <div className="space-y-2 mb-6 text-sm text-lavender-600">
               <p>
-                <span className="text-warmgray-400">Last interaction:</span>{' '}
+                <span className="text-lavender-400">Last interaction:</span>{' '}
                 {getTimeAgoText(selectedConnection.last_interaction_date)}
               </p>
               <p>
-                <span className="text-warmgray-400">Catch-up frequency:</span>{' '}
+                <span className="text-lavender-400">Catch-up frequency:</span>{' '}
                 {selectedConnection.catchup_frequency === 'weekly' && 'Weekly'}
                 {selectedConnection.catchup_frequency === 'biweekly' && 'Every 2 weeks'}
                 {selectedConnection.catchup_frequency === 'monthly' && 'Monthly'}
@@ -285,7 +285,7 @@ export default function ForestPage() {
             <Link
               href="/"
               onClick={() => setSelectedConnection(null)}
-              className="block w-full py-3 px-4 bg-sage-400 hover:bg-sage-500 text-white font-medium rounded-xl transition-colors text-center"
+              className="block w-full py-3 px-4 bg-muted-teal-500 hover:bg-muted-teal-600 text-white font-medium rounded-xl transition-colors text-center"
             >
               Reach out today
             </Link>

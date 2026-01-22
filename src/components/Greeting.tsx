@@ -33,10 +33,10 @@ export default function Greeting({ userName }: GreetingProps) {
 
   return (
     <div className="mb-8">
-      <h1 className="text-2xl font-semibold text-warmgray-800 mb-1">
+      <h1 className="text-2xl font-semibold text-lavender-800 mb-1">
         {greeting}{firstName ? `, ${firstName}` : ''}
       </h1>
-      <p className="text-warmgray-500">{getEncouragement(true)}</p>
+      <p className="text-lavender-500">{getEncouragement(true)}</p>
     </div>
   )
 }

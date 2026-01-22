@@ -98,12 +98,12 @@ export default function EditConnectionModal({ connection, isOpen, onClose, onSuc
       <div className="bg-white rounded-2xl w-full max-w-md shadow-xl">
         <div className="p-6">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-semibold text-warmgray-800">
+            <h2 className="text-xl font-semibold text-lavender-800">
               Edit connection
             </h2>
             <button
               onClick={onClose}
-              className="text-warmgray-400 hover:text-warmgray-600 transition-colors"
+              className="text-lavender-400 hover:text-lavender-600 transition-colors"
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -113,7 +113,7 @@ export default function EditConnectionModal({ connection, isOpen, onClose, onSuc
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label htmlFor="edit-name" className="block text-sm font-medium text-warmgray-700 mb-1">
+              <label htmlFor="edit-name" className="block text-sm font-medium text-lavender-700 mb-1">
                 Their name
               </label>
               <input
@@ -122,33 +122,33 @@ export default function EditConnectionModal({ connection, isOpen, onClose, onSuc
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 required
-                className="w-full px-4 py-3 rounded-xl border border-warmgray-200 bg-white text-warmgray-800 placeholder-warmgray-400 focus:outline-none focus:ring-2 focus:ring-sage-400 focus:border-transparent transition-all"
+                className="w-full px-4 py-3 rounded-xl border border-lavender-200 bg-white text-lavender-800 placeholder-lavender-400 focus:outline-none focus:ring-2 focus:ring-muted-teal-400 focus:border-transparent transition-all"
               />
             </div>
 
             <div>
-              <label htmlFor="edit-relationship" className="block text-sm font-medium text-warmgray-700 mb-1">
-                How do you know them? <span className="text-warmgray-400">(optional)</span>
+              <label htmlFor="edit-relationship" className="block text-sm font-medium text-lavender-700 mb-1">
+                How do you know them? <span className="text-lavender-400">(optional)</span>
               </label>
               <input
                 id="edit-relationship"
                 type="text"
                 value={relationship}
                 onChange={(e) => setRelationship(e.target.value)}
-                className="w-full px-4 py-3 rounded-xl border border-warmgray-200 bg-white text-warmgray-800 placeholder-warmgray-400 focus:outline-none focus:ring-2 focus:ring-sage-400 focus:border-transparent transition-all"
+                className="w-full px-4 py-3 rounded-xl border border-lavender-200 bg-white text-lavender-800 placeholder-lavender-400 focus:outline-none focus:ring-2 focus:ring-muted-teal-400 focus:border-transparent transition-all"
                 placeholder="e.g., College friend, Cousin, Coworker"
               />
             </div>
 
             <div>
-              <label htmlFor="edit-frequency" className="block text-sm font-medium text-warmgray-700 mb-1">
+              <label htmlFor="edit-frequency" className="block text-sm font-medium text-lavender-700 mb-1">
                 How often do you want to catch up?
               </label>
               <select
                 id="edit-frequency"
                 value={frequency}
                 onChange={(e) => setFrequency(e.target.value as CatchupFrequency)}
-                className="w-full px-4 py-3 rounded-xl border border-warmgray-200 bg-white text-warmgray-800 focus:outline-none focus:ring-2 focus:ring-sage-400 focus:border-transparent transition-all"
+                className="w-full px-4 py-3 rounded-xl border border-lavender-200 bg-white text-lavender-800 focus:outline-none focus:ring-2 focus:ring-muted-teal-400 focus:border-transparent transition-all"
               >
                 {frequencyOptions.map((option) => (
                   <option key={option.value} value={option.value}>
@@ -166,13 +166,13 @@ export default function EditConnectionModal({ connection, isOpen, onClose, onSuc
               <button
                 type="submit"
                 disabled={loading || !name.trim()}
-                className="flex-1 py-3 px-4 bg-sage-400 hover:bg-sage-500 text-white font-medium rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex-1 py-3 px-4 bg-muted-teal-500 hover:bg-muted-teal-600 text-white font-medium rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading ? 'Saving...' : 'Save changes'}
               </button>
             </div>
 
-            <div className="pt-4 border-t border-warmgray-100">
+            <div className="pt-4 border-t border-lavender-100">
               <button
                 type="button"
                 onClick={handleDelete}
@@ -180,7 +180,7 @@ export default function EditConnectionModal({ connection, isOpen, onClose, onSuc
                 className={`w-full py-3 px-4 font-medium rounded-xl transition-colors disabled:opacity-50 ${
                   deleteConfirm
                     ? 'bg-red-500 hover:bg-red-600 text-white'
-                    : 'bg-warmgray-100 hover:bg-warmgray-200 text-warmgray-600'
+                    : 'bg-lavender-100 hover:bg-lavender-200 text-lavender-600'
                 }`}
               >
                 {deleteConfirm ? 'Click again to confirm delete' : 'Delete connection'}

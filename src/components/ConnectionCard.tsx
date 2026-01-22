@@ -111,22 +111,22 @@ export default function ConnectionCard({ connection, onLogInteraction, onSkip, o
   const nextCatchup = getNextCatchupInfo(connection)
 
   return (
-    <div className="bg-white rounded-2xl p-6 shadow-sm border border-warmgray-100">
+    <div className="bg-white rounded-2xl p-6 shadow-sm border border-lavender-100">
       <div className="mb-4">
         <div className="flex items-center justify-between mb-1">
           <button
             onClick={onViewDetails}
-            className="text-xl font-semibold text-warmgray-800 hover:text-sage-600 transition-colors text-left"
+            className="text-xl font-semibold text-lavender-800 hover:text-muted-teal-600 transition-colors text-left"
           >
             {connection.name}
           </button>
           <div className="flex items-center gap-2">
             {connection.relationship && (
-              <span className="text-sm text-warmgray-400">{connection.relationship}</span>
+              <span className="text-sm text-lavender-400">{connection.relationship}</span>
             )}
             <button
               onClick={onEdit}
-              className="p-1.5 text-warmgray-400 hover:text-warmgray-600 hover:bg-warmgray-100 rounded-lg transition-colors"
+              className="p-1.5 text-lavender-400 hover:text-lavender-600 hover:bg-lavender-100 rounded-lg transition-colors"
               title="Edit connection"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -137,19 +137,19 @@ export default function ConnectionCard({ connection, onLogInteraction, onSkip, o
         </div>
 
         <div className="flex items-center gap-2">
-          <span className={`text-sm ${status.isUrgent ? 'text-amber-600' : 'text-sage-600'}`}>
+          <span className={`text-sm ${status.isUrgent ? 'text-amber-600' : 'text-muted-teal-600'}`}>
             {status.text}
           </span>
           {timeAgo && (
             <>
-              <span className="text-warmgray-300">·</span>
-              <span className="text-sm text-warmgray-400">{timeAgo}</span>
+              <span className="text-lavender-300">·</span>
+              <span className="text-sm text-lavender-400">{timeAgo}</span>
             </>
           )}
         </div>
 
         {nextCatchup.text && (
-          <div className={`mt-2 text-sm ${nextCatchup.isOverdue ? 'text-red-500 font-medium' : 'text-warmgray-500'}`}>
+          <div className={`mt-2 text-sm ${nextCatchup.isOverdue ? 'text-red-500 font-medium' : 'text-lavender-500'}`}>
             {nextCatchup.text}
           </div>
         )}
@@ -158,13 +158,13 @@ export default function ConnectionCard({ connection, onLogInteraction, onSkip, o
       <div className="flex gap-3">
         <button
           onClick={onLogInteraction}
-          className="flex-1 py-3 px-4 bg-sage-400 hover:bg-sage-500 text-white font-medium rounded-xl transition-colors"
+          className="flex-1 py-3 px-4 bg-muted-teal-500 hover:bg-muted-teal-600 text-white font-medium rounded-xl transition-colors"
         >
           Log interaction
         </button>
         <button
           onClick={onSkip}
-          className="py-3 px-4 bg-warmgray-100 hover:bg-warmgray-200 text-warmgray-600 font-medium rounded-xl transition-colors"
+          className="py-3 px-4 bg-lavender-100 hover:bg-lavender-200 text-lavender-600 font-medium rounded-xl transition-colors"
         >
           Skip for now
         </button>

@@ -89,14 +89,14 @@ export default function ConnectionDetailModal({ connection, isOpen, onClose, onE
     <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-end sm:items-center justify-center z-50 p-4">
       <div className="bg-white rounded-2xl w-full max-w-md max-h-[90vh] shadow-xl flex flex-col">
         {/* Header */}
-        <div className="p-6 border-b border-warmgray-100">
+        <div className="p-6 border-b border-lavender-100">
           <div className="flex items-center justify-between mb-1">
-            <h2 className="text-xl font-semibold text-warmgray-800">
+            <h2 className="text-xl font-semibold text-lavender-800">
               {connection.name}
             </h2>
             <button
               onClick={onClose}
-              className="text-warmgray-400 hover:text-warmgray-600 transition-colors"
+              className="text-lavender-400 hover:text-lavender-600 transition-colors"
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -104,7 +104,7 @@ export default function ConnectionDetailModal({ connection, isOpen, onClose, onE
             </button>
           </div>
 
-          <div className="flex items-center gap-2 text-sm text-warmgray-500">
+          <div className="flex items-center gap-2 text-sm text-lavender-500">
             {connection.relationship && (
               <>
                 <span>{connection.relationship}</span>
@@ -117,13 +117,13 @@ export default function ConnectionDetailModal({ connection, isOpen, onClose, onE
           <div className="flex gap-2 mt-4">
             <button
               onClick={onLogInteraction}
-              className="flex-1 py-2.5 px-4 bg-sage-400 hover:bg-sage-500 text-white text-sm font-medium rounded-xl transition-colors"
+              className="flex-1 py-2.5 px-4 bg-muted-teal-500 hover:bg-muted-teal-600 text-white text-sm font-medium rounded-xl transition-colors"
             >
               Log interaction
             </button>
             <button
               onClick={onEdit}
-              className="py-2.5 px-4 bg-warmgray-100 hover:bg-warmgray-200 text-warmgray-600 text-sm font-medium rounded-xl transition-colors"
+              className="py-2.5 px-4 bg-lavender-100 hover:bg-lavender-200 text-lavender-600 text-sm font-medium rounded-xl transition-colors"
             >
               Edit
             </button>
@@ -132,36 +132,36 @@ export default function ConnectionDetailModal({ connection, isOpen, onClose, onE
 
         {/* Interaction History */}
         <div className="flex-1 overflow-y-auto p-6">
-          <h3 className="text-sm font-medium text-warmgray-700 mb-4">Interaction History</h3>
+          <h3 className="text-sm font-medium text-lavender-700 mb-4">Interaction History</h3>
 
           {loading ? (
-            <div className="text-center py-8 text-warmgray-400">Loading...</div>
+            <div className="text-center py-8 text-lavender-400">Loading...</div>
           ) : interactions.length === 0 ? (
             <div className="text-center py-8">
               <div className="text-3xl mb-2">📭</div>
-              <p className="text-warmgray-500">No interactions yet</p>
-              <p className="text-warmgray-400 text-sm mt-1">Log your first interaction to start tracking</p>
+              <p className="text-lavender-500">No interactions yet</p>
+              <p className="text-lavender-400 text-sm mt-1">Log your first interaction to start tracking</p>
             </div>
           ) : (
             <div className="space-y-3">
               {interactions.map((interaction) => (
                 <div
                   key={interaction.id}
-                  className="p-4 bg-warmgray-50 rounded-xl"
+                  className="p-4 bg-lavender-50 rounded-xl"
                 >
                   <div className="flex items-center justify-between mb-1">
                     <div className="flex items-center gap-2">
                       <span>{interactionTypeIcons[interaction.interaction_type]}</span>
-                      <span className="text-sm font-medium text-warmgray-700">
+                      <span className="text-sm font-medium text-lavender-700">
                         {interactionTypeLabels[interaction.interaction_type]}
                       </span>
                     </div>
-                    <span className="text-sm text-warmgray-400">
+                    <span className="text-sm text-lavender-400">
                       {formatDate(interaction.interaction_date)}
                     </span>
                   </div>
                   {interaction.memory && (
-                    <p className="text-sm text-warmgray-600 mt-2 pl-7">
+                    <p className="text-sm text-lavender-600 mt-2 pl-7">
                       {interaction.memory}
                     </p>
                   )}
