@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { Connection, InteractionType, Interaction } from '@/types/database'
+import { getWeekStartDate } from '@/lib/reflectionUtils'
 
 interface LogInteractionModalProps {
   connection: Connection
@@ -50,14 +51,32 @@ export default function LogInteractionModal({ connection, isOpen, onClose, onSuc
   const [error, setError] = useState<string | null>(null)
   const [lastInteraction, setLastInteraction] = useState<Interaction | null>(null)
   const [loadingLastInteraction, setLoadingLastInteraction] = useState(false)
+  const [isReflectionPriority, setIsReflectionPriority] = useState(false)
 
   const supabase = createClient()
 
   useEffect(() => {
     if (isOpen) {
       fetchLastInteraction()
+      checkReflectionPriority()
     }
   }, [isOpen, connection.id])
+
+  const checkReflectionPriority = async () => {
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return
+
+    const weekDate = getWeekStartDate()
+
+    const { data: reflection } = await supabase
+      .from('weekly_reflections')
+      .select('grow_closer_id')
+      .eq('user_id', user.id)
+      .eq('week_date', weekDate)
+      .single()
+
+    setIsReflectionPriority(reflection?.grow_closer_id === connection.id)
+  }
 
   const fetchLastInteraction = async () => {
     setLoadingLastInteraction(true)
@@ -113,6 +132,17 @@ export default function LogInteractionModal({ connection, isOpen, onClose, onSuc
 
       if (updateError) throw updateError
 
+      // Update reflection followup date if this is a reflection priority
+      if (isReflectionPriority) {
+        const weekDate = getWeekStartDate()
+        await supabase
+          .from('weekly_reflections')
+          .update({ grow_closer_followup_date: interactionDate })
+          .eq('user_id', user.id)
+          .eq('week_date', weekDate)
+          .is('grow_closer_followup_date', null)
+      }
+
       // Reset form and close
       setInteractionType('call')
       setMemory('')
@@ -147,6 +177,23 @@ export default function LogInteractionModal({ connection, isOpen, onClose, onSuc
               </svg>
             </button>
           </div>
+
+          {/* Reflection Priority Badge */}
+          {isReflectionPriority && (
+            <div className="mb-4 p-3 bg-muted-teal-50 rounded-xl border border-muted-teal-200">
+              <div className="flex items-center gap-2">
+                <span className="text-lg">🌱</span>
+                <div>
+                  <div className="text-sm font-medium text-muted-teal-700">
+                    Reflection Priority
+                  </div>
+                  <div className="text-xs text-muted-teal-600">
+                    You wanted to grow closer to {connection.name} this week
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Last Memory Resurface */}
           {!loadingLastInteraction && lastInteraction?.memory && (

@@ -129,6 +129,42 @@ export interface Database {
         }
         Relationships: []
       }
+      weekly_reflections: {
+        Row: {
+          id: string
+          user_id: string
+          week_date: string
+          most_connected_id: string | null
+          grow_closer_id: string | null
+          reflection_notes: string | null
+          grow_closer_followup_date: string | null
+          completed_at: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          week_date: string
+          most_connected_id?: string | null
+          grow_closer_id?: string | null
+          reflection_notes?: string | null
+          grow_closer_followup_date?: string | null
+          completed_at?: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          week_date?: string
+          most_connected_id?: string | null
+          grow_closer_id?: string | null
+          reflection_notes?: string | null
+          grow_closer_followup_date?: string | null
+          completed_at?: string
+          created_at?: string
+        }
+        Relationships: []
+      }
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,5 +186,6 @@ export type User = Database['public']['Tables']['users']['Row']
 export type Connection = Database['public']['Tables']['connections']['Row']
 export type Interaction = Database['public']['Tables']['interactions']['Row']
 export type UserSettings = Database['public']['Tables']['user_settings']['Row']
+export type WeeklyReflection = Database['public']['Tables']['weekly_reflections']['Row']
 export type InteractionType = Database['public']['Enums']['interaction_type']
 export type CatchupFrequency = Database['public']['Enums']['catchup_frequency']

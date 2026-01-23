@@ -163,3 +163,44 @@ $$ language plpgsql security definer;
 create trigger on_auth_user_created
   after insert on auth.users
   for each row execute procedure public.handle_new_user();
+
+-- Weekly reflections table (stores completed weekly reflections)
+create table public.weekly_reflections (
+  id uuid default uuid_generate_v4() primary key,
+  user_id uuid references public.users on delete cascade not null,
+  week_date date not null, -- Monday of the week
+  most_connected_id uuid references public.connections on delete set null,
+  grow_closer_id uuid references public.connections on delete set null,
+  reflection_notes text,
+  grow_closer_followup_date date, -- Set when user follows up with grow_closer person
+  completed_at timestamp with time zone default timezone('utc'::text, now()) not null,
+  created_at timestamp with time zone default timezone('utc'::text, now()) not null
+);
+
+-- Indexes for weekly_reflections
+create index weekly_reflections_user_id_idx on public.weekly_reflections(user_id);
+create index weekly_reflections_week_date_idx on public.weekly_reflections(week_date);
+create index weekly_reflections_grow_closer_id_idx on public.weekly_reflections(grow_closer_id);
+
+-- Unique constraint to prevent duplicate reflections for the same week
+create unique index weekly_reflections_user_week_unique on public.weekly_reflections(user_id, week_date);
+
+-- Enable Row Level Security for weekly_reflections
+alter table public.weekly_reflections enable row level security;
+
+-- RLS Policies for weekly_reflections table
+create policy "Users can view own reflections"
+  on public.weekly_reflections for select
+  using (auth.uid() = user_id);
+
+create policy "Users can insert own reflections"
+  on public.weekly_reflections for insert
+  with check (auth.uid() = user_id);
+
+create policy "Users can update own reflections"
+  on public.weekly_reflections for update
+  using (auth.uid() = user_id);
+
+create policy "Users can delete own reflections"
+  on public.weekly_reflections for delete
+  using (auth.uid() = user_id);
