@@ -4,7 +4,7 @@ export const dynamic = 'force-dynamic'
 
 import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { WeeklyReflection } from '@/types/database'
+import { WeeklyReflection, Connection } from '@/types/database'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import {
@@ -14,8 +14,8 @@ import {
 } from '@/lib/reflectionUtils'
 
 interface ReflectionWithConnections extends WeeklyReflection {
-  most_connected?: { id: string; name: string } | null
-  grow_closer?: { id: string; name: string } | null
+  most_connected_name?: string | null
+  grow_closer_name?: string | null
 }
 
 export default function ReflectionHistoryPage() {
@@ -33,21 +33,41 @@ export default function ReflectionHistoryPage() {
       return
     }
 
-    const { data } = await supabase
+    // Fetch reflections
+    const { data: reflectionsData } = await supabase
       .from('weekly_reflections')
-      .select(`
-        *,
-        most_connected:connections!most_connected_id(id, name),
-        grow_closer:connections!grow_closer_id(id, name)
-      `)
+      .select('*')
       .eq('user_id', authUser.id)
       .order('week_date', { ascending: false })
       .limit(52)
 
-    if (data) {
-      setReflections(data as ReflectionWithConnections[])
-      setStreak(calculateReflectionStreak(data))
+    if (!reflectionsData) {
+      setLoading(false)
+      return
     }
+
+    // Fetch all connections for this user to map names
+    const { data: connectionsData } = await supabase
+      .from('connections')
+      .select('id, name')
+      .eq('user_id', authUser.id)
+
+    const connectionMap = new Map<string, string>()
+    if (connectionsData) {
+      connectionsData.forEach((c: Pick<Connection, 'id' | 'name'>) => {
+        connectionMap.set(c.id, c.name)
+      })
+    }
+
+    // Map reflections with connection names
+    const enrichedReflections: ReflectionWithConnections[] = reflectionsData.map((r: WeeklyReflection) => ({
+      ...r,
+      most_connected_name: r.most_connected_id ? connectionMap.get(r.most_connected_id) || null : null,
+      grow_closer_name: r.grow_closer_id ? connectionMap.get(r.grow_closer_id) || null : null
+    }))
+
+    setReflections(enrichedReflections)
+    setStreak(calculateReflectionStreak(reflectionsData))
     setLoading(false)
   }, [supabase, router])
 
@@ -126,7 +146,7 @@ export default function ReflectionHistoryPage() {
                     <div className="text-sm font-medium text-lavender-700">
                       {dateRange.start} - {dateRange.end}
                     </div>
-                    {reflection.grow_closer && hasFollowedUp && (
+                    {reflection.grow_closer_name && hasFollowedUp && (
                       <div className="flex items-center gap-1 text-xs text-muted-teal-600 bg-muted-teal-50 px-2 py-1 rounded-full">
                         <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
                           <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
@@ -137,22 +157,22 @@ export default function ReflectionHistoryPage() {
                   </div>
 
                   <div className="space-y-2">
-                    {reflection.most_connected && (
+                    {reflection.most_connected_name && (
                       <div className="flex items-center gap-2">
                         <span className="text-sm">💭</span>
                         <span className="text-xs text-lavender-500">Most connected:</span>
                         <span className="text-sm font-medium text-lavender-700">
-                          {reflection.most_connected.name}
+                          {reflection.most_connected_name}
                         </span>
                       </div>
                     )}
 
-                    {reflection.grow_closer && (
+                    {reflection.grow_closer_name && (
                       <div className="flex items-center gap-2">
                         <span className="text-sm">🌱</span>
                         <span className="text-xs text-lavender-500">Grow closer:</span>
                         <span className="text-sm font-medium text-lavender-700">
-                          {reflection.grow_closer.name}
+                          {reflection.grow_closer_name}
                         </span>
                         {!hasFollowedUp && (
                           <span className="text-xs text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full">
@@ -162,7 +182,7 @@ export default function ReflectionHistoryPage() {
                       </div>
                     )}
 
-                    {!reflection.most_connected && !reflection.grow_closer && (
+                    {!reflection.most_connected_name && !reflection.grow_closer_name && (
                       <div className="text-sm text-lavender-400 italic">
                         Skipped selections
                       </div>
