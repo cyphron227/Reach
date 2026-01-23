@@ -4,7 +4,7 @@ export const dynamic = 'force-dynamic'
 
 import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { WeeklyReflection, Connection } from '@/types/database'
+import { WeeklyReflection } from '@/types/database'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import {
