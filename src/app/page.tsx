@@ -4,7 +4,7 @@ export const dynamic = 'force-dynamic'
 
 import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { Connection, User, Interaction } from '@/types/database'
+import { Connection, User } from '@/types/database'
 import Greeting from '@/components/Greeting'
 import ConnectionCard from '@/components/ConnectionCard'
 import LogInteractionModal from '@/components/LogInteractionModal'
