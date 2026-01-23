@@ -101,35 +101,26 @@ export default function LoginPage() {
 
     try {
       if (isSignUp) {
-        // Check rate limit before sending email
-        if (isRateLimited()) {
-          setError(`Please wait ${rateLimitSecondsRemaining} seconds before requesting another confirmation email.`)
-          setLoading(false)
-          return
-        }
-
-        const { error } = await supabase.auth.signUp({
+        const { data, error } = await supabase.auth.signUp({
           email,
           password,
           options: {
-            emailRedirectTo: `${window.location.origin}/auth/callback`,
             data: {
               full_name: fullName,
             },
           },
         })
 
-        if (error) {
-          // Handle Supabase rate limit errors
-          if (error.message.includes('email_rate_limit') || error.message.includes('rate limit')) {
-            setRateLimit(email)
-            throw new Error('Too many email requests. Please wait a minute before trying again.')
-          }
-          throw error
+        if (error) throw error
+
+        // If email confirmation is disabled, user is immediately logged in
+        if (data.session) {
+          router.push('/')
+          router.refresh()
+          return
         }
 
-        // Set rate limit after successful email send
-        setRateLimit(email)
+        // If email confirmation is enabled, show message
         setMessage('Check your email for a confirmation link.')
       } else {
         const { error } = await supabase.auth.signInWithPassword({
@@ -442,18 +433,12 @@ export default function LoginPage() {
             <p className="text-muted-teal-600 text-sm bg-muted-teal-50 p-3 rounded-lg">{message}</p>
           )}
 
-          {isSignUp && rateLimitSecondsRemaining > 0 && (
-            <p className="text-amber-600 text-sm bg-amber-50 p-3 rounded-lg">
-              Please wait {rateLimitSecondsRemaining} second{rateLimitSecondsRemaining !== 1 ? 's' : ''} before requesting another confirmation email.
-            </p>
-          )}
-
           <button
             type="submit"
-            disabled={loading || (isSignUp && rateLimitSecondsRemaining > 0)}
+            disabled={loading}
             className="w-full py-3 px-4 bg-muted-teal-500 hover:bg-muted-teal-600 text-white font-medium rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {loading ? 'Loading...' : isSignUp && rateLimitSecondsRemaining > 0 ? `Wait ${rateLimitSecondsRemaining}s` : isSignUp ? 'Create account' : 'Sign in'}
+            {loading ? 'Loading...' : isSignUp ? 'Create account' : 'Sign in'}
           </button>
         </form>
 
