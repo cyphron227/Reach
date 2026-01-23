@@ -254,9 +254,6 @@ export default function ForestPage() {
                   <h2 className="text-lg font-semibold text-lavender-800">
                     {selectedConnection.name}
                   </h2>
-                  {selectedConnection.relationship && (
-                    <p className="text-sm text-lavender-500">{selectedConnection.relationship}</p>
-                  )}
                 </div>
               </div>
               <button

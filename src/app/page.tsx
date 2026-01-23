@@ -4,7 +4,7 @@ export const dynamic = 'force-dynamic'
 
 import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { Connection, User } from '@/types/database'
+import { Connection, User, Interaction } from '@/types/database'
 import Greeting from '@/components/Greeting'
 import ConnectionCard from '@/components/ConnectionCard'
 import LogInteractionModal from '@/components/LogInteractionModal'
@@ -72,6 +72,7 @@ function calculatePriorityScore(connection: Connection): number {
 export default function TodayPage() {
   const [user, setUser] = useState<User | null>(null)
   const [connections, setConnections] = useState<Connection[]>([])
+  const [lastMemories, setLastMemories] = useState<Record<string, string>>({})
   const [skippedIds, setSkippedIds] = useState<Set<string>>(new Set())
   const [loading, setLoading] = useState(true)
   const [showLogModal, setShowLogModal] = useState(false)
@@ -122,6 +123,30 @@ export default function TodayPage() {
     return visibleConnections
   }, [supabase, skippedIds])
 
+  const fetchLastMemories = useCallback(async (connectionIds: string[]): Promise<Record<string, string>> => {
+    if (connectionIds.length === 0) return {}
+
+    // Get the last interaction with a memory for each connection
+    const { data } = await supabase
+      .from('interactions')
+      .select('connection_id, memory')
+      .in('connection_id', connectionIds)
+      .not('memory', 'is', null)
+      .order('interaction_date', { ascending: false })
+
+    if (!data) return {}
+
+    // Build a map of connection_id -> last memory (first one found per connection since sorted desc)
+    const memories: Record<string, string> = {}
+    for (const interaction of data) {
+      if (!memories[interaction.connection_id] && interaction.memory) {
+        memories[interaction.connection_id] = interaction.memory
+      }
+    }
+
+    return memories
+  }, [supabase])
+
   const loadData = useCallback(async () => {
     setLoading(true)
     const [userData, connectionsData] = await Promise.all([
@@ -130,8 +155,16 @@ export default function TodayPage() {
     ])
     setUser(userData)
     setConnections(connectionsData)
+
+    // Fetch last memories for all connections
+    if (connectionsData.length > 0) {
+      const connectionIds = connectionsData.map(c => c.id)
+      const memories = await fetchLastMemories(connectionIds)
+      setLastMemories(memories)
+    }
+
     setLoading(false)
-  }, [fetchUser, fetchConnections])
+  }, [fetchUser, fetchConnections, fetchLastMemories])
 
   useEffect(() => {
     loadData()
@@ -225,6 +258,7 @@ export default function TodayPage() {
                 <ConnectionCard
                   key={conn.id}
                   connection={conn}
+                  lastMemory={lastMemories[conn.id]}
                   onLogInteraction={() => handleLogInteraction(conn)}
                   onSkip={() => handleSkip(conn.id)}
                   onEdit={() => handleEdit(conn)}

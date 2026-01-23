@@ -21,7 +21,6 @@ const frequencyOptions: { value: CatchupFrequency; label: string }[] = [
 
 export default function EditConnectionModal({ connection, isOpen, onClose, onSuccess }: EditConnectionModalProps) {
   const [name, setName] = useState(connection.name)
-  const [relationship, setRelationship] = useState(connection.relationship || '')
   const [frequency, setFrequency] = useState<CatchupFrequency>(connection.catchup_frequency)
   const [loading, setLoading] = useState(false)
   const [deleteConfirm, setDeleteConfirm] = useState(false)
@@ -32,7 +31,6 @@ export default function EditConnectionModal({ connection, isOpen, onClose, onSuc
   useEffect(() => {
     if (isOpen) {
       setName(connection.name)
-      setRelationship(connection.relationship || '')
       setFrequency(connection.catchup_frequency)
       setDeleteConfirm(false)
       setError(null)
@@ -49,7 +47,6 @@ export default function EditConnectionModal({ connection, isOpen, onClose, onSuc
         .from('connections')
         .update({
           name: name.trim(),
-          relationship: relationship.trim() || null,
           catchup_frequency: frequency,
         })
         .eq('id', connection.id)
@@ -123,20 +120,6 @@ export default function EditConnectionModal({ connection, isOpen, onClose, onSuc
                 onChange={(e) => setName(e.target.value)}
                 required
                 className="w-full px-4 py-3 rounded-xl border border-lavender-200 bg-white text-lavender-800 placeholder-lavender-400 focus:outline-none focus:ring-2 focus:ring-muted-teal-400 focus:border-transparent transition-all"
-              />
-            </div>
-
-            <div>
-              <label htmlFor="edit-relationship" className="block text-sm font-medium text-lavender-700 mb-1">
-                How do you know them? <span className="text-lavender-400">(optional)</span>
-              </label>
-              <input
-                id="edit-relationship"
-                type="text"
-                value={relationship}
-                onChange={(e) => setRelationship(e.target.value)}
-                className="w-full px-4 py-3 rounded-xl border border-lavender-200 bg-white text-lavender-800 placeholder-lavender-400 focus:outline-none focus:ring-2 focus:ring-muted-teal-400 focus:border-transparent transition-all"
-                placeholder="e.g., College friend, Cousin, Coworker"
               />
             </div>
 

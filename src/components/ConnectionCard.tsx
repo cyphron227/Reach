@@ -4,6 +4,7 @@ import { Connection, CatchupFrequency } from '@/types/database'
 
 interface ConnectionCardProps {
   connection: Connection
+  lastMemory?: string
   onLogInteraction: () => void
   onSkip: () => void
   onEdit: () => void
@@ -105,7 +106,7 @@ function getTimeAgoText(lastInteractionDate: string | null): string {
   return `${Math.floor(days / 30)} months ago`
 }
 
-export default function ConnectionCard({ connection, onLogInteraction, onSkip, onEdit, onViewDetails }: ConnectionCardProps) {
+export default function ConnectionCard({ connection, lastMemory, onLogInteraction, onSkip, onEdit, onViewDetails }: ConnectionCardProps) {
   const status = getStatusText(connection.last_interaction_date)
   const timeAgo = getTimeAgoText(connection.last_interaction_date)
   const nextCatchup = getNextCatchupInfo(connection)
@@ -121,9 +122,6 @@ export default function ConnectionCard({ connection, onLogInteraction, onSkip, o
             {connection.name}
           </button>
           <div className="flex items-center gap-2">
-            {connection.relationship && (
-              <span className="text-sm text-lavender-400">{connection.relationship}</span>
-            )}
             <button
               onClick={onEdit}
               className="p-1.5 text-lavender-400 hover:text-lavender-600 hover:bg-lavender-100 rounded-lg transition-colors"
@@ -151,6 +149,15 @@ export default function ConnectionCard({ connection, onLogInteraction, onSkip, o
         {nextCatchup.text && (
           <div className={`mt-2 text-sm ${nextCatchup.isOverdue ? 'text-red-500 font-medium' : 'text-lavender-500'}`}>
             {nextCatchup.text}
+          </div>
+        )}
+
+        {lastMemory && (
+          <div className="mt-3 p-3 bg-lavender-50 rounded-xl">
+            <div className="text-xs text-lavender-400 mb-1">Last note</div>
+            <p className="text-sm text-lavender-700 italic line-clamp-2">
+              &ldquo;{lastMemory}&rdquo;
+            </p>
           </div>
         )}
       </div>

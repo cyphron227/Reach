@@ -87,7 +87,7 @@ export default function SettingsPage() {
     setSaving(true)
     setMessage(null)
 
-    const { error } = await supabase
+    const { data, error } = await supabase
       .from('user_settings')
       .update({
         notifications_enabled: notificationsEnabled,
@@ -95,10 +95,16 @@ export default function SettingsPage() {
         weekly_reflection_enabled: weeklyReflectionEnabled,
       })
       .eq('id', settings.id)
+      .select()
+      .single()
 
     if (error) {
       setMessage({ type: 'error', text: 'Failed to save settings' })
     } else {
+      // Update local state with the saved values
+      if (data) {
+        setSettings(data as UserSettings)
+      }
       setMessage({ type: 'success', text: 'Settings saved' })
       setTimeout(() => setMessage(null), 3000)
     }

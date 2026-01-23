@@ -105,12 +105,6 @@ export default function ConnectionDetailModal({ connection, isOpen, onClose, onE
           </div>
 
           <div className="flex items-center gap-2 text-sm text-lavender-500">
-            {connection.relationship && (
-              <>
-                <span>{connection.relationship}</span>
-                <span>·</span>
-              </>
-            )}
             <span>{frequencyLabels[connection.catchup_frequency]}</span>
           </div>
 

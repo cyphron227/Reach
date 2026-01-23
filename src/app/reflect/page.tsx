@@ -121,9 +121,6 @@ export default function ReflectPage() {
                   }`}
                 >
                   <div className="font-medium text-lavender-800">{connection.name}</div>
-                  {connection.relationship && (
-                    <div className="text-sm text-lavender-500">{connection.relationship}</div>
-                  )}
                 </button>
               ))}
             </div>
@@ -171,9 +168,6 @@ export default function ReflectPage() {
                   }`}
                 >
                   <div className="font-medium text-lavender-800">{connection.name}</div>
-                  {connection.relationship && (
-                    <div className="text-sm text-lavender-500">{connection.relationship}</div>
-                  )}
                 </button>
               ))}
             </div>
