@@ -228,23 +228,15 @@ export default function TodayPage() {
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div className="text-muted-teal-500 font-semibold text-lg">Reach</div>
-          <div className="flex items-center gap-4">
-            <Link
-              href="/forest"
-              className="text-lavender-400 hover:text-muted-teal-600 text-sm transition-colors flex items-center gap-1"
-            >
-              <span>🌳</span> Forest
-            </Link>
-            <Link
-              href="/settings"
-              className="text-lavender-400 hover:text-lavender-600 transition-colors"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-              </svg>
-            </Link>
-          </div>
+          <Link
+            href="/settings"
+            className="text-lavender-400 hover:text-lavender-600 transition-colors"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+          </Link>
         </div>
 
         {/* Greeting */}
@@ -323,20 +315,35 @@ export default function TodayPage() {
           </button>
         )}
 
-        {/* Weekly Reflection Prompt (shown on Sundays or can be accessed anytime) */}
+        {/* Reach Forest and Weekly Reflection */}
         {connections.length > 0 && (
-          <Link
-            href="/reflect"
-            className="mt-6 block bg-muted-teal-50 rounded-xl p-4 border border-muted-teal-100 hover:bg-muted-teal-100 transition-colors"
-          >
-            <div className="flex items-center gap-3">
-              <span className="text-2xl">💭</span>
-              <div>
-                <div className="text-sm font-medium text-muted-teal-700">Weekly reflection</div>
-                <div className="text-xs text-muted-teal-600">Take a moment to reflect on your connections</div>
+          <>
+            <Link
+              href="/forest"
+              className="mt-6 block bg-muted-teal-50 rounded-xl p-4 border border-muted-teal-100 hover:bg-muted-teal-100 transition-colors"
+            >
+              <div className="flex items-center gap-3">
+                <span className="text-2xl">🌳</span>
+                <div>
+                  <div className="text-sm font-medium text-muted-teal-700">Reach Forest</div>
+                  <div className="text-xs text-muted-teal-600">View the health of all your relationships</div>
+                </div>
               </div>
-            </div>
-          </Link>
+            </Link>
+
+            <Link
+              href="/reflect"
+              className="mt-3 block bg-muted-teal-50 rounded-xl p-4 border border-muted-teal-100 hover:bg-muted-teal-100 transition-colors"
+            >
+              <div className="flex items-center gap-3">
+                <span className="text-2xl">💭</span>
+                <div>
+                  <div className="text-sm font-medium text-muted-teal-700">Weekly reflection</div>
+                  <div className="text-xs text-muted-teal-600">Take a moment to reflect on your connections</div>
+                </div>
+              </div>
+            </Link>
+          </>
         )}
       </div>
 
