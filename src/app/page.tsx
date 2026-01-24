@@ -81,6 +81,8 @@ export default function TodayPage() {
   const [showDetailModal, setShowDetailModal] = useState(false)
   const [selectedConnection, setSelectedConnection] = useState<Connection | null>(null)
   const [showAllConnections, setShowAllConnections] = useState(false)
+  const [searchQuery, setSearchQuery] = useState<string>('')
+  const [sortMode, setSortMode] = useState<'soonest' | 'alphabetical'>('soonest')
 
   const supabase = createClient()
   const router = useRouter()
@@ -113,15 +115,25 @@ export default function TodayPage() {
 
     if (!data || data.length === 0) return []
 
-    // Sort by priority (soonest catch-up needed first)
-    const sortedConnections = (data as Connection[])
-      .sort((a, b) => calculatePriorityScore(a) - calculatePriorityScore(b))
+    let processedConnections = data as Connection[]
+
+    // Apply search filter
+    if (searchQuery.trim()) {
+      processedConnections = processedConnections.filter(c =>
+        c.name.toLowerCase().includes(searchQuery.toLowerCase().trim())
+      )
+    }
+
+    // Apply sort
+    processedConnections = sortMode === 'soonest'
+      ? processedConnections.sort((a, b) => calculatePriorityScore(a) - calculatePriorityScore(b))
+      : processedConnections.sort((a, b) => a.name.localeCompare(b.name))
 
     // Filter out skipped connections
-    const visibleConnections = sortedConnections.filter(c => !skippedIds.has(c.id))
+    const visibleConnections = processedConnections.filter(c => !skippedIds.has(c.id))
 
     return visibleConnections
-  }, [supabase, skippedIds])
+  }, [supabase, skippedIds, searchQuery, sortMode])
 
   const fetchLastMemories = useCallback(async (connectionIds: string[]): Promise<Record<string, string>> => {
     if (connectionIds.length === 0) return {}
@@ -170,6 +182,19 @@ export default function TodayPage() {
     loadData()
   }, [loadData])
 
+  // Initialize sort preference from localStorage
+  useEffect(() => {
+    const savedSort = localStorage.getItem('ringur_sort_preference')
+    if (savedSort === 'alphabetical' || savedSort === 'soonest') {
+      setSortMode(savedSort)
+    }
+  }, [])
+
+  // Save sort preference to localStorage
+  useEffect(() => {
+    localStorage.setItem('ringur_sort_preference', sortMode)
+  }, [sortMode])
+
   const handleSkip = (connectionId: string) => {
     setSkippedIds(prev => new Set(Array.from(prev).concat(connectionId)))
   }
@@ -202,6 +227,7 @@ export default function TodayPage() {
     setSkippedIds(new Set())
     setSelectedConnection(null)
     setShowAllConnections(false)
+    setSearchQuery('')
     loadData()
   }
 
@@ -242,6 +268,59 @@ export default function TodayPage() {
         {/* Greeting */}
         <Greeting userName={user?.full_name} />
 
+        {/* Search and Sort Controls */}
+        {(connections.length > 0 || skippedIds.size > 0) && (
+          <div className="mb-6 space-y-3">
+            {/* Search Bar */}
+            <div className="relative">
+              <svg
+                className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-lavender-400"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                />
+              </svg>
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search connections..."
+                className="w-full px-4 py-3 pl-10 rounded-xl border border-lavender-200 bg-white text-lavender-800 placeholder-lavender-400 focus:outline-none focus:ring-2 focus:ring-muted-teal-400 focus:border-transparent transition-all"
+              />
+            </div>
+
+            {/* Sort Toggle */}
+            <div className="flex gap-2">
+              <button
+                onClick={() => setSortMode('soonest')}
+                className={`flex-1 py-2.5 px-4 rounded-xl font-medium transition-colors ${
+                  sortMode === 'soonest'
+                    ? 'bg-muted-teal-500 text-white'
+                    : 'bg-lavender-100 text-lavender-600 hover:bg-lavender-200'
+                }`}
+              >
+                Soonest
+              </button>
+              <button
+                onClick={() => setSortMode('alphabetical')}
+                className={`flex-1 py-2.5 px-4 rounded-xl font-medium transition-colors ${
+                  sortMode === 'alphabetical'
+                    ? 'bg-muted-teal-500 text-white'
+                    : 'bg-lavender-100 text-lavender-600 hover:bg-lavender-200'
+                }`}
+              >
+                A-Z
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* Connection Cards or Empty State */}
         {connections.length > 0 ? (
           <>
@@ -269,6 +348,23 @@ export default function TodayPage() {
               </button>
             )}
           </>
+        ) : searchQuery.trim() ? (
+          /* No search results state */
+          <div className="bg-white rounded-2xl p-8 shadow-sm border border-lavender-100 text-center">
+            <div className="text-4xl mb-4">🔍</div>
+            <h2 className="text-lg font-semibold text-lavender-800 mb-2">
+              No matches found
+            </h2>
+            <p className="text-lavender-500 mb-6">
+              Try a different search term or{' '}
+              <button
+                onClick={() => setSearchQuery('')}
+                className="text-muted-teal-600 hover:underline font-medium"
+              >
+                clear your search
+              </button>
+            </p>
+          </div>
         ) : skippedIds.size > 0 ? (
           /* All caught up state */
           <div className="bg-white rounded-2xl p-8 shadow-sm border border-lavender-100 text-center">
