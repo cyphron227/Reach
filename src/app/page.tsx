@@ -227,7 +227,7 @@ export default function TodayPage() {
       <div className="max-w-lg mx-auto px-6 py-8">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
-          <div className="text-muted-teal-500 font-semibold text-lg">Reach</div>
+          <div className="text-muted-teal-500 font-semibold text-lg">Ringur</div>
           <Link
             href="/settings"
             className="text-lavender-400 hover:text-lavender-600 transition-colors"
@@ -315,7 +315,7 @@ export default function TodayPage() {
           </button>
         )}
 
-        {/* Reach Forest and Weekly Reflection */}
+        {/* Ringur Forest and Weekly Reflection */}
         {connections.length > 0 && (
           <>
             <Link
@@ -325,7 +325,7 @@ export default function TodayPage() {
               <div className="flex items-center gap-3">
                 <span className="text-2xl">🌳</span>
                 <div>
-                  <div className="text-sm font-medium text-muted-teal-700">Reach Forest</div>
+                  <div className="text-sm font-medium text-muted-teal-700">Ringur Forest</div>
                   <div className="text-xs text-muted-teal-600">View the health of all your relationships</div>
                 </div>
               </div>

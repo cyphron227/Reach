@@ -11,7 +11,7 @@ const geistSans = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "Reach - Stay close to who matters",
+  title: "Ringur - Stay close to who matters",
   description: "A calm relationship companion that helps you maintain meaningful connections",
 };
 

@@ -201,7 +201,7 @@ export default function LoginPage() {
           <div className="max-w-md w-full text-center">
             {/* Logo and Tagline */}
             <div className="mb-12">
-              <h1 className="text-5xl font-semibold text-lavender-800 mb-4">Reach</h1>
+              <h1 className="text-5xl font-semibold text-lavender-800 mb-4">Ringur</h1>
               <p className="text-xl text-lavender-600 leading-relaxed">
                 Stay close to who matters
               </p>
@@ -210,7 +210,7 @@ export default function LoginPage() {
             {/* Hero Description */}
             <div className="bg-white/70 backdrop-blur-sm rounded-3xl p-8 shadow-lg border border-white/50 mb-8">
               <p className="text-lavender-700 text-lg leading-relaxed mb-6">
-                Life gets busy. Friendships drift. <span className="text-muted-teal-600 font-medium">Reach</span> helps you nurture the relationships that matter most with gentle reminders and meaningful memories.
+                Life gets busy. Friendships drift. <span className="text-muted-teal-600 font-medium">Ringur</span> helps you nurture the relationships that matter most with gentle reminders and meaningful memories.
               </p>
 
               {/* Feature Highlights */}

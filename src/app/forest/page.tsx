@@ -498,7 +498,7 @@ export default function ForestPage() {
             </svg>
             Today
           </Link>
-          <div className="text-muted-teal-500 font-semibold text-lg">Your Reach Forest</div>
+          <div className="text-muted-teal-500 font-semibold text-lg">Your Ringur Forest</div>
           <div className="w-12" />
         </div>
 
