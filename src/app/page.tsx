@@ -13,6 +13,12 @@ import EditConnectionModal from '@/components/EditConnectionModal'
 import ConnectionDetailModal from '@/components/ConnectionDetailModal'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import {
+  isCapacitor,
+  requestNotificationPermissions,
+  scheduleConnectionNotifications,
+  registerNotificationTapListener,
+} from '@/lib/capacitor'
 
 const CONNECTIONS_TO_SHOW = 3
 
@@ -85,6 +91,7 @@ export default function TodayPage() {
   const [sortMode, setSortMode] = useState<'soonest' | 'alphabetical'>('soonest')
   const [scrollY, setScrollY] = useState(0)
   const [showMenu, setShowMenu] = useState(false)
+  const [notificationConnectionId, setNotificationConnectionId] = useState<string | null>(null)
   const menuRef = useRef<HTMLDivElement>(null)
 
   const supabase = createClient()
@@ -111,6 +118,25 @@ export default function TodayPage() {
     }
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [showMenu])
+
+  // Register notification tap listener
+  useEffect(() => {
+    const cleanup = registerNotificationTapListener((connectionId) => {
+      setNotificationConnectionId(connectionId)
+    })
+    return cleanup
+  }, [])
+
+  // Handle notification tap - open the connection details
+  useEffect(() => {
+    if (notificationConnectionId && connections.length > 0) {
+      const connection = connections.find(c => c.id === notificationConnectionId)
+      if (connection) {
+        handleViewDetails(connection)
+        setNotificationConnectionId(null)
+      }
+    }
+  }, [notificationConnectionId, connections])
 
   const fetchUser = useCallback(async () => {
     const { data: { user: authUser } } = await supabase.auth.getUser()
@@ -200,8 +226,32 @@ export default function TodayPage() {
       setLastMemories(memories)
     }
 
+    // Schedule notifications for native app
+    if (isCapacitor() && connectionsData.length > 0) {
+      try {
+        const { data: { user: authUser } } = await supabase.auth.getUser()
+        if (authUser) {
+          const { data: settings } = await supabase
+            .from('user_settings')
+            .select('notifications_enabled, notification_time')
+            .eq('user_id', authUser.id)
+            .single()
+
+          if (settings?.notifications_enabled !== false) {
+            // Request permissions if needed
+            await requestNotificationPermissions()
+            // Schedule notifications using user's preferred time
+            const notificationTime = settings?.notification_time || '18:00'
+            await scheduleConnectionNotifications(connectionsData, notificationTime)
+          }
+        }
+      } catch (error) {
+        console.error('Failed to schedule notifications:', error)
+      }
+    }
+
     setLoading(false)
-  }, [fetchUser, fetchConnections, fetchLastMemories])
+  }, [fetchUser, fetchConnections, fetchLastMemories, supabase])
 
   useEffect(() => {
     loadData()

@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { Connection, InteractionType, Interaction } from '@/types/database'
 import { getWeekStartDate } from '@/lib/reflectionUtils'
+import { cancelConnectionNotification } from '@/lib/capacitor'
 
 interface LogInteractionModalProps {
   connection: Connection
@@ -142,6 +143,9 @@ export default function LogInteractionModal({ connection, isOpen, onClose, onSuc
           .eq('week_date', weekDate)
           .is('grow_closer_followup_date', null)
       }
+
+      // Cancel the notification for this connection since we just interacted
+      await cancelConnectionNotification(connection.id)
 
       // Reset form and close
       setInteractionType('call')

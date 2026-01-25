@@ -47,3 +47,13 @@ export function getPasswordResetRedirectUrl(): string {
 export function getOAuthCallbackUrl(): string {
   return getAuthRedirectUrl('/auth/callback')
 }
+
+// Re-export notification utilities
+export {
+  requestNotificationPermissions,
+  areNotificationsPermitted,
+  cancelAllNotifications,
+  cancelConnectionNotification,
+  scheduleConnectionNotifications,
+  registerNotificationTapListener,
+} from './notifications'

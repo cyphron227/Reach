@@ -7,6 +7,12 @@ import { createClient } from '@/lib/supabase/client'
 import { User, UserSettings } from '@/types/database'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import {
+  isCapacitor,
+  requestNotificationPermissions,
+  areNotificationsPermitted,
+  cancelAllNotifications,
+} from '@/lib/capacitor'
 
 export default function SettingsPage() {
   const [user, setUser] = useState<User | null>(null)
@@ -22,6 +28,7 @@ export default function SettingsPage() {
   const [notificationsEnabled, setNotificationsEnabled] = useState(true)
   const [notificationTime, setNotificationTime] = useState('18:00')
   const [weeklyReflectionEnabled, setWeeklyReflectionEnabled] = useState(true)
+  const [notificationPermissionGranted, setNotificationPermissionGranted] = useState<boolean | null>(null)
 
   const router = useRouter()
   const supabase = createClient()
@@ -54,7 +61,10 @@ export default function SettingsPage() {
       const settings = settingsData as UserSettings
       setSettings(settings)
       setNotificationsEnabled(settings.notifications_enabled)
-      setNotificationTime(settings.notification_time)
+      // PostgreSQL time type returns "18:00:00" but dropdown uses "18:00"
+      // Normalize by taking only HH:MM portion
+      const normalizedTime = settings.notification_time?.substring(0, 5) || '18:00'
+      setNotificationTime(normalizedTime)
       setWeeklyReflectionEnabled(settings.weekly_reflection_enabled)
     } else {
       // Create default settings
@@ -80,6 +90,37 @@ export default function SettingsPage() {
   useEffect(() => {
     fetchData()
   }, [fetchData])
+
+  // Check notification permission status on load
+  useEffect(() => {
+    if (isCapacitor()) {
+      areNotificationsPermitted().then(setNotificationPermissionGranted)
+    }
+  }, [])
+
+  // Handle notification toggle with permission request
+  const handleNotificationToggle = async () => {
+    const newValue = !notificationsEnabled
+
+    if (newValue && isCapacitor()) {
+      // Request permissions when enabling
+      const granted = await requestNotificationPermissions()
+      setNotificationPermissionGranted(granted)
+
+      if (!granted) {
+        setMessage({
+          type: 'error',
+          text: 'Please enable notifications in your device settings'
+        })
+        return
+      }
+    } else if (!newValue && isCapacitor()) {
+      // Cancel all notifications when disabling
+      await cancelAllNotifications()
+    }
+
+    setNotificationsEnabled(newValue)
+  }
 
   const handleSave = async () => {
     if (!settings) return
@@ -234,7 +275,7 @@ export default function SettingsPage() {
                 <div className="text-sm text-lavender-500">Get a gentle nudge to reach out</div>
               </div>
               <button
-                onClick={() => setNotificationsEnabled(!notificationsEnabled)}
+                onClick={handleNotificationToggle}
                 className={`relative w-12 h-7 rounded-full transition-colors ${
                   notificationsEnabled ? 'bg-muted-teal-400' : 'bg-lavender-200'
                 }`}
