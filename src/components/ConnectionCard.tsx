@@ -134,8 +134,14 @@ export default function ConnectionCard({ connection, lastMemory, onLogInteractio
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
-          <span className={`text-sm ${status.isUrgent ? 'text-amber-600' : 'text-muted-teal-600'}`}>
+        {nextCatchup.text && (
+          <div className={`text-sm font-bold ${nextCatchup.isOverdue ? 'text-red-500' : 'text-muted-teal-600'}`}>
+            {nextCatchup.text}
+          </div>
+        )}
+
+        <div className="flex items-center gap-2 mt-1">
+          <span className="text-sm text-lavender-500">
             {status.text}
           </span>
           {timeAgo && (
@@ -144,22 +150,13 @@ export default function ConnectionCard({ connection, lastMemory, onLogInteractio
               <span className="text-sm text-lavender-400">{timeAgo}</span>
             </>
           )}
+          {lastMemory && (
+            <>
+              <span className="text-lavender-300">·</span>
+              <span className="text-sm text-lavender-500 italic line-clamp-1">&ldquo;{lastMemory}&rdquo;</span>
+            </>
+          )}
         </div>
-
-        {nextCatchup.text && (
-          <div className={`mt-2 text-sm ${nextCatchup.isOverdue ? 'text-red-500 font-medium' : 'text-lavender-500'}`}>
-            {nextCatchup.text}
-          </div>
-        )}
-
-        {lastMemory && (
-          <div className="mt-3 p-3 bg-lavender-50 rounded-xl">
-            <div className="text-xs text-lavender-400 mb-1">Last note</div>
-            <p className="text-sm text-lavender-700 italic line-clamp-2">
-              &ldquo;{lastMemory}&rdquo;
-            </p>
-          </div>
-        )}
       </div>
 
       <div className="flex gap-3">
