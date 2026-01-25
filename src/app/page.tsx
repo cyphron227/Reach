@@ -2,7 +2,7 @@
 
 export const dynamic = 'force-dynamic'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { Connection, User } from '@/types/database'
 import Greeting from '@/components/Greeting'
@@ -83,9 +83,34 @@ export default function TodayPage() {
   const [showAllConnections, setShowAllConnections] = useState(false)
   const [searchQuery, setSearchQuery] = useState<string>('')
   const [sortMode, setSortMode] = useState<'soonest' | 'alphabetical'>('soonest')
+  const [scrollY, setScrollY] = useState(0)
+  const [showMenu, setShowMenu] = useState(false)
+  const menuRef = useRef<HTMLDivElement>(null)
 
   const supabase = createClient()
   const router = useRouter()
+
+  // Track scroll position for shrinking header
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrollY(window.scrollY)
+    }
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
+
+  // Close menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setShowMenu(false)
+      }
+    }
+    if (showMenu) {
+      document.addEventListener('mousedown', handleClickOutside)
+    }
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [showMenu])
 
   const fetchUser = useCallback(async () => {
     const { data: { user: authUser } } = await supabase.auth.getUser()
@@ -248,23 +273,82 @@ export default function TodayPage() {
     )
   }
 
+  // Calculate header shrink based on scroll
+  const headerScale = Math.max(0.7, 1 - scrollY / 200)
+  const headerOpacity = Math.max(0.85, 1 - scrollY / 300)
+
   return (
     <main className="min-h-screen bg-lavender-50">
-      <div className="max-w-lg mx-auto px-6 py-8">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <div className="text-muted-teal-500 font-semibold text-lg">Ringur</div>
-          <Link
-            href="/settings"
-            className="text-lavender-400 hover:text-lavender-600 transition-colors"
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-            </svg>
-          </Link>
-        </div>
+      {/* Sticky Header */}
+      <div
+        className="sticky top-0 z-50 bg-lavender-50 transition-all duration-150"
+        style={{
+          paddingTop: `${Math.max(8, 32 - scrollY / 5)}px`,
+          paddingBottom: `${Math.max(8, 16 - scrollY / 10)}px`
+        }}
+      >
+        <div className="max-w-lg mx-auto px-6">
+          <div className="flex items-center justify-between">
+            <div
+              className="text-muted-teal-500 font-semibold transition-all duration-150 origin-left"
+              style={{
+                fontSize: `${Math.max(14, 18 * headerScale)}px`,
+                opacity: headerOpacity
+              }}
+            >
+              Ringur
+            </div>
+            <div className="relative" ref={menuRef}>
+              <button
+                onClick={() => setShowMenu(!showMenu)}
+                className="p-2 text-lavender-400 hover:text-lavender-600 hover:bg-lavender-100 rounded-lg transition-colors"
+              >
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                  <circle cx="12" cy="5" r="2" />
+                  <circle cx="12" cy="12" r="2" />
+                  <circle cx="12" cy="19" r="2" />
+                </svg>
+              </button>
 
+              {/* Menu Overlay */}
+              {showMenu && (
+                <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-lavender-100 py-2 z-50">
+                  <button
+                    onClick={() => {
+                      setShowMenu(false)
+                      setShowAddModal(true)
+                    }}
+                    className="w-full px-4 py-3 text-left text-lavender-700 hover:bg-lavender-50 transition-colors flex items-center gap-3"
+                  >
+                    <svg className="w-5 h-5 text-muted-teal-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                    </svg>
+                    New Contact
+                  </button>
+                  <Link
+                    href="/forest"
+                    onClick={() => setShowMenu(false)}
+                    className="w-full px-4 py-3 text-left text-lavender-700 hover:bg-lavender-50 transition-colors flex items-center gap-3"
+                  >
+                    <span className="text-lg">🌳</span>
+                    Ringur Forest
+                  </Link>
+                  <Link
+                    href="/reflect"
+                    onClick={() => setShowMenu(false)}
+                    className="w-full px-4 py-3 text-left text-lavender-700 hover:bg-lavender-50 transition-colors flex items-center gap-3"
+                  >
+                    <span className="text-lg">💭</span>
+                    Weekly Reflection
+                  </Link>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="max-w-lg mx-auto px-6 pb-8">
         {/* Greeting */}
         <Greeting userName={user?.full_name} />
 
@@ -325,7 +409,7 @@ export default function TodayPage() {
         {connections.length > 0 ? (
           <>
             <div className="space-y-4">
-              {(showAllConnections ? connections : connections.slice(0, CONNECTIONS_TO_SHOW)).map((conn) => (
+              {(showAllConnections || sortMode === 'alphabetical' ? connections : connections.slice(0, CONNECTIONS_TO_SHOW)).map((conn) => (
                 <ConnectionCard
                   key={conn.id}
                   connection={conn}
@@ -339,7 +423,7 @@ export default function TodayPage() {
             </div>
 
             {/* Show all button */}
-            {connections.length > CONNECTIONS_TO_SHOW && !showAllConnections && (
+            {connections.length > CONNECTIONS_TO_SHOW && !showAllConnections && sortMode !== 'alphabetical' && (
               <button
                 onClick={() => setShowAllConnections(true)}
                 className="mt-4 w-full py-3 px-4 bg-lavender-100 hover:bg-lavender-200 text-lavender-600 font-medium rounded-xl transition-colors"
@@ -407,7 +491,7 @@ export default function TodayPage() {
             onClick={() => setShowAddModal(true)}
             className="mt-6 w-full py-3 px-4 border-2 border-dashed border-lavender-200 hover:border-muted-teal-300 text-lavender-500 hover:text-muted-teal-600 font-medium rounded-xl transition-colors"
           >
-            + Add another connection
+            + Add New Contact
           </button>
         )}
 

@@ -71,7 +71,7 @@ function getNextCatchupInfo(connection: Connection): { text: string; isOverdue: 
   return { text: `Catch up in ${Math.floor(daysUntilDue / 7)} weeks`, isOverdue: false }
 }
 
-function getStatusText(lastInteractionDate: string | null): { text: string; isUrgent: boolean } {
+function getConnectionStatusText(lastInteractionDate: string | null): { text: string; isUrgent: boolean } {
   const days = getDaysSince(lastInteractionDate)
 
   if (days === null) {
@@ -90,25 +90,11 @@ function getStatusText(lastInteractionDate: string | null): { text: string; isUr
     return { text: "Connected yesterday", isUrgent: false }
   }
 
-  return { text: "Recently connected", isUrgent: false }
-}
-
-function getTimeAgoText(lastInteractionDate: string | null): string {
-  const days = getDaysSince(lastInteractionDate)
-
-  if (days === null) return ''
-  if (days === 0) return 'Today'
-  if (days === 1) return '1 day ago'
-  if (days < 7) return `${days} days ago`
-  if (days < 14) return '1 week ago'
-  if (days < 30) return `${Math.floor(days / 7)} weeks ago`
-  if (days < 60) return '1 month ago'
-  return `${Math.floor(days / 30)} months ago`
+  return { text: `Connected ${days} days ago`, isUrgent: false }
 }
 
 export default function ConnectionCard({ connection, lastMemory, onLogInteraction, onSkip, onEdit, onViewDetails }: ConnectionCardProps) {
-  const status = getStatusText(connection.last_interaction_date)
-  const timeAgo = getTimeAgoText(connection.last_interaction_date)
+  const status = getConnectionStatusText(connection.last_interaction_date)
   const nextCatchup = getNextCatchupInfo(connection)
 
   return (
@@ -140,23 +126,15 @@ export default function ConnectionCard({ connection, lastMemory, onLogInteractio
           </div>
         )}
 
-        <div className="flex items-center gap-2 mt-1">
-          <span className="text-sm text-lavender-500">
-            {status.text}
-          </span>
-          {timeAgo && (
-            <>
-              <span className="text-lavender-300">·</span>
-              <span className="text-sm text-lavender-400">{timeAgo}</span>
-            </>
-          )}
-          {lastMemory && (
-            <>
-              <span className="text-lavender-300">·</span>
-              <span className="text-sm text-lavender-500 italic line-clamp-1">&ldquo;{lastMemory}&rdquo;</span>
-            </>
-          )}
+        <div className="text-sm text-lavender-500 mt-1">
+          {status.text}
         </div>
+
+        {lastMemory && (
+          <div className="text-sm text-lavender-500 italic mt-2 line-clamp-3">
+            &ldquo;{lastMemory}&rdquo;
+          </div>
+        )}
       </div>
 
       <div className="flex gap-3">
