@@ -5,6 +5,7 @@ export const dynamic = 'force-dynamic'
 import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
+import { getPasswordResetRedirectUrl } from '@/lib/capacitor'
 
 // Rate limiting configuration
 const EMAIL_RATE_LIMIT_SECONDS = 60
@@ -161,7 +162,7 @@ export default function LoginPage() {
       }
 
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/auth/update-password`,
+        redirectTo: getPasswordResetRedirectUrl(),
       })
 
       if (error) {
