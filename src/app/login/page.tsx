@@ -216,10 +216,10 @@ export default function LoginPage() {
               {/* Feature Highlights */}
               <div className="space-y-4 text-left">
                 <div className="flex items-start gap-3">
-                  <span className="text-xl">🌳</span>
+                  <span className="text-xl">🌿</span>
                   <div>
-                    <div className="font-medium text-lavender-800">Forest View</div>
-                    <div className="text-sm text-lavender-500">Watch your relationships flourish as a living garden</div>
+                    <div className="font-medium text-lavender-800">Gentle Nudges</div>
+                    <div className="text-sm text-lavender-500">A gentle nudge when it might be time to reach out</div>
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
@@ -230,10 +230,10 @@ export default function LoginPage() {
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
-                  <span className="text-xl">🌿</span>
+                  <span className="text-xl">🌳</span>
                   <div>
-                    <div className="font-medium text-lavender-800">Gentle Nudges</div>
-                    <div className="text-sm text-lavender-500">Never let important connections fade away</div>
+                    <div className="font-medium text-lavender-800">Forest View</div>
+                    <div className="text-sm text-lavender-500">Watch your relationships flourish as a living garden</div>
                   </div>
                 </div>
               </div>
