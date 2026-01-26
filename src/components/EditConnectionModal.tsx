@@ -125,7 +125,7 @@ export default function EditConnectionModal({ connection, isOpen, onClose, onSuc
 
             <div>
               <label htmlFor="edit-frequency" className="block text-sm font-medium text-lavender-700 mb-1">
-                How often do you want to catch up?
+                How often do you want to catch-up?
               </label>
               <select
                 id="edit-frequency"

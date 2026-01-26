@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
 import { SpeedInsights } from '@vercel/speed-insights/next';
@@ -15,6 +15,12 @@ export const metadata: Metadata = {
   description: "A calm relationship companion that helps you maintain meaningful connections",
 };
 
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -23,6 +29,12 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${geistSans.variable} font-sans antialiased bg-cream`}>
+        {/* Fixed status bar background for mobile devices */}
+        <div
+          className="fixed top-0 left-0 right-0 bg-lavender-50 z-[100]"
+          style={{ height: 'env(safe-area-inset-top, 0px)' }}
+          aria-hidden="true"
+        />
         {children}
         <SpeedInsights />
         <Analytics />

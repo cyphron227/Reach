@@ -366,7 +366,7 @@ export default function SettingsPage() {
             <div>
               <div className="text-sm font-medium text-lavender-700">Your data is private</div>
               <div className="text-xs text-lavender-500">
-                All your connections and interactions are stored securely and only visible to you.
+                All your connections and catch-ups are stored securely and only visible to you.
               </div>
             </div>
           </div>

@@ -215,7 +215,7 @@ export async function scheduleConnectionNotifications(
       await LocalNotifications.createChannel({
         id: 'catchup_reminders',
         name: 'Catch-up Reminders',
-        description: 'Reminders to catch up with your connections',
+        description: 'Reminders to catch-up with your connections',
         importance: 4, // HIGH
         visibility: 1, // PUBLIC
         sound: 'default',

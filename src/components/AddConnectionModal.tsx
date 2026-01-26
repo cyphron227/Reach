@@ -64,7 +64,7 @@ export default function AddConnectionModal({ isOpen, onClose, onSuccess }: AddCo
         <div className="p-6">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-xl font-semibold text-lavender-800">
-              Add someone to reach
+              New connection
             </h2>
             <button
               onClick={onClose}
@@ -94,7 +94,7 @@ export default function AddConnectionModal({ isOpen, onClose, onSuccess }: AddCo
 
             <div>
               <label htmlFor="frequency" className="block text-sm font-medium text-lavender-700 mb-1">
-                How often do you want to catch up?
+                How often do you want to catch-up?
               </label>
               <select
                 id="frequency"

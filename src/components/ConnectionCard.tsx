@@ -6,7 +6,7 @@ interface ConnectionCardProps {
   connection: Connection
   lastMemory?: string
   onLogInteraction: () => void
-  onSkip: () => void
+  onPlanCatchup: () => void
   onEdit: () => void
   onViewDetails: () => void
 }
@@ -45,11 +45,11 @@ function getNextCatchupInfo(connection: Connection): { text: string; isOverdue: 
     const daysUntil = getDaysUntil(connection.next_catchup_date)
     if (daysUntil === null) return { text: '', isOverdue: false }
     if (daysUntil < 0) return { text: `${Math.abs(daysUntil)} days overdue`, isOverdue: true }
-    if (daysUntil === 0) return { text: 'Catch up today', isOverdue: false }
-    if (daysUntil === 1) return { text: 'Catch up tomorrow', isOverdue: false }
-    if (daysUntil < 7) return { text: `Catch up in ${daysUntil} days`, isOverdue: false }
-    if (daysUntil < 14) return { text: 'Catch up next week', isOverdue: false }
-    return { text: `Catch up in ${Math.floor(daysUntil / 7)} weeks`, isOverdue: false }
+    if (daysUntil === 0) return { text: 'Catch-up today', isOverdue: false }
+    if (daysUntil === 1) return { text: 'Catch-up tomorrow', isOverdue: false }
+    if (daysUntil < 7) return { text: `Catch-up in ${daysUntil} days`, isOverdue: false }
+    if (daysUntil < 14) return { text: 'Catch-up next week', isOverdue: false }
+    return { text: `Catch-up in ${Math.floor(daysUntil / 7)} weeks`, isOverdue: false }
   }
 
   // Otherwise calculate based on last interaction + frequency
@@ -64,18 +64,18 @@ function getNextCatchupInfo(connection: Connection): { text: string; isOverdue: 
   const daysUntilDue = frequencyDays - daysSince
 
   if (daysUntilDue < 0) return { text: `${Math.abs(daysUntilDue)} days overdue`, isOverdue: true }
-  if (daysUntilDue === 0) return { text: 'Catch up today', isOverdue: false }
-  if (daysUntilDue === 1) return { text: 'Catch up tomorrow', isOverdue: false }
-  if (daysUntilDue < 7) return { text: `Catch up in ${daysUntilDue} days`, isOverdue: false }
-  if (daysUntilDue < 14) return { text: 'Catch up next week', isOverdue: false }
-  return { text: `Catch up in ${Math.floor(daysUntilDue / 7)} weeks`, isOverdue: false }
+  if (daysUntilDue === 0) return { text: 'Catch-up today', isOverdue: false }
+  if (daysUntilDue === 1) return { text: 'Catch-up tomorrow', isOverdue: false }
+  if (daysUntilDue < 7) return { text: `Catch-up in ${daysUntilDue} days`, isOverdue: false }
+  if (daysUntilDue < 14) return { text: 'Catch-up next week', isOverdue: false }
+  return { text: `Catch-up in ${Math.floor(daysUntilDue / 7)} weeks`, isOverdue: false }
 }
 
 function getConnectionStatusText(lastInteractionDate: string | null): { text: string; isUrgent: boolean } {
   const days = getDaysSince(lastInteractionDate)
 
   if (days === null) {
-    return { text: "You haven't connected yet", isUrgent: false }
+    return { text: "You haven't caught-up yet", isUrgent: false }
   }
 
   if (days > 14) {
@@ -83,17 +83,17 @@ function getConnectionStatusText(lastInteractionDate: string | null): { text: st
   }
 
   if (days === 0) {
-    return { text: "Connected today", isUrgent: false }
+    return { text: "Caught-up today", isUrgent: false }
   }
 
   if (days === 1) {
-    return { text: "Connected yesterday", isUrgent: false }
+    return { text: "Caught-up yesterday", isUrgent: false }
   }
 
-  return { text: `Connected ${days} days ago`, isUrgent: false }
+  return { text: `Caught-up ${days} days ago`, isUrgent: false }
 }
 
-export default function ConnectionCard({ connection, lastMemory, onLogInteraction, onSkip, onEdit, onViewDetails }: ConnectionCardProps) {
+export default function ConnectionCard({ connection, lastMemory, onLogInteraction, onPlanCatchup, onEdit, onViewDetails }: ConnectionCardProps) {
   const status = getConnectionStatusText(connection.last_interaction_date)
   const nextCatchup = getNextCatchupInfo(connection)
 
@@ -142,13 +142,13 @@ export default function ConnectionCard({ connection, lastMemory, onLogInteractio
           onClick={onLogInteraction}
           className="flex-1 py-3 px-4 bg-muted-teal-500 hover:bg-muted-teal-600 text-white font-medium rounded-xl transition-colors"
         >
-          Log interaction
+          Record catch-up
         </button>
         <button
-          onClick={onSkip}
+          onClick={onPlanCatchup}
           className="py-3 px-4 bg-lavender-100 hover:bg-lavender-200 text-lavender-600 font-medium rounded-xl transition-colors"
         >
-          Skip for now
+          Plan catch-up
         </button>
       </div>
     </div>

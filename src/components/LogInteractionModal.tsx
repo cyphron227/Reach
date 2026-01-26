@@ -24,7 +24,7 @@ const interactionTypeLabels: Record<InteractionType, string> = {
   call: 'call',
   text: 'text',
   in_person: 'in-person meeting',
-  other: 'interaction',
+  other: 'catch-up',
 }
 
 function formatRelativeDate(dateString: string): string {
@@ -170,7 +170,7 @@ export default function LogInteractionModal({ connection, isOpen, onClose, onSuc
         <div className="p-6">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-xl font-semibold text-lavender-800">
-              Log interaction with {connection.name}
+              Record catch-up with {connection.name}
             </h2>
             <button
               onClick={onClose}
@@ -215,7 +215,7 @@ export default function LogInteractionModal({ connection, isOpen, onClose, onSuc
             {/* Interaction Date */}
             <div>
               <label htmlFor="interactionDate" className="block text-sm font-medium text-lavender-700 mb-2">
-                When did you connect?
+                When did you catch-up?
               </label>
               <input
                 id="interactionDate"
@@ -230,7 +230,7 @@ export default function LogInteractionModal({ connection, isOpen, onClose, onSuc
             {/* Interaction Type */}
             <div>
               <label className="block text-sm font-medium text-lavender-700 mb-2">
-                How did you connect?
+                How did you catch-up?
               </label>
               <div className="grid grid-cols-4 gap-2">
                 {interactionTypes.map((type) => (
@@ -314,7 +314,7 @@ export default function LogInteractionModal({ connection, isOpen, onClose, onSuc
               disabled={loading}
               className="w-full py-3 px-4 bg-muted-teal-500 hover:bg-muted-teal-600 text-white font-medium rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {loading ? 'Saving...' : 'Save interaction'}
+              {loading ? 'Saving...' : 'Save catch-up'}
             </button>
           </form>
         </div>

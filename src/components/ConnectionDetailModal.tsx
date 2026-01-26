@@ -113,7 +113,7 @@ export default function ConnectionDetailModal({ connection, isOpen, onClose, onE
               onClick={onLogInteraction}
               className="flex-1 py-2.5 px-4 bg-muted-teal-500 hover:bg-muted-teal-600 text-white text-sm font-medium rounded-xl transition-colors"
             >
-              Log interaction
+              Record catch-up
             </button>
             <button
               onClick={onEdit}
@@ -124,17 +124,17 @@ export default function ConnectionDetailModal({ connection, isOpen, onClose, onE
           </div>
         </div>
 
-        {/* Interaction History */}
+        {/* Catch-up History */}
         <div className="flex-1 overflow-y-auto p-6">
-          <h3 className="text-sm font-medium text-lavender-700 mb-4">Interaction History</h3>
+          <h3 className="text-sm font-medium text-lavender-700 mb-4">Catch-up history</h3>
 
           {loading ? (
             <div className="text-center py-8 text-lavender-400">Loading...</div>
           ) : interactions.length === 0 ? (
             <div className="text-center py-8">
               <div className="text-3xl mb-2">📭</div>
-              <p className="text-lavender-500">No interactions yet</p>
-              <p className="text-lavender-400 text-sm mt-1">Log your first interaction to start tracking</p>
+              <p className="text-lavender-500">No catch-ups yet</p>
+              <p className="text-lavender-400 text-sm mt-1">Record your first catch-up to start tracking</p>
             </div>
           ) : (
             <div className="space-y-3">

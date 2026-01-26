@@ -11,6 +11,7 @@ import LogInteractionModal from '@/components/LogInteractionModal'
 import AddConnectionModal from '@/components/AddConnectionModal'
 import EditConnectionModal from '@/components/EditConnectionModal'
 import ConnectionDetailModal from '@/components/ConnectionDetailModal'
+import PlanCatchupModal from '@/components/PlanCatchupModal'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import {
@@ -79,12 +80,12 @@ export default function TodayPage() {
   const [user, setUser] = useState<User | null>(null)
   const [connections, setConnections] = useState<Connection[]>([])
   const [lastMemories, setLastMemories] = useState<Record<string, string>>({})
-  const [skippedIds, setSkippedIds] = useState<Set<string>>(new Set())
   const [loading, setLoading] = useState(true)
   const [showLogModal, setShowLogModal] = useState(false)
   const [showAddModal, setShowAddModal] = useState(false)
   const [showEditModal, setShowEditModal] = useState(false)
   const [showDetailModal, setShowDetailModal] = useState(false)
+  const [showPlanModal, setShowPlanModal] = useState(false)
   const [selectedConnection, setSelectedConnection] = useState<Connection | null>(null)
   const [showAllConnections, setShowAllConnections] = useState(false)
   const [searchQuery, setSearchQuery] = useState<string>('')
@@ -180,11 +181,8 @@ export default function TodayPage() {
       ? processedConnections.sort((a, b) => calculatePriorityScore(a) - calculatePriorityScore(b))
       : processedConnections.sort((a, b) => a.name.localeCompare(b.name))
 
-    // Filter out skipped connections
-    const visibleConnections = processedConnections.filter(c => !skippedIds.has(c.id))
-
-    return visibleConnections
-  }, [supabase, skippedIds, searchQuery, sortMode])
+    return processedConnections
+  }, [supabase, searchQuery, sortMode])
 
   const fetchLastMemories = useCallback(async (connectionIds: string[]): Promise<Record<string, string>> => {
     if (connectionIds.length === 0) return {}
@@ -270,8 +268,9 @@ export default function TodayPage() {
     localStorage.setItem('ringur_sort_preference', sortMode)
   }, [sortMode])
 
-  const handleSkip = (connectionId: string) => {
-    setSkippedIds(prev => new Set(Array.from(prev).concat(connectionId)))
+  const handlePlanCatchup = (connection: Connection) => {
+    setSelectedConnection(connection)
+    setShowPlanModal(true)
   }
 
   const handleLogInteraction = (connection: Connection) => {
@@ -291,15 +290,7 @@ export default function TodayPage() {
     setShowDetailModal(true)
   }
 
-  // Re-fetch connections when skippedIds changes
-  useEffect(() => {
-    if (skippedIds.size > 0) {
-      fetchConnections().then(setConnections)
-    }
-  }, [skippedIds, fetchConnections])
-
   const handleLogSuccess = () => {
-    setSkippedIds(new Set())
     setSelectedConnection(null)
     setShowAllConnections(false)
     setSearchQuery('')
@@ -331,8 +322,9 @@ export default function TodayPage() {
     <main className="min-h-screen bg-lavender-50">
       {/* Sticky Header */}
       <div
-        className="sticky top-0 z-50 bg-lavender-50 transition-all duration-150"
+        className="sticky z-40 bg-lavender-50 transition-all duration-150"
         style={{
+          top: 'env(safe-area-inset-top, 0px)',
           paddingTop: `${Math.max(8, 32 - scrollY / 5)}px`,
           paddingBottom: `${Math.max(8, 16 - scrollY / 10)}px`
         }}
@@ -373,7 +365,7 @@ export default function TodayPage() {
                     <svg className="w-5 h-5 text-muted-teal-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                     </svg>
-                    New Contact
+                    New connection
                   </button>
                   <Link
                     href="/forest"
@@ -415,7 +407,7 @@ export default function TodayPage() {
         <Greeting userName={user?.full_name} />
 
         {/* Search and Sort Controls */}
-        {(connections.length > 0 || skippedIds.size > 0) && (
+        {connections.length > 0 && (
           <div className="mb-6 space-y-3">
             {/* Search Bar */}
             <div className="relative">
@@ -477,7 +469,7 @@ export default function TodayPage() {
                   connection={conn}
                   lastMemory={lastMemories[conn.id]}
                   onLogInteraction={() => handleLogInteraction(conn)}
-                  onSkip={() => handleSkip(conn.id)}
+                  onPlanCatchup={() => handlePlanCatchup(conn)}
                   onEdit={() => handleEdit(conn)}
                   onViewDetails={() => handleViewDetails(conn)}
                 />
@@ -511,23 +503,6 @@ export default function TodayPage() {
               </button>
             </p>
           </div>
-        ) : skippedIds.size > 0 ? (
-          /* All caught up state */
-          <div className="bg-white rounded-2xl p-8 shadow-sm border border-lavender-100 text-center">
-            <div className="text-4xl mb-4">✨</div>
-            <h2 className="text-lg font-semibold text-lavender-800 mb-2">
-              All caught up for now
-            </h2>
-            <p className="text-lavender-500 mb-6">
-              You&apos;ve gone through everyone. Check back later or add more connections.
-            </p>
-            <button
-              onClick={() => setSkippedIds(new Set())}
-              className="py-3 px-6 bg-lavender-100 hover:bg-lavender-200 text-lavender-600 font-medium rounded-xl transition-colors"
-            >
-              Start over
-            </button>
-          </div>
         ) : (
           /* No connections empty state */
           <div className="bg-white rounded-2xl p-8 shadow-sm border border-lavender-100 text-center">
@@ -548,12 +523,12 @@ export default function TodayPage() {
         )}
 
         {/* Add Connection Button (when connections exist) */}
-        {(connections.length > 0 || skippedIds.size > 0) && (
+        {connections.length > 0 && (
           <button
             onClick={() => setShowAddModal(true)}
             className="mt-6 w-full py-3 px-4 border-2 border-dashed border-lavender-200 hover:border-muted-teal-300 text-lavender-500 hover:text-muted-teal-600 font-medium rounded-xl transition-colors"
           >
-            + Add New Contact
+            + New connection
           </button>
         )}
 
@@ -636,6 +611,21 @@ export default function TodayPage() {
         onClose={() => setShowAddModal(false)}
         onSuccess={handleAddSuccess}
       />
+
+      {selectedConnection && (
+        <PlanCatchupModal
+          connection={selectedConnection}
+          isOpen={showPlanModal}
+          onClose={() => {
+            setShowPlanModal(false)
+            setSelectedConnection(null)
+          }}
+          onSuccess={() => {
+            setSelectedConnection(null)
+            loadData()
+          }}
+        />
+      )}
     </main>
   )
 }

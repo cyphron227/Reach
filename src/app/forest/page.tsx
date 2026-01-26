@@ -106,7 +106,7 @@ function calculateTreeStats(
 function getTimeAgoText(lastInteractionDate: string | null): string {
   const days = getDaysSince(lastInteractionDate)
 
-  if (days === null) return 'Never connected'
+  if (days === null) return 'Never caught-up'
   if (days === 0) return 'Today'
   if (days === 1) return 'Yesterday'
   if (days < 7) return `${days} days ago`
@@ -218,13 +218,13 @@ function TreeStatsDisplay({ stats }: { stats: TreeStats }) {
         </div>
       </div>
 
-      {/* Tree Rings / Interaction Stats */}
+      {/* Tree Rings / Catch-up Stats */}
       <div className="bg-muted-teal-50 rounded-xl p-4">
         <div className="text-xs text-muted-teal-600 uppercase tracking-wide mb-3">Tree Rings</div>
         <div className="grid grid-cols-2 gap-4">
           <div>
             <div className="text-2xl font-bold text-muted-teal-700">{stats.totalInteractions}</div>
-            <div className="text-xs text-muted-teal-600">Total interactions</div>
+            <div className="text-xs text-muted-teal-600">Total catch-ups</div>
           </div>
           <div>
             <div className="text-2xl font-bold text-muted-teal-700">{stats.longevityMonths}</div>
@@ -235,7 +235,7 @@ function TreeStatsDisplay({ stats }: { stats: TreeStats }) {
         {/* Frequency meter */}
         <div className="mt-4">
           <div className="flex justify-between text-xs text-muted-teal-600 mb-1">
-            <span>Interaction frequency</span>
+            <span>Catch-up frequency</span>
             <span>{Math.round(stats.interactionFrequencyScore)}%</span>
           </div>
           <div className="h-2 bg-muted-teal-200 rounded-full overflow-hidden">
