@@ -10,7 +10,6 @@ import { useRouter } from 'next/navigation'
 import {
   isCapacitor,
   requestNotificationPermissions,
-  areNotificationsPermitted,
   cancelAllNotifications,
 } from '@/lib/capacitor'
 
@@ -28,7 +27,6 @@ export default function SettingsPage() {
   const [notificationsEnabled, setNotificationsEnabled] = useState(true)
   const [notificationTime, setNotificationTime] = useState('18:00')
   const [weeklyReflectionEnabled, setWeeklyReflectionEnabled] = useState(true)
-  const [notificationPermissionGranted, setNotificationPermissionGranted] = useState<boolean | null>(null)
 
   const router = useRouter()
   const supabase = createClient()
@@ -91,13 +89,6 @@ export default function SettingsPage() {
     fetchData()
   }, [fetchData])
 
-  // Check notification permission status on load
-  useEffect(() => {
-    if (isCapacitor()) {
-      areNotificationsPermitted().then(setNotificationPermissionGranted)
-    }
-  }, [])
-
   // Handle notification toggle with permission request
   const handleNotificationToggle = async () => {
     const newValue = !notificationsEnabled
@@ -105,7 +96,6 @@ export default function SettingsPage() {
     if (newValue && isCapacitor()) {
       // Request permissions when enabling
       const granted = await requestNotificationPermissions()
-      setNotificationPermissionGranted(granted)
 
       if (!granted) {
         setMessage({
