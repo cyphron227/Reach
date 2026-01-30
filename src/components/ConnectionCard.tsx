@@ -12,6 +12,7 @@ interface ConnectionCardProps {
 }
 
 type TreeHealth = 'thriving' | 'healthy' | 'needs_water' | 'wilting'
+type GrowthStage = 'seed' | 'seedling' | 'sapling' | 'young' | 'mature' | 'ancient'
 
 function getDaysSince(dateString: string | null): number | null {
   if (!dateString) return null
@@ -115,41 +116,141 @@ function getTreeHealth(connection: Connection): TreeHealth {
   return 'healthy'
 }
 
-// SVG tree background based on health
-function TreeBackground({ health }: { health: TreeHealth }) {
+function getGrowthStage(connection: Connection): GrowthStage {
+  const daysSinceCreated = getDaysSince(connection.created_at) || 0
+  const hasInteracted = connection.last_interaction_date !== null
+  const longevityMonths = Math.floor(daysSinceCreated / 30)
+
+  if (!hasInteracted) {
+    return 'seed'
+  } else if (longevityMonths < 1) {
+    return 'seedling'
+  } else if (longevityMonths < 3) {
+    return 'sapling'
+  } else if (longevityMonths < 6) {
+    return 'young'
+  } else if (longevityMonths < 12) {
+    return 'mature'
+  }
+  return 'ancient'
+}
+
+// SVG tree background based on health and growth stage
+function TreeBackground({ health, stage }: { health: TreeHealth; stage: GrowthStage }) {
   const colors = {
-    thriving: { trunk: '#92B89B', leaves: '#C8E6C9', accent: '#A5D6A7' },
-    healthy: { trunk: '#A8C5B5', leaves: '#D4E5D8', accent: '#B8D4BE' },
-    needs_water: { trunk: '#C9B896', leaves: '#E8DFC9', accent: '#DDD5C0' },
-    wilting: { trunk: '#C4A98A', leaves: '#E0D4C4', accent: '#D4C8B8' },
+    thriving: { trunk: '#6B8E6B', leaves: '#8FBC8F', accent: '#98D998' },
+    healthy: { trunk: '#7BA37B', leaves: '#A8D4A8', accent: '#B5DEB5' },
+    needs_water: { trunk: '#C4A35A', leaves: '#E6D390', accent: '#DBC878' },
+    wilting: { trunk: '#A67B5B', leaves: '#C9A882', accent: '#B8956F' },
   }
 
   const c = colors[health]
 
+  // Seed stage - just a small seed
+  if (stage === 'seed') {
+    return (
+      <svg
+        className="absolute right-2 top-2 w-16 h-16 opacity-[0.25] pointer-events-none"
+        viewBox="0 0 100 100"
+        fill="none"
+      >
+        <ellipse cx="50" cy="55" rx="12" ry="16" fill={c.trunk} />
+        <ellipse cx="50" cy="52" rx="8" ry="10" fill={c.leaves} opacity="0.5" />
+      </svg>
+    )
+  }
+
+  // Seedling stage - small sprout
+  if (stage === 'seedling') {
+    return (
+      <svg
+        className="absolute right-2 top-2 w-18 h-18 opacity-[0.25] pointer-events-none"
+        viewBox="0 0 100 100"
+        fill="none"
+      >
+        <path d="M50 85 L50 55" stroke={c.trunk} strokeWidth="3" strokeLinecap="round" />
+        <ellipse cx="50" cy="45" rx="15" ry="18" fill={c.leaves} />
+        <ellipse cx="50" cy="42" rx="10" ry="12" fill={c.accent} />
+      </svg>
+    )
+  }
+
+  // Sapling stage - small tree with few leaves
+  if (stage === 'sapling') {
+    return (
+      <svg
+        className="absolute right-1 top-1 w-20 h-20 opacity-[0.22] pointer-events-none"
+        viewBox="0 0 100 100"
+        fill="none"
+      >
+        <path d="M50 90 L50 50" stroke={c.trunk} strokeWidth="4" strokeLinecap="round" />
+        <circle cx="50" cy="38" r="18" fill={c.leaves} />
+        <circle cx="42" cy="42" r="12" fill={c.accent} />
+        <circle cx="58" cy="42" r="12" fill={c.accent} />
+        <circle cx="50" cy="32" r="10" fill={c.accent} />
+      </svg>
+    )
+  }
+
+  // Young tree - medium sized
+  if (stage === 'young') {
+    return (
+      <svg
+        className="absolute right-0 top-0 w-22 h-22 opacity-[0.22] pointer-events-none"
+        viewBox="0 0 100 100"
+        fill="none"
+      >
+        <path d="M50 95 L50 50 Q48 46 44 44 M50 55 Q52 50 56 48" stroke={c.trunk} strokeWidth="4" strokeLinecap="round" fill="none" />
+        <circle cx="50" cy="35" r="20" fill={c.leaves} />
+        <circle cx="38" cy="40" r="14" fill={c.accent} />
+        <circle cx="62" cy="40" r="14" fill={c.accent} />
+        <circle cx="50" cy="28" r="14" fill={c.leaves} />
+        <circle cx="44" cy="32" r="9" fill={c.accent} />
+        <circle cx="56" cy="32" r="9" fill={c.accent} />
+      </svg>
+    )
+  }
+
+  // Mature tree - full sized
+  if (stage === 'mature') {
+    return (
+      <svg
+        className="absolute right-0 top-0 w-24 h-24 opacity-[0.2] pointer-events-none"
+        viewBox="0 0 100 100"
+        fill="none"
+      >
+        <path d="M50 95 L50 55 Q48 50 45 48 M50 55 Q52 50 55 48" stroke={c.trunk} strokeWidth="4" strokeLinecap="round" fill="none" />
+        <circle cx="50" cy="35" r="22" fill={c.leaves} />
+        <circle cx="38" cy="40" r="15" fill={c.accent} />
+        <circle cx="62" cy="40" r="15" fill={c.accent} />
+        <circle cx="50" cy="28" r="16" fill={c.leaves} />
+        <circle cx="42" cy="32" r="12" fill={c.accent} />
+        <circle cx="58" cy="32" r="12" fill={c.accent} />
+        <circle cx="45" cy="25" r="5" fill={c.accent} opacity="0.7" />
+        <circle cx="55" cy="38" r="4" fill={c.leaves} opacity="0.8" />
+      </svg>
+    )
+  }
+
+  // Ancient tree - largest with extra details
   return (
     <svg
-      className="absolute right-0 bottom-0 w-32 h-32 opacity-[0.15] pointer-events-none"
+      className="absolute right-0 top-0 w-28 h-28 opacity-[0.2] pointer-events-none"
       viewBox="0 0 100 100"
       fill="none"
     >
-      {/* Tree trunk */}
-      <path
-        d="M50 95 L50 55 Q48 50 45 48 M50 55 Q52 50 55 48"
-        stroke={c.trunk}
-        strokeWidth="4"
-        strokeLinecap="round"
-        fill="none"
-      />
-      {/* Main foliage - layered circles for organic feel */}
-      <circle cx="50" cy="35" r="22" fill={c.leaves} />
-      <circle cx="38" cy="40" r="15" fill={c.accent} />
-      <circle cx="62" cy="40" r="15" fill={c.accent} />
-      <circle cx="50" cy="28" r="16" fill={c.leaves} />
-      <circle cx="42" cy="32" r="12" fill={c.accent} />
-      <circle cx="58" cy="32" r="12" fill={c.accent} />
-      {/* Small highlight circles */}
-      <circle cx="45" cy="25" r="5" fill={c.accent} opacity="0.7" />
-      <circle cx="55" cy="38" r="4" fill={c.leaves} opacity="0.8" />
+      <path d="M50 98 L50 52 Q46 46 40 44 M50 60 Q54 54 60 52 M50 68 Q48 64 44 62" stroke={c.trunk} strokeWidth="5" strokeLinecap="round" fill="none" />
+      <circle cx="50" cy="32" r="26" fill={c.leaves} />
+      <circle cx="34" cy="38" r="18" fill={c.accent} />
+      <circle cx="66" cy="38" r="18" fill={c.accent} />
+      <circle cx="50" cy="22" r="20" fill={c.leaves} />
+      <circle cx="38" cy="28" r="14" fill={c.accent} />
+      <circle cx="62" cy="28" r="14" fill={c.accent} />
+      <circle cx="50" cy="15" r="12" fill={c.accent} />
+      <circle cx="42" cy="20" r="6" fill={c.leaves} opacity="0.8" />
+      <circle cx="58" cy="35" r="5" fill={c.leaves} opacity="0.8" />
+      <circle cx="30" cy="42" r="4" fill={c.accent} opacity="0.6" />
+      <circle cx="70" cy="42" r="4" fill={c.accent} opacity="0.6" />
     </svg>
   )
 }
@@ -158,10 +259,11 @@ export default function ConnectionCard({ connection, lastMemory, onLogInteractio
   const status = getConnectionStatusText(connection.last_interaction_date)
   const nextCatchup = getNextCatchupInfo(connection)
   const treeHealth = getTreeHealth(connection)
+  const growthStage = getGrowthStage(connection)
 
   return (
     <div className="bg-white rounded-2xl p-6 shadow-sm border border-lavender-100 relative overflow-hidden">
-      <TreeBackground health={treeHealth} />
+      <TreeBackground health={treeHealth} stage={growthStage} />
       {/* Clickable area for viewing details */}
       <button
         onClick={onViewDetails}

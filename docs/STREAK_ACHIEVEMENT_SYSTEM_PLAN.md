@@ -114,7 +114,7 @@ User maintains streak by logging at least ONE interaction with ANY contact per d
 |-------|----------|------|
 | Quality Time | 5+ in-person interactions in 30 days | ☕ |
 | Deep Listener | 10+ interactions with memory notes in 30 days | 📝 |
-| Variety Connector | Used all 4 interaction types in 7 days | 🌈 |
+| Bestie | Used all 4 interaction types in 7 days | 🌈 |
 
 **Removed from original:**
 - "Thoughtful Touch" (following up on specific mentions) - requires NLP/AI that's out of scope
