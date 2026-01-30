@@ -146,61 +146,50 @@ function TreeBackground({ health, stage }: { health: TreeHealth; stage: GrowthSt
 
   const c = colors[health]
 
-  // Seed stage - just a small seed
+  // Common class for positioning in top-right quarter
+  const baseClass = "absolute right-0 top-0 w-1/2 h-1/2 opacity-[0.2] pointer-events-none"
+
+  // Seed stage - small seed with tiny sprout
   if (stage === 'seed') {
     return (
       <svg
-        className="absolute right-2 top-2 w-16 h-16 opacity-[0.25] pointer-events-none"
+        className={baseClass}
         viewBox="0 0 100 100"
         fill="none"
       >
-        <ellipse cx="50" cy="55" rx="12" ry="16" fill={c.trunk} />
-        <ellipse cx="50" cy="52" rx="8" ry="10" fill={c.leaves} opacity="0.5" />
+        <ellipse cx="50" cy="75" rx="8" ry="10" fill={c.trunk} />
+        <path d="M50 70 L50 60" stroke={c.trunk} strokeWidth="2" strokeLinecap="round" />
+        <ellipse cx="50" cy="55" rx="8" ry="10" fill={c.leaves} />
       </svg>
     )
   }
 
-  // Seedling stage - small sprout
+  // Seedling stage - small but tree-like
   if (stage === 'seedling') {
     return (
       <svg
-        className="absolute right-2 top-2 w-18 h-18 opacity-[0.25] pointer-events-none"
+        className={baseClass}
         viewBox="0 0 100 100"
         fill="none"
       >
-        <path d="M50 85 L50 55" stroke={c.trunk} strokeWidth="3" strokeLinecap="round" />
-        <ellipse cx="50" cy="45" rx="15" ry="18" fill={c.leaves} />
-        <ellipse cx="50" cy="42" rx="10" ry="12" fill={c.accent} />
+        <path d="M50 95 L50 55" stroke={c.trunk} strokeWidth="3" strokeLinecap="round" />
+        <circle cx="50" cy="42" r="16" fill={c.leaves} />
+        <circle cx="42" cy="46" r="10" fill={c.accent} />
+        <circle cx="58" cy="46" r="10" fill={c.accent} />
+        <circle cx="50" cy="36" r="10" fill={c.accent} />
       </svg>
     )
   }
 
-  // Sapling stage - small tree with few leaves
+  // Sapling stage - proper small tree
   if (stage === 'sapling') {
     return (
       <svg
-        className="absolute right-1 top-1 w-20 h-20 opacity-[0.22] pointer-events-none"
+        className={baseClass}
         viewBox="0 0 100 100"
         fill="none"
       >
-        <path d="M50 90 L50 50" stroke={c.trunk} strokeWidth="4" strokeLinecap="round" />
-        <circle cx="50" cy="38" r="18" fill={c.leaves} />
-        <circle cx="42" cy="42" r="12" fill={c.accent} />
-        <circle cx="58" cy="42" r="12" fill={c.accent} />
-        <circle cx="50" cy="32" r="10" fill={c.accent} />
-      </svg>
-    )
-  }
-
-  // Young tree - medium sized
-  if (stage === 'young') {
-    return (
-      <svg
-        className="absolute right-0 top-0 w-22 h-22 opacity-[0.22] pointer-events-none"
-        viewBox="0 0 100 100"
-        fill="none"
-      >
-        <path d="M50 95 L50 50 Q48 46 44 44 M50 55 Q52 50 56 48" stroke={c.trunk} strokeWidth="4" strokeLinecap="round" fill="none" />
+        <path d="M50 98 L50 50" stroke={c.trunk} strokeWidth="4" strokeLinecap="round" />
         <circle cx="50" cy="35" r="20" fill={c.leaves} />
         <circle cx="38" cy="40" r="14" fill={c.accent} />
         <circle cx="62" cy="40" r="14" fill={c.accent} />
@@ -211,23 +200,44 @@ function TreeBackground({ health, stage }: { health: TreeHealth; stage: GrowthSt
     )
   }
 
+  // Young tree - medium sized with branches
+  if (stage === 'young') {
+    return (
+      <svg
+        className={baseClass}
+        viewBox="0 0 100 100"
+        fill="none"
+      >
+        <path d="M50 98 L50 50 Q48 46 44 44 M50 55 Q52 50 56 48" stroke={c.trunk} strokeWidth="4" strokeLinecap="round" fill="none" />
+        <circle cx="50" cy="32" r="22" fill={c.leaves} />
+        <circle cx="36" cy="38" r="15" fill={c.accent} />
+        <circle cx="64" cy="38" r="15" fill={c.accent} />
+        <circle cx="50" cy="25" r="16" fill={c.leaves} />
+        <circle cx="42" cy="30" r="11" fill={c.accent} />
+        <circle cx="58" cy="30" r="11" fill={c.accent} />
+        <circle cx="50" cy="20" r="8" fill={c.accent} />
+      </svg>
+    )
+  }
+
   // Mature tree - full sized
   if (stage === 'mature') {
     return (
       <svg
-        className="absolute right-0 top-0 w-24 h-24 opacity-[0.2] pointer-events-none"
+        className={baseClass}
         viewBox="0 0 100 100"
         fill="none"
       >
-        <path d="M50 95 L50 55 Q48 50 45 48 M50 55 Q52 50 55 48" stroke={c.trunk} strokeWidth="4" strokeLinecap="round" fill="none" />
-        <circle cx="50" cy="35" r="22" fill={c.leaves} />
-        <circle cx="38" cy="40" r="15" fill={c.accent} />
-        <circle cx="62" cy="40" r="15" fill={c.accent} />
-        <circle cx="50" cy="28" r="16" fill={c.leaves} />
-        <circle cx="42" cy="32" r="12" fill={c.accent} />
-        <circle cx="58" cy="32" r="12" fill={c.accent} />
-        <circle cx="45" cy="25" r="5" fill={c.accent} opacity="0.7" />
-        <circle cx="55" cy="38" r="4" fill={c.leaves} opacity="0.8" />
+        <path d="M50 98 L50 48 Q46 42 40 40 M50 55 Q54 49 60 47" stroke={c.trunk} strokeWidth="5" strokeLinecap="round" fill="none" />
+        <circle cx="50" cy="30" r="24" fill={c.leaves} />
+        <circle cx="34" cy="36" r="16" fill={c.accent} />
+        <circle cx="66" cy="36" r="16" fill={c.accent} />
+        <circle cx="50" cy="22" r="18" fill={c.leaves} />
+        <circle cx="40" cy="28" r="12" fill={c.accent} />
+        <circle cx="60" cy="28" r="12" fill={c.accent} />
+        <circle cx="50" cy="15" r="10" fill={c.accent} />
+        <circle cx="44" cy="20" r="5" fill={c.leaves} opacity="0.8" />
+        <circle cx="56" cy="33" r="4" fill={c.leaves} opacity="0.8" />
       </svg>
     )
   }
@@ -235,22 +245,22 @@ function TreeBackground({ health, stage }: { health: TreeHealth; stage: GrowthSt
   // Ancient tree - largest with extra details
   return (
     <svg
-      className="absolute right-0 top-0 w-28 h-28 opacity-[0.2] pointer-events-none"
+      className={baseClass}
       viewBox="0 0 100 100"
       fill="none"
     >
-      <path d="M50 98 L50 52 Q46 46 40 44 M50 60 Q54 54 60 52 M50 68 Q48 64 44 62" stroke={c.trunk} strokeWidth="5" strokeLinecap="round" fill="none" />
-      <circle cx="50" cy="32" r="26" fill={c.leaves} />
-      <circle cx="34" cy="38" r="18" fill={c.accent} />
-      <circle cx="66" cy="38" r="18" fill={c.accent} />
-      <circle cx="50" cy="22" r="20" fill={c.leaves} />
-      <circle cx="38" cy="28" r="14" fill={c.accent} />
-      <circle cx="62" cy="28" r="14" fill={c.accent} />
-      <circle cx="50" cy="15" r="12" fill={c.accent} />
-      <circle cx="42" cy="20" r="6" fill={c.leaves} opacity="0.8" />
-      <circle cx="58" cy="35" r="5" fill={c.leaves} opacity="0.8" />
-      <circle cx="30" cy="42" r="4" fill={c.accent} opacity="0.6" />
-      <circle cx="70" cy="42" r="4" fill={c.accent} opacity="0.6" />
+      <path d="M50 98 L50 45 Q44 38 36 36 M50 55 Q56 48 64 46 M50 65 Q46 60 40 58" stroke={c.trunk} strokeWidth="6" strokeLinecap="round" fill="none" />
+      <circle cx="50" cy="28" r="26" fill={c.leaves} />
+      <circle cx="32" cy="35" r="18" fill={c.accent} />
+      <circle cx="68" cy="35" r="18" fill={c.accent} />
+      <circle cx="50" cy="18" r="20" fill={c.leaves} />
+      <circle cx="38" cy="25" r="14" fill={c.accent} />
+      <circle cx="62" cy="25" r="14" fill={c.accent} />
+      <circle cx="50" cy="10" r="12" fill={c.accent} />
+      <circle cx="42" cy="16" r="6" fill={c.leaves} opacity="0.8" />
+      <circle cx="58" cy="30" r="5" fill={c.leaves} opacity="0.8" />
+      <circle cx="28" cy="40" r="4" fill={c.accent} opacity="0.6" />
+      <circle cx="72" cy="40" r="4" fill={c.accent} opacity="0.6" />
     </svg>
   )
 }
