@@ -2,15 +2,16 @@
 
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { Connection, InteractionType, Interaction } from '@/types/database'
+import { Connection, InteractionType, Interaction, AchievementDefinition } from '@/types/database'
 import { getWeekStartDate } from '@/lib/reflectionUtils'
 import { cancelConnectionNotification } from '@/lib/capacitor'
+import { updateDailyStreak } from '@/lib/streakUtils'
 
 interface LogInteractionModalProps {
   connection: Connection
   isOpen: boolean
   onClose: () => void
-  onSuccess: () => void
+  onSuccess: (newAchievements?: AchievementDefinition[]) => void
 }
 
 const interactionTypes: { value: InteractionType; label: string; icon: string }[] = [
@@ -147,13 +148,23 @@ export default function LogInteractionModal({ connection, isOpen, onClose, onSuc
       // Cancel the notification for this connection since we just interacted
       await cancelConnectionNotification(connection.id)
 
+      // Update daily streak and check for achievements
+      let newAchievements: AchievementDefinition[] = []
+      try {
+        const streakResult = await updateDailyStreak(supabase, user.id, interactionDate)
+        newAchievements = streakResult.newAchievements
+      } catch (streakError) {
+        // Don't fail the whole operation if streak update fails
+        console.error('Failed to update streak:', streakError)
+      }
+
       // Reset form and close
       setInteractionType('call')
       setMemory('')
       setInteractionDate(new Date().toISOString().split('T')[0])
       setPlanNextCatchup(false)
       setNextCatchupDate('')
-      onSuccess()
+      onSuccess(newAchievements.length > 0 ? newAchievements : undefined)
       onClose()
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Something went wrong')

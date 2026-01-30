@@ -4,7 +4,7 @@ export const dynamic = 'force-dynamic'
 
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { Connection, User } from '@/types/database'
+import { Connection, User, UserStreak, AchievementDefinition } from '@/types/database'
 import Greeting from '@/components/Greeting'
 import ConnectionCard from '@/components/ConnectionCard'
 import LogInteractionModal from '@/components/LogInteractionModal'
@@ -12,7 +12,9 @@ import AddConnectionModal from '@/components/AddConnectionModal'
 import EditConnectionModal from '@/components/EditConnectionModal'
 import ConnectionDetailModal from '@/components/ConnectionDetailModal'
 import PlanCatchupModal from '@/components/PlanCatchupModal'
+import AchievementUnlockModal from '@/components/AchievementUnlockModal'
 import Link from 'next/link'
+import { getOrCreateUserStreak, getNextMilestone, getDaysToNextMilestone } from '@/lib/streakUtils'
 import { useRouter } from 'next/navigation'
 import {
   isCapacitor,
@@ -93,6 +95,9 @@ export default function TodayPage() {
   const [scrollY, setScrollY] = useState(0)
   const [showMenu, setShowMenu] = useState(false)
   const [notificationConnectionId, setNotificationConnectionId] = useState<string | null>(null)
+  const [userStreak, setUserStreak] = useState<UserStreak | null>(null)
+  const [newAchievements, setNewAchievements] = useState<AchievementDefinition[]>([])
+  const [showStreakInfo, setShowStreakInfo] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
 
   const supabase = createClient()
@@ -217,6 +222,16 @@ export default function TodayPage() {
     setUser(userData)
     setConnections(connectionsData)
 
+    // Fetch user streak
+    if (userData) {
+      try {
+        const streak = await getOrCreateUserStreak(supabase, userData.id)
+        setUserStreak(streak)
+      } catch (error) {
+        console.error('Failed to fetch streak:', error)
+      }
+    }
+
     // Fetch last memories for all connections
     if (connectionsData.length > 0) {
       const connectionIds = connectionsData.map(c => c.id)
@@ -290,11 +305,15 @@ export default function TodayPage() {
     setShowDetailModal(true)
   }
 
-  const handleLogSuccess = () => {
+  const handleLogSuccess = (achievements?: AchievementDefinition[]) => {
     setSelectedConnection(null)
     setShowAllConnections(false)
     setSearchQuery('')
     loadData()
+    // Show achievement unlock modal if there are new achievements
+    if (achievements && achievements.length > 0) {
+      setNewAchievements(achievements)
+    }
   }
 
   const handleAddSuccess = () => {
@@ -331,14 +350,26 @@ export default function TodayPage() {
       >
         <div className="max-w-lg mx-auto px-6">
           <div className="flex items-center justify-between">
-            <div
-              className="text-muted-teal-500 font-semibold transition-all duration-150 origin-left"
-              style={{
-                fontSize: `${Math.max(14, 18 * headerScale)}px`,
-                opacity: headerOpacity
-              }}
-            >
-              Ringur
+            <div className="flex items-center gap-3">
+              <div
+                className="text-muted-teal-500 font-semibold transition-all duration-150 origin-left"
+                style={{
+                  fontSize: `${Math.max(14, 18 * headerScale)}px`,
+                  opacity: headerOpacity
+                }}
+              >
+                Ringur
+              </div>
+              {userStreak && userStreak.current_streak > 0 && (
+                <button
+                  onClick={() => setShowStreakInfo(true)}
+                  className="flex items-center gap-1 bg-amber-50 hover:bg-amber-100 px-2 py-1 rounded-lg transition-all duration-150"
+                  style={{ opacity: headerOpacity }}
+                >
+                  <span className="text-base">🔥</span>
+                  <span className="text-sm font-bold text-amber-600">{userStreak.current_streak}</span>
+                </button>
+              )}
             </div>
             <div className="relative" ref={menuRef}>
               <button
@@ -602,6 +633,7 @@ export default function TodayPage() {
               setShowDetailModal(false)
               setShowLogModal(true)
             }}
+            onInteractionUpdated={loadData}
           />
         </>
       )}
@@ -625,6 +657,72 @@ export default function TodayPage() {
             loadData()
           }}
         />
+      )}
+
+      <AchievementUnlockModal
+        achievements={newAchievements}
+        isOpen={newAchievements.length > 0}
+        onClose={() => setNewAchievements([])}
+      />
+
+      {/* Streak Info Modal */}
+      {showStreakInfo && userStreak && (
+        <div
+          className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+          onClick={() => setShowStreakInfo(false)}
+        >
+          <div
+            className="bg-white rounded-2xl w-full max-w-sm shadow-xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="p-6 text-center">
+              <div className="text-5xl mb-4">🔥</div>
+              <h2 className="text-2xl font-bold text-lavender-800 mb-2">
+                {userStreak.current_streak} day streak!
+              </h2>
+              <p className="text-lavender-600 mb-4">
+                You&apos;ve been catching-up with your connections for {userStreak.current_streak} {userStreak.current_streak === 1 ? 'day' : 'days'} in a row.
+              </p>
+
+              {/* Next milestone */}
+              {getNextMilestone(userStreak.current_streak) && (
+                <div className="bg-amber-50 rounded-xl p-4 mb-4">
+                  <div className="text-sm text-amber-700 font-medium">
+                    Next milestone: {getNextMilestone(userStreak.current_streak)} days
+                  </div>
+                  <div className="text-xs text-amber-600 mt-1">
+                    {getDaysToNextMilestone(userStreak.current_streak)} more {getDaysToNextMilestone(userStreak.current_streak) === 1 ? 'day' : 'days'} to go!
+                  </div>
+                </div>
+              )}
+
+              {/* Longest streak */}
+              {userStreak.longest_streak > userStreak.current_streak && (
+                <div className="text-sm text-lavender-500 mb-4">
+                  Your longest streak: {userStreak.longest_streak} days
+                </div>
+              )}
+
+              {/* How streaks work */}
+              <div className="text-left bg-lavender-50 rounded-xl p-4 mb-4">
+                <div className="text-sm font-medium text-lavender-700 mb-2">How streaks work</div>
+                <ul className="text-xs text-lavender-600 space-y-1">
+                  <li>• Record a catch-up each day to keep your streak</li>
+                  <li>• Miss a day? You get 1 free freeze per week</li>
+                  <li>• Weekend flexibility: Fri-Sun counts as one window</li>
+                  <li>• Unlock achievements at 7, 30, 90, 180 & 365 days</li>
+                </ul>
+              </div>
+
+              <button
+                onClick={() => setShowStreakInfo(false)}
+                className="w-full py-3 px-4 bg-muted-teal-500 hover:bg-muted-teal-600 text-white font-medium rounded-xl transition-colors"
+              >
+                Keep it going!
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </main>
   )

@@ -11,6 +11,8 @@ interface ConnectionCardProps {
   onViewDetails: () => void
 }
 
+type TreeHealth = 'thriving' | 'healthy' | 'needs_water' | 'wilting'
+
 function getDaysSince(dateString: string | null): number | null {
   if (!dateString) return null
   const date = new Date(dateString)
@@ -93,21 +95,86 @@ function getConnectionStatusText(lastInteractionDate: string | null): { text: st
   return { text: `Caught-up ${days} days ago`, isUrgent: false }
 }
 
+function getTreeHealth(connection: Connection): TreeHealth {
+  const daysSinceLastInteraction = getDaysSince(connection.last_interaction_date)
+  const frequencyDays = frequencyToDays[connection.catchup_frequency]
+
+  if (daysSinceLastInteraction === null) {
+    return 'needs_water' // Never interacted
+  }
+
+  const overdueByDays = Math.max(0, daysSinceLastInteraction - frequencyDays)
+
+  if (overdueByDays > frequencyDays * 2) {
+    return 'wilting'
+  } else if (overdueByDays > 0) {
+    return 'needs_water'
+  } else if (daysSinceLastInteraction <= frequencyDays * 0.5) {
+    return 'thriving'
+  }
+  return 'healthy'
+}
+
+// SVG tree background based on health
+function TreeBackground({ health }: { health: TreeHealth }) {
+  const colors = {
+    thriving: { trunk: '#92B89B', leaves: '#C8E6C9', accent: '#A5D6A7' },
+    healthy: { trunk: '#A8C5B5', leaves: '#D4E5D8', accent: '#B8D4BE' },
+    needs_water: { trunk: '#C9B896', leaves: '#E8DFC9', accent: '#DDD5C0' },
+    wilting: { trunk: '#C4A98A', leaves: '#E0D4C4', accent: '#D4C8B8' },
+  }
+
+  const c = colors[health]
+
+  return (
+    <svg
+      className="absolute right-0 bottom-0 w-32 h-32 opacity-[0.15] pointer-events-none"
+      viewBox="0 0 100 100"
+      fill="none"
+    >
+      {/* Tree trunk */}
+      <path
+        d="M50 95 L50 55 Q48 50 45 48 M50 55 Q52 50 55 48"
+        stroke={c.trunk}
+        strokeWidth="4"
+        strokeLinecap="round"
+        fill="none"
+      />
+      {/* Main foliage - layered circles for organic feel */}
+      <circle cx="50" cy="35" r="22" fill={c.leaves} />
+      <circle cx="38" cy="40" r="15" fill={c.accent} />
+      <circle cx="62" cy="40" r="15" fill={c.accent} />
+      <circle cx="50" cy="28" r="16" fill={c.leaves} />
+      <circle cx="42" cy="32" r="12" fill={c.accent} />
+      <circle cx="58" cy="32" r="12" fill={c.accent} />
+      {/* Small highlight circles */}
+      <circle cx="45" cy="25" r="5" fill={c.accent} opacity="0.7" />
+      <circle cx="55" cy="38" r="4" fill={c.leaves} opacity="0.8" />
+    </svg>
+  )
+}
+
 export default function ConnectionCard({ connection, lastMemory, onLogInteraction, onPlanCatchup, onEdit, onViewDetails }: ConnectionCardProps) {
   const status = getConnectionStatusText(connection.last_interaction_date)
   const nextCatchup = getNextCatchupInfo(connection)
+  const treeHealth = getTreeHealth(connection)
 
   return (
-    <div className="bg-white rounded-2xl p-6 shadow-sm border border-lavender-100">
-      <div className="mb-4">
+    <div className="bg-white rounded-2xl p-6 shadow-sm border border-lavender-100 relative overflow-hidden">
+      <TreeBackground health={treeHealth} />
+      {/* Clickable area for viewing details */}
+      <button
+        onClick={onViewDetails}
+        className="w-full text-left mb-4 cursor-pointer"
+      >
         <div className="flex items-center justify-between mb-1">
-          <button
-            onClick={onViewDetails}
-            className="text-xl font-semibold text-lavender-800 hover:text-muted-teal-600 transition-colors text-left"
-          >
+          <span className="text-xl font-semibold text-lavender-800">
             {connection.name}
-          </button>
-          <div className="flex items-center gap-2">
+          </span>
+          <div
+            className="flex items-center gap-2"
+            onClick={(e) => e.stopPropagation()}
+          >
             <button
               onClick={onEdit}
               className="p-1.5 text-lavender-400 hover:text-lavender-600 hover:bg-lavender-100 rounded-lg transition-colors"
@@ -135,7 +202,7 @@ export default function ConnectionCard({ connection, lastMemory, onLogInteractio
             &ldquo;{lastMemory}&rdquo;
           </div>
         )}
-      </div>
+      </button>
 
       <div className="flex gap-3">
         <button

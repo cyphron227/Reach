@@ -189,3 +189,112 @@ export type UserSettings = Database['public']['Tables']['user_settings']['Row']
 export type WeeklyReflection = Database['public']['Tables']['weekly_reflections']['Row']
 export type InteractionType = Database['public']['Enums']['interaction_type']
 export type CatchupFrequency = Database['public']['Enums']['catchup_frequency']
+
+// Streak & Achievement Types
+export interface UserStreak {
+  id: string
+  user_id: string
+  current_streak: number
+  longest_streak: number
+  last_interaction_date: string | null
+  streak_started_at: string | null
+  freezes_used_this_week: number
+  week_freeze_reset_date: string
+  created_at: string
+  updated_at: string
+}
+
+export type AchievementCategory = 'streak' | 'consistency' | 'recovery' | 'quality'
+
+export interface AchievementDefinition {
+  id: string
+  name: string
+  description: string
+  icon: string
+  category: AchievementCategory
+  threshold_value: number | null
+  threshold_type: string | null
+  is_per_contact: boolean
+  created_at: string
+}
+
+export interface UserAchievement {
+  id: string
+  user_id: string
+  achievement_id: string
+  connection_id: string | null
+  current_progress: number
+  is_unlocked: boolean
+  unlocked_at: string | null
+  created_at: string
+  updated_at: string
+  // Joined data
+  achievement?: AchievementDefinition
+}
+
+export interface ConnectionStreak {
+  id: string
+  connection_id: string
+  user_id: string
+  current_cycle_streak: number
+  longest_cycle_streak: number
+  last_cycle_met_at: string | null
+  worst_health_reached: string | null
+  was_ever_wilting: boolean
+  restored_from_wilting_at: string | null
+  created_at: string
+  updated_at: string
+}
+
+export interface MonthlyReportData {
+  streak: {
+    current: number
+    daysToNextMilestone: number
+    nextMilestone: number
+  }
+  interactions: {
+    total: number
+    byType: {
+      in_person: number
+      call: number
+      text: number
+      other: number
+    }
+  }
+  forestHealth: {
+    current: number
+    previous: number
+    change: number
+  }
+  achievements: {
+    unlocked: string[]
+    inProgress: Array<{
+      id: string
+      progress: number
+      remaining: number
+    }>
+  }
+  connections: {
+    thriving: string[]
+    needsAttention: Array<{
+      id: string
+      name: string
+      reason: string
+    }>
+  }
+  patterns: {
+    mostActiveDay: string
+    preferredType: string
+    categoryBreakdown: Record<string, number>
+  }
+  suggestions: string[]
+}
+
+export interface MonthlyReport {
+  id: string
+  user_id: string
+  report_month: string
+  report_data: MonthlyReportData
+  viewed_at: string | null
+  generated_at: string
+}
