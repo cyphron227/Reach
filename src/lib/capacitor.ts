@@ -57,3 +57,12 @@ export {
   scheduleConnectionNotifications,
   registerNotificationTapListener,
 } from './notifications'
+
+// Re-export contact utilities
+export {
+  checkContactsPermission,
+  requestContactsPermission,
+  pickContact,
+  formatPhoneNumber,
+  type SelectedContact,
+} from './contacts'

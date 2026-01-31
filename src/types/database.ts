@@ -42,6 +42,9 @@ export interface Database {
           catchup_frequency: 'weekly' | 'biweekly' | 'monthly' | 'quarterly' | 'biannually'
           last_interaction_date: string | null
           next_catchup_date: string | null
+          phone_number: string | null
+          email: string | null
+          preferred_contact_method: 'call' | 'whatsapp' | 'text' | 'email' | null
           created_at: string
           updated_at: string
         }
@@ -53,6 +56,9 @@ export interface Database {
           catchup_frequency?: 'weekly' | 'biweekly' | 'monthly' | 'quarterly' | 'biannually'
           last_interaction_date?: string | null
           next_catchup_date?: string | null
+          phone_number?: string | null
+          email?: string | null
+          preferred_contact_method?: 'call' | 'whatsapp' | 'text' | 'email' | null
           created_at?: string
           updated_at?: string
         }
@@ -64,6 +70,9 @@ export interface Database {
           catchup_frequency?: 'weekly' | 'biweekly' | 'monthly' | 'quarterly' | 'biannually'
           last_interaction_date?: string | null
           next_catchup_date?: string | null
+          phone_number?: string | null
+          email?: string | null
+          preferred_contact_method?: 'call' | 'whatsapp' | 'text' | 'email' | null
           created_at?: string
           updated_at?: string
         }
@@ -189,6 +198,7 @@ export type UserSettings = Database['public']['Tables']['user_settings']['Row']
 export type WeeklyReflection = Database['public']['Tables']['weekly_reflections']['Row']
 export type InteractionType = Database['public']['Enums']['interaction_type']
 export type CatchupFrequency = Database['public']['Enums']['catchup_frequency']
+export type PreferredContactMethod = 'call' | 'whatsapp' | 'text' | 'email'
 
 // Streak & Achievement Types
 export interface UserStreak {

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { Connection, CatchupFrequency } from '@/types/database'
+import { Connection, CatchupFrequency, PreferredContactMethod } from '@/types/database'
 
 interface EditConnectionModalProps {
   connection: Connection
@@ -19,8 +19,20 @@ const frequencyOptions: { value: CatchupFrequency; label: string }[] = [
   { value: 'biannually', label: 'Every 6 months' },
 ]
 
+const contactMethodOptions: { value: PreferredContactMethod; label: string; icon: string }[] = [
+  { value: 'call', label: 'Call', icon: '📞' },
+  { value: 'whatsapp', label: 'WhatsApp', icon: '💬' },
+  { value: 'text', label: 'Text', icon: '📱' },
+  { value: 'email', label: 'Email', icon: '📧' },
+]
+
 export default function EditConnectionModal({ connection, isOpen, onClose, onSuccess }: EditConnectionModalProps) {
   const [name, setName] = useState(connection.name)
+  const [phoneNumber, setPhoneNumber] = useState(connection.phone_number || '')
+  const [email, setEmail] = useState(connection.email || '')
+  const [preferredMethod, setPreferredMethod] = useState<PreferredContactMethod | null>(
+    connection.preferred_contact_method || null
+  )
   const [frequency, setFrequency] = useState<CatchupFrequency>(connection.catchup_frequency)
   const [loading, setLoading] = useState(false)
   const [deleteConfirm, setDeleteConfirm] = useState(false)
@@ -31,6 +43,9 @@ export default function EditConnectionModal({ connection, isOpen, onClose, onSuc
   useEffect(() => {
     if (isOpen) {
       setName(connection.name)
+      setPhoneNumber(connection.phone_number || '')
+      setEmail(connection.email || '')
+      setPreferredMethod(connection.preferred_contact_method || null)
       setFrequency(connection.catchup_frequency)
       setDeleteConfirm(false)
       setError(null)
@@ -48,6 +63,9 @@ export default function EditConnectionModal({ connection, isOpen, onClose, onSuc
         .update({
           name: name.trim(),
           catchup_frequency: frequency,
+          phone_number: phoneNumber.trim() || null,
+          email: email.trim() || null,
+          preferred_contact_method: preferredMethod,
         })
         .eq('id', connection.id)
 
@@ -96,7 +114,7 @@ export default function EditConnectionModal({ connection, isOpen, onClose, onSuc
       onClick={onClose}
     >
       <div
-        className="bg-white rounded-2xl w-full max-w-md shadow-xl"
+        className="bg-white rounded-2xl w-full max-w-md shadow-xl max-h-[90vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="p-6">
@@ -115,6 +133,7 @@ export default function EditConnectionModal({ connection, isOpen, onClose, onSuc
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
+            {/* Name */}
             <div>
               <label htmlFor="edit-name" className="block text-sm font-medium text-lavender-700 mb-1">
                 Their name
@@ -129,6 +148,63 @@ export default function EditConnectionModal({ connection, isOpen, onClose, onSuc
               />
             </div>
 
+            {/* Phone Number */}
+            <div>
+              <label htmlFor="edit-phone" className="block text-sm font-medium text-lavender-700 mb-1">
+                Phone number <span className="text-lavender-400">(optional)</span>
+              </label>
+              <input
+                id="edit-phone"
+                type="tel"
+                value={phoneNumber}
+                onChange={(e) => setPhoneNumber(e.target.value)}
+                className="w-full px-4 py-3 rounded-xl border border-lavender-200 bg-white text-lavender-800 placeholder-lavender-400 focus:outline-none focus:ring-2 focus:ring-muted-teal-400 focus:border-transparent transition-all"
+                placeholder="e.g., +1 555 123 4567"
+              />
+            </div>
+
+            {/* Email */}
+            <div>
+              <label htmlFor="edit-email" className="block text-sm font-medium text-lavender-700 mb-1">
+                Email <span className="text-lavender-400">(optional)</span>
+              </label>
+              <input
+                id="edit-email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full px-4 py-3 rounded-xl border border-lavender-200 bg-white text-lavender-800 placeholder-lavender-400 focus:outline-none focus:ring-2 focus:ring-muted-teal-400 focus:border-transparent transition-all"
+                placeholder="e.g., sarah@example.com"
+              />
+            </div>
+
+            {/* Preferred Contact Method */}
+            <div>
+              <label className="block text-sm font-medium text-lavender-700 mb-2">
+                Preferred way to reach out <span className="text-lavender-400">(optional)</span>
+              </label>
+              <div className="grid grid-cols-4 gap-2">
+                {contactMethodOptions.map((method) => (
+                  <button
+                    key={method.value}
+                    type="button"
+                    onClick={() => setPreferredMethod(
+                      preferredMethod === method.value ? null : method.value
+                    )}
+                    className={`py-2 px-2 rounded-xl text-center transition-all ${
+                      preferredMethod === method.value
+                        ? 'bg-muted-teal-400 text-white'
+                        : 'bg-lavender-50 text-lavender-600 hover:bg-lavender-100'
+                    }`}
+                  >
+                    <div className="text-lg mb-0.5">{method.icon}</div>
+                    <div className="text-xs font-medium">{method.label}</div>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Frequency */}
             <div>
               <label htmlFor="edit-frequency" className="block text-sm font-medium text-lavender-700 mb-1">
                 How often do you want to catch-up?
