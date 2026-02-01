@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { Connection, CatchupFrequency, PreferredContactMethod } from '@/types/database'
+import { parsePhone } from '@/lib/phone'
 
 interface EditConnectionModalProps {
   connection: Connection
@@ -12,11 +13,13 @@ interface EditConnectionModalProps {
 }
 
 const frequencyOptions: { value: CatchupFrequency; label: string }[] = [
+  { value: 'daily', label: 'Daily' },
   { value: 'weekly', label: 'Weekly' },
   { value: 'biweekly', label: 'Every 2 weeks' },
   { value: 'monthly', label: 'Monthly' },
   { value: 'quarterly', label: 'Every 3 months' },
   { value: 'biannually', label: 'Every 6 months' },
+  { value: 'annually', label: 'Annually' },
 ]
 
 const contactMethodOptions: { value: PreferredContactMethod; label: string; icon: string }[] = [
@@ -28,7 +31,7 @@ const contactMethodOptions: { value: PreferredContactMethod; label: string; icon
 
 export default function EditConnectionModal({ connection, isOpen, onClose, onSuccess }: EditConnectionModalProps) {
   const [name, setName] = useState(connection.name)
-  const [phoneNumber, setPhoneNumber] = useState(connection.phone_number || '')
+  const [phoneNumber, setPhoneNumber] = useState(connection.phone_raw || '')
   const [email, setEmail] = useState(connection.email || '')
   const [preferredMethod, setPreferredMethod] = useState<PreferredContactMethod | null>(
     connection.preferred_contact_method || null
@@ -43,7 +46,7 @@ export default function EditConnectionModal({ connection, isOpen, onClose, onSuc
   useEffect(() => {
     if (isOpen) {
       setName(connection.name)
-      setPhoneNumber(connection.phone_number || '')
+      setPhoneNumber(connection.phone_raw || '')
       setEmail(connection.email || '')
       setPreferredMethod(connection.preferred_contact_method || null)
       setFrequency(connection.catchup_frequency)
@@ -52,18 +55,38 @@ export default function EditConnectionModal({ connection, isOpen, onClose, onSuc
     }
   }, [isOpen, connection])
 
+  // Lock body scroll when modal is open
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden'
+    }
+    return () => {
+      document.body.style.overflow = ''
+    }
+  }, [isOpen])
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
     setError(null)
 
     try {
+      // Parse and normalize phone number
+      const phoneRaw = phoneNumber.trim() || null
+      let phoneE164: string | null = null
+
+      if (phoneRaw) {
+        const parsed = parsePhone(phoneRaw)
+        phoneE164 = parsed.e164
+      }
+
       const { error: updateError } = await supabase
         .from('connections')
         .update({
           name: name.trim(),
           catchup_frequency: frequency,
-          phone_number: phoneNumber.trim() || null,
+          phone_raw: phoneRaw,
+          phone_e164: phoneE164,
           email: email.trim() || null,
           preferred_contact_method: preferredMethod,
         })
@@ -110,12 +133,16 @@ export default function EditConnectionModal({ connection, isOpen, onClose, onSuc
 
   return (
     <div
-      className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-end sm:items-center justify-center z-50 p-4"
-      onClick={onClose}
+      className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-end sm:items-center justify-center z-50 p-4 overscroll-contain"
+      onClick={(e) => {
+        // Only close if clicking directly on the backdrop, not on children
+        if (e.target === e.currentTarget) {
+          onClose()
+        }
+      }}
     >
       <div
-        className="bg-white rounded-2xl w-full max-w-md shadow-xl max-h-[90vh] overflow-y-auto"
-        onClick={(e) => e.stopPropagation()}
+        className="bg-white rounded-2xl w-full max-w-md shadow-xl max-h-[90vh] overflow-y-auto overscroll-contain"
       >
         <div className="p-6">
           <div className="flex items-center justify-between mb-6">

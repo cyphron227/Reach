@@ -14,11 +14,13 @@ interface ConnectionDetailModalProps {
 }
 
 const frequencyLabels: Record<CatchupFrequency, string> = {
+  daily: 'Daily',
   weekly: 'Weekly',
   biweekly: 'Every 2 weeks',
   monthly: 'Monthly',
   quarterly: 'Every 3 months',
   biannually: 'Every 6 months',
+  annually: 'Annually',
 }
 
 const interactionTypeIcons: Record<string, string> = {
@@ -83,6 +85,16 @@ export default function ConnectionDetailModal({ connection, isOpen, onClose, onE
       fetchInteractions()
     }
   }, [isOpen, connection.id])
+
+  // Lock body scroll when modal is open
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden'
+    }
+    return () => {
+      document.body.style.overflow = ''
+    }
+  }, [isOpen])
 
   const fetchInteractions = async () => {
     setLoading(true)
@@ -153,11 +165,11 @@ export default function ConnectionDetailModal({ connection, isOpen, onClose, onE
 
   return (
     <div
-      className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-end sm:items-center justify-center z-50 p-4"
+      className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-end sm:items-center justify-center z-50 p-4 overscroll-contain"
       onClick={onClose}
     >
       <div
-        className="bg-white rounded-2xl w-full max-w-md max-h-[90vh] shadow-xl flex flex-col"
+        className="bg-white rounded-2xl w-full max-w-md max-h-[90vh] shadow-xl flex flex-col overscroll-contain"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}

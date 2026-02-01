@@ -2,7 +2,7 @@
 
 export const dynamic = 'force-dynamic'
 
-import { useState, useEffect, useCallback, useRef } from 'react'
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { Connection, User, UserStreak, AchievementDefinition } from '@/types/database'
 import Greeting from '@/components/Greeting'
@@ -12,6 +12,7 @@ import AddConnectionModal from '@/components/AddConnectionModal'
 import EditConnectionModal from '@/components/EditConnectionModal'
 import ConnectionDetailModal from '@/components/ConnectionDetailModal'
 import PlanCatchupModal from '@/components/PlanCatchupModal'
+import CatchupMethodModal from '@/components/CatchupMethodModal'
 import AchievementUnlockModal from '@/components/AchievementUnlockModal'
 import Link from 'next/link'
 import { getOrCreateUserStreak, getNextMilestone, getDaysToNextMilestone } from '@/lib/streakUtils'
@@ -27,11 +28,13 @@ const CONNECTIONS_TO_SHOW = 3
 
 // Helper functions for priority calculation
 const frequencyToDays: Record<string, number> = {
+  daily: 1,
   weekly: 7,
   biweekly: 14,
   monthly: 30,
   quarterly: 90,
   biannually: 180,
+  annually: 365,
 }
 
 function getDaysSince(dateString: string | null): number | null {
@@ -88,6 +91,7 @@ export default function TodayPage() {
   const [showEditModal, setShowEditModal] = useState(false)
   const [showDetailModal, setShowDetailModal] = useState(false)
   const [showPlanModal, setShowPlanModal] = useState(false)
+  const [showCatchupModal, setShowCatchupModal] = useState(false)
   const [selectedConnection, setSelectedConnection] = useState<Connection | null>(null)
   const [showAllConnections, setShowAllConnections] = useState(false)
   const [searchQuery, setSearchQuery] = useState<string>('')
@@ -164,7 +168,7 @@ export default function TodayPage() {
     const { data: { user: authUser } } = await supabase.auth.getUser()
     if (!authUser) return []
 
-    // Get all connections
+    // Get all connections (filtering/sorting done client-side via useMemo)
     const { data } = await supabase
       .from('connections')
       .select('*')
@@ -172,22 +176,8 @@ export default function TodayPage() {
 
     if (!data || data.length === 0) return []
 
-    let processedConnections = data as Connection[]
-
-    // Apply search filter
-    if (searchQuery.trim()) {
-      processedConnections = processedConnections.filter(c =>
-        c.name.toLowerCase().includes(searchQuery.toLowerCase().trim())
-      )
-    }
-
-    // Apply sort
-    processedConnections = sortMode === 'soonest'
-      ? processedConnections.sort((a, b) => calculatePriorityScore(a) - calculatePriorityScore(b))
-      : processedConnections.sort((a, b) => a.name.localeCompare(b.name))
-
-    return processedConnections
-  }, [supabase, searchQuery, sortMode])
+    return data as Connection[]
+  }, [supabase])
 
   const fetchLastMemories = useCallback(async (connectionIds: string[]): Promise<Record<string, string>> => {
     if (connectionIds.length === 0) return {}
@@ -212,6 +202,25 @@ export default function TodayPage() {
 
     return memories
   }, [supabase])
+
+  // Filter and sort connections client-side (no refetch on search/sort change)
+  const filteredConnections = useMemo(() => {
+    let result = [...connections]
+
+    // Apply search filter
+    if (searchQuery.trim()) {
+      result = result.filter(c =>
+        c.name.toLowerCase().includes(searchQuery.toLowerCase().trim())
+      )
+    }
+
+    // Apply sort
+    result = sortMode === 'soonest'
+      ? result.sort((a, b) => calculatePriorityScore(a) - calculatePriorityScore(b))
+      : result.sort((a, b) => a.name.localeCompare(b.name))
+
+    return result
+  }, [connections, searchQuery, sortMode])
 
   const loadData = useCallback(async () => {
     setLoading(true)
@@ -286,6 +295,11 @@ export default function TodayPage() {
   const handlePlanCatchup = (connection: Connection) => {
     setSelectedConnection(connection)
     setShowPlanModal(true)
+  }
+
+  const handleCatchup = (connection: Connection) => {
+    setSelectedConnection(connection)
+    setShowCatchupModal(true)
   }
 
   const handleLogInteraction = (connection: Connection) => {
@@ -491,16 +505,17 @@ export default function TodayPage() {
         )}
 
         {/* Connection Cards or Empty State */}
-        {connections.length > 0 ? (
+        {filteredConnections.length > 0 ? (
           <>
             <div className="space-y-4">
-              {(showAllConnections || sortMode === 'alphabetical' ? connections : connections.slice(0, CONNECTIONS_TO_SHOW)).map((conn) => (
+              {(showAllConnections || sortMode === 'alphabetical' ? filteredConnections : filteredConnections.slice(0, CONNECTIONS_TO_SHOW)).map((conn) => (
                 <ConnectionCard
                   key={conn.id}
                   connection={conn}
                   lastMemory={lastMemories[conn.id]}
                   onLogInteraction={() => handleLogInteraction(conn)}
                   onPlanCatchup={() => handlePlanCatchup(conn)}
+                  onCatchup={() => handleCatchup(conn)}
                   onEdit={() => handleEdit(conn)}
                   onViewDetails={() => handleViewDetails(conn)}
                 />
@@ -508,17 +523,17 @@ export default function TodayPage() {
             </div>
 
             {/* Show all button */}
-            {connections.length > CONNECTIONS_TO_SHOW && !showAllConnections && sortMode !== 'alphabetical' && (
+            {filteredConnections.length > CONNECTIONS_TO_SHOW && !showAllConnections && sortMode !== 'alphabetical' && (
               <button
                 onClick={() => setShowAllConnections(true)}
                 className="mt-4 w-full py-3 px-4 bg-lavender-100 hover:bg-lavender-200 text-lavender-600 font-medium rounded-xl transition-colors"
               >
-                Show all ({connections.length} connections)
+                Show all ({filteredConnections.length} connections)
               </button>
             )}
           </>
-        ) : searchQuery.trim() ? (
-          /* No search results state */
+        ) : connections.length > 0 && searchQuery.trim() ? (
+          /* No search results state (we have connections but none match) */
           <div className="bg-white rounded-2xl p-8 shadow-sm border border-lavender-100 text-center">
             <div className="text-4xl mb-4">🔍</div>
             <h2 className="text-lg font-semibold text-lavender-800 mb-2">
@@ -655,6 +670,21 @@ export default function TodayPage() {
           onSuccess={() => {
             setSelectedConnection(null)
             loadData()
+          }}
+        />
+      )}
+
+      {selectedConnection && (
+        <CatchupMethodModal
+          connection={selectedConnection}
+          isOpen={showCatchupModal}
+          onClose={() => {
+            setShowCatchupModal(false)
+            setSelectedConnection(null)
+          }}
+          onSuccess={() => {
+            setShowCatchupModal(false)
+            setSelectedConnection(null)
           }}
         />
       )}

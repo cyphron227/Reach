@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { formatPhoneNumber } from '@/lib/capacitor'
 
 interface ContactSelectionModalProps {
@@ -30,6 +30,16 @@ export default function ContactSelectionModal({
   const showPhoneSelection = phoneNumbers.length > 1
   const showEmailSelection = emails.length > 1
 
+  // Lock body scroll when modal is open
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden'
+    }
+    return () => {
+      document.body.style.overflow = ''
+    }
+  }, [isOpen])
+
   const handleContinue = () => {
     onSelect(
       selectedPhone || (phoneNumbers.length === 1 ? phoneNumbers[0] : null),
@@ -41,11 +51,11 @@ export default function ContactSelectionModal({
 
   return (
     <div
-      className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-end sm:items-center justify-center z-[60] p-4"
+      className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-end sm:items-center justify-center z-[60] p-4 overscroll-contain"
       onClick={onCancel}
     >
       <div
-        className="bg-white rounded-2xl w-full max-w-md shadow-xl max-h-[80vh] overflow-y-auto"
+        className="bg-white rounded-2xl w-full max-w-md shadow-xl max-h-[80vh] overflow-y-auto overscroll-contain"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="p-6">

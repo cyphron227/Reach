@@ -66,3 +66,11 @@ export {
   formatPhoneNumber,
   type SelectedContact,
 } from './contacts'
+
+// Re-export intent utilities
+export {
+  initiateCall,
+  initiateWhatsApp,
+  initiateText,
+  initiateEmail,
+} from './intents'

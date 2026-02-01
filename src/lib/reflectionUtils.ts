@@ -1,11 +1,13 @@
 import { CatchupFrequency, Interaction, InteractionType } from '@/types/database'
 
 export const frequencyToDays: Record<CatchupFrequency, number> = {
+  daily: 1,
   weekly: 7,
   biweekly: 14,
   monthly: 30,
   quarterly: 90,
   biannually: 180,
+  annually: 365,
 }
 
 export function getWeekStartDate(date: Date = new Date()): string {

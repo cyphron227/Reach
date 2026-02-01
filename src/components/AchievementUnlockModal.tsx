@@ -27,6 +27,16 @@ export default function AchievementUnlockModal({
     }
   }, [isOpen, achievements])
 
+  // Lock body scroll when modal is open
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden'
+    }
+    return () => {
+      document.body.style.overflow = ''
+    }
+  }, [isOpen])
+
   if (!isOpen || achievements.length === 0) return null
 
   const currentAchievement = achievements[currentIndex]
@@ -43,7 +53,7 @@ export default function AchievementUnlockModal({
   }
 
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4 overscroll-contain">
       {/* Confetti animation */}
       {showConfetti && (
         <div className="absolute inset-0 pointer-events-none overflow-hidden">

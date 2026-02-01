@@ -25,11 +25,13 @@ interface TreeStats {
 }
 
 const frequencyToDays: Record<CatchupFrequency, number> = {
+  daily: 1,
   weekly: 7,
   biweekly: 14,
   monthly: 30,
   quarterly: 90,
   biannually: 180,
+  annually: 365,
 }
 
 function getDaysSince(dateString: string | null): number | null {

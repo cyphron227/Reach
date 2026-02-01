@@ -64,6 +64,16 @@ export default function LogInteractionModal({ connection, isOpen, onClose, onSuc
     }
   }, [isOpen, connection.id])
 
+  // Lock body scroll when modal is open
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden'
+    }
+    return () => {
+      document.body.style.overflow = ''
+    }
+  }, [isOpen])
+
   const checkReflectionPriority = async () => {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return
@@ -176,8 +186,8 @@ export default function LogInteractionModal({ connection, isOpen, onClose, onSuc
   if (!isOpen) return null
 
   return (
-    <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-end sm:items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl w-full max-w-md max-h-[90vh] overflow-y-auto shadow-xl">
+    <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-end sm:items-center justify-center z-50 p-4 overscroll-contain">
+      <div className="bg-white rounded-2xl w-full max-w-md max-h-[90vh] overflow-y-auto shadow-xl overscroll-contain">
         <div className="p-6">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-xl font-semibold text-lavender-800">

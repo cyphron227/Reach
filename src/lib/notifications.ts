@@ -8,11 +8,13 @@ import { Connection } from '@/types/database'
 
 // Frequency to days mapping
 const frequencyToDays: Record<string, number> = {
+  daily: 1,
   weekly: 7,
   biweekly: 14,
   monthly: 30,
   quarterly: 90,
   biannually: 180,
+  annually: 365,
 }
 
 /**

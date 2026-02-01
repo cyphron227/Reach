@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { CatchupFrequency, PreferredContactMethod } from '@/types/database'
 import { isCapacitor, pickContact, SelectedContact } from '@/lib/capacitor'
+import { parsePhone } from '@/lib/phone'
 import ContactSelectionModal from './ContactSelectionModal'
 
 interface AddConnectionModalProps {
@@ -13,11 +14,13 @@ interface AddConnectionModalProps {
 }
 
 const frequencyOptions: { value: CatchupFrequency; label: string }[] = [
+  { value: 'daily', label: 'Daily' },
   { value: 'weekly', label: 'Weekly' },
   { value: 'biweekly', label: 'Every 2 weeks' },
   { value: 'monthly', label: 'Monthly' },
   { value: 'quarterly', label: 'Every 3 months' },
   { value: 'biannually', label: 'Every 6 months' },
+  { value: 'annually', label: 'Annually' },
 ]
 
 const contactMethodOptions: { value: PreferredContactMethod; label: string; icon: string }[] = [
@@ -62,6 +65,16 @@ export default function AddConnectionModal({ isOpen, onClose, onSuccess }: AddCo
       setPendingContact(null)
     }
   }, [isOpen, isNative])
+
+  // Lock body scroll when modal is open
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden'
+    }
+    return () => {
+      document.body.style.overflow = ''
+    }
+  }, [isOpen])
 
   const handleImportFromContacts = async () => {
     setError(null)
@@ -120,13 +133,28 @@ export default function AddConnectionModal({ isOpen, onClose, onSuccess }: AddCo
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
 
+      // Parse and normalize phone number
+      const phoneRaw = phoneNumber.trim() || null
+      let phoneE164: string | null = null
+
+      if (phoneRaw) {
+        const parsed = parsePhone(phoneRaw)
+        phoneE164 = parsed.e164
+        // Note: We store both raw and e164 - e164 may be null if number is invalid
+      }
+
+      // Default last_interaction_date to today so the next catchup is calculated from now
+      const today = new Date().toISOString().split('T')[0]
+
       const { error: insertError } = await supabase
         .from('connections')
         .insert({
           user_id: user.id,
           name: name.trim(),
           catchup_frequency: frequency,
-          phone_number: phoneNumber.trim() || null,
+          last_interaction_date: today,
+          phone_raw: phoneRaw,
+          phone_e164: phoneE164,
           email: email.trim() || null,
           preferred_contact_method: preferredMethod,
         })
@@ -152,11 +180,11 @@ export default function AddConnectionModal({ isOpen, onClose, onSuccess }: AddCo
   return (
     <>
       <div
-        className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-end sm:items-center justify-center z-50 p-4"
+        className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-end sm:items-center justify-center z-50 p-4 overscroll-contain"
         onClick={onClose}
       >
         <div
-          className="bg-white rounded-2xl w-full max-w-md shadow-xl"
+          className="bg-white rounded-2xl w-full max-w-md shadow-xl max-h-[90vh] overflow-y-auto overscroll-contain"
           onClick={(e) => e.stopPropagation()}
         >
           <div className="p-6">
@@ -199,6 +227,28 @@ export default function AddConnectionModal({ isOpen, onClose, onSuccess }: AddCo
                 {error && (
                   <p className="text-red-600 text-sm bg-red-50 p-3 rounded-lg">{error}</p>
                 )}
+
+                {/* Privacy notice */}
+                <div className="pt-4 border-t border-lavender-100">
+                  <ul className="space-y-2 text-xs text-lavender-500">
+                    <li className="flex gap-2">
+                      <span className="text-muted-teal-500">•</span>
+                      <span>Ringur only accesses contacts you explicitly choose.</span>
+                    </li>
+                    <li className="flex gap-2">
+                      <span className="text-muted-teal-500">•</span>
+                      <span>We never scan, read, or upload your entire address book.</span>
+                    </li>
+                    <li className="flex gap-2">
+                      <span className="text-muted-teal-500">•</span>
+                      <span>Only the selected contact is saved to your Ringur account so it can sync across your devices.</span>
+                    </li>
+                    <li className="flex gap-2">
+                      <span className="text-muted-teal-500">•</span>
+                      <span>Contacts are private and never shared with third parties.</span>
+                    </li>
+                  </ul>
+                </div>
               </div>
             )}
 

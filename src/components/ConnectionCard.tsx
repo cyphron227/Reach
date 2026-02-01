@@ -7,6 +7,7 @@ interface ConnectionCardProps {
   lastMemory?: string
   onLogInteraction: () => void
   onPlanCatchup: () => void
+  onCatchup: () => void
   onEdit: () => void
   onViewDetails: () => void
 }
@@ -32,11 +33,13 @@ function getDaysUntil(dateString: string | null): number | null {
 }
 
 const frequencyToDays: Record<CatchupFrequency, number> = {
+  daily: 1,
   weekly: 7,
   biweekly: 14,
   monthly: 30,
   quarterly: 90,
   biannually: 180,
+  annually: 365,
 }
 
 function getNextCatchupInfo(connection: Connection): { text: string; isOverdue: boolean } {
@@ -93,7 +96,7 @@ function getConnectionStatusText(lastInteractionDate: string | null): { text: st
   return { text: `Caught-up ${days} days ago`, isUrgent: false }
 }
 
-export default function ConnectionCard({ connection, lastMemory, onLogInteraction, onPlanCatchup, onEdit, onViewDetails }: ConnectionCardProps) {
+export default function ConnectionCard({ connection, lastMemory, onLogInteraction, onPlanCatchup, onCatchup, onEdit, onViewDetails }: ConnectionCardProps) {
   const status = getConnectionStatusText(connection.last_interaction_date)
   const nextCatchup = getNextCatchupInfo(connection)
 
@@ -141,18 +144,24 @@ export default function ConnectionCard({ connection, lastMemory, onLogInteractio
         )}
       </button>
 
-      <div className="flex gap-3">
-        <button
-          onClick={onLogInteraction}
-          className="flex-1 py-3 px-4 bg-muted-teal-500 hover:bg-muted-teal-600 text-white font-medium rounded-xl transition-colors"
-        >
-          Record catch-up
-        </button>
+      <div className="grid grid-cols-3 gap-2">
         <button
           onClick={onPlanCatchup}
-          className="py-3 px-4 bg-lavender-100 hover:bg-lavender-200 text-lavender-600 font-medium rounded-xl transition-colors"
+          className="py-2.5 px-3 bg-lavender-100 hover:bg-lavender-200 text-lavender-700 text-sm font-medium rounded-xl transition-colors"
         >
-          Plan catch-up
+          Plan
+        </button>
+        <button
+          onClick={onCatchup}
+          className="py-2.5 px-3 bg-muted-teal-500 hover:bg-muted-teal-600 text-white text-sm font-medium rounded-xl transition-colors"
+        >
+          Catch-up
+        </button>
+        <button
+          onClick={onLogInteraction}
+          className="py-2.5 px-3 bg-lavender-100 hover:bg-lavender-200 text-lavender-700 text-sm font-medium rounded-xl transition-colors"
+        >
+          Record
         </button>
       </div>
     </div>

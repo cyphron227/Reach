@@ -39,10 +39,11 @@ export interface Database {
           user_id: string
           name: string
           relationship: string | null
-          catchup_frequency: 'weekly' | 'biweekly' | 'monthly' | 'quarterly' | 'biannually'
+          catchup_frequency: 'daily' | 'weekly' | 'biweekly' | 'monthly' | 'quarterly' | 'biannually' | 'annually'
           last_interaction_date: string | null
           next_catchup_date: string | null
-          phone_number: string | null
+          phone_raw: string | null
+          phone_e164: string | null
           email: string | null
           preferred_contact_method: 'call' | 'whatsapp' | 'text' | 'email' | null
           created_at: string
@@ -53,10 +54,11 @@ export interface Database {
           user_id: string
           name: string
           relationship?: string | null
-          catchup_frequency?: 'weekly' | 'biweekly' | 'monthly' | 'quarterly' | 'biannually'
+          catchup_frequency?: 'daily' | 'weekly' | 'biweekly' | 'monthly' | 'quarterly' | 'biannually' | 'annually'
           last_interaction_date?: string | null
           next_catchup_date?: string | null
-          phone_number?: string | null
+          phone_raw?: string | null
+          phone_e164?: string | null
           email?: string | null
           preferred_contact_method?: 'call' | 'whatsapp' | 'text' | 'email' | null
           created_at?: string
@@ -67,10 +69,11 @@ export interface Database {
           user_id?: string
           name?: string
           relationship?: string | null
-          catchup_frequency?: 'weekly' | 'biweekly' | 'monthly' | 'quarterly' | 'biannually'
+          catchup_frequency?: 'daily' | 'weekly' | 'biweekly' | 'monthly' | 'quarterly' | 'biannually' | 'annually'
           last_interaction_date?: string | null
           next_catchup_date?: string | null
-          phone_number?: string | null
+          phone_raw?: string | null
+          phone_e164?: string | null
           email?: string | null
           preferred_contact_method?: 'call' | 'whatsapp' | 'text' | 'email' | null
           created_at?: string
@@ -174,6 +177,30 @@ export interface Database {
         }
         Relationships: []
       }
+      communication_intents: {
+        Row: {
+          id: string
+          user_id: string
+          connection_id: string
+          method: 'call' | 'whatsapp' | 'text' | 'email'
+          initiated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          connection_id: string
+          method: 'call' | 'whatsapp' | 'text' | 'email'
+          initiated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          connection_id?: string
+          method?: 'call' | 'whatsapp' | 'text' | 'email'
+          initiated_at?: string
+        }
+        Relationships: []
+      }
     }
     CompositeTypes: {
       [_ in never]: never
@@ -186,7 +213,7 @@ export interface Database {
     }
     Enums: {
       interaction_type: 'call' | 'text' | 'in_person' | 'other'
-      catchup_frequency: 'weekly' | 'biweekly' | 'monthly' | 'quarterly' | 'biannually'
+      catchup_frequency: 'daily' | 'weekly' | 'biweekly' | 'monthly' | 'quarterly' | 'biannually' | 'annually'
     }
   }
 }
@@ -199,6 +226,8 @@ export type WeeklyReflection = Database['public']['Tables']['weekly_reflections'
 export type InteractionType = Database['public']['Enums']['interaction_type']
 export type CatchupFrequency = Database['public']['Enums']['catchup_frequency']
 export type PreferredContactMethod = 'call' | 'whatsapp' | 'text' | 'email'
+export type CommunicationIntent = Database['public']['Tables']['communication_intents']['Row']
+export type CommunicationMethod = 'call' | 'whatsapp' | 'text' | 'email'
 
 // Streak & Achievement Types
 export interface UserStreak {
