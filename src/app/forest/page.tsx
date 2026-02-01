@@ -84,7 +84,7 @@ function calculateTreeStats(
   let health: TreeHealth = 'healthy'
   if (daysSinceLastInteraction === null) {
     health = 'needs_water' // Never interacted
-  } else if (overdueByDays > frequencyDays * 2) {
+  } else if (overdueByDays > frequencyDays * 1) {
     health = 'wilting'
   } else if (overdueByDays > 0) {
     health = 'needs_water'
