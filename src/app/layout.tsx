@@ -4,6 +4,7 @@ import Script from "next/script";
 import "./globals.css";
 import { SpeedInsights } from '@vercel/speed-insights/next';
 import { Analytics } from '@vercel/analytics/next';
+import { DeepLinkHandler } from '@/components/DeepLinkHandler';
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -44,6 +45,7 @@ export default function RootLayout({
         </Script>
       </head>
       <body className={`${geistSans.variable} font-sans antialiased bg-cream`}>
+        <DeepLinkHandler />
         {/* Fixed status bar background for mobile devices */}
         <div
           className="fixed top-0 left-0 right-0 bg-lavender-50 z-[100]"

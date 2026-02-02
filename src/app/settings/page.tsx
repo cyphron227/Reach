@@ -27,6 +27,9 @@ export default function SettingsPage() {
   const [notificationsEnabled, setNotificationsEnabled] = useState(true)
   const [notificationTime, setNotificationTime] = useState('18:00')
   const [weeklyReflectionEnabled, setWeeklyReflectionEnabled] = useState(true)
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const [deleteConfirmText, setDeleteConfirmText] = useState('')
+  const [deleting, setDeleting] = useState(false)
 
   const router = useRouter()
   const supabase = createClient()
@@ -170,6 +173,67 @@ export default function SettingsPage() {
     await supabase.auth.signOut()
     router.push('/login')
     router.refresh()
+  }
+
+  const handleDeleteAccount = async () => {
+    if (deleteConfirmText.toLowerCase() !== 'delete') return
+
+    setDeleting(true)
+    setMessage(null)
+
+    try {
+      const { data: { user: authUser } } = await supabase.auth.getUser()
+      if (!authUser) {
+        router.push('/login')
+        return
+      }
+
+      // Delete all user data in order (respecting foreign key constraints)
+      // 1. Delete communication intents
+      await supabase
+        .from('communication_intents')
+        .delete()
+        .eq('user_id', authUser.id)
+
+      // 2. Delete interactions (references connections)
+      await supabase
+        .from('interactions')
+        .delete()
+        .eq('user_id', authUser.id)
+
+      // 3. Delete weekly reflections
+      await supabase
+        .from('weekly_reflections')
+        .delete()
+        .eq('user_id', authUser.id)
+
+      // 4. Delete connections
+      await supabase
+        .from('connections')
+        .delete()
+        .eq('user_id', authUser.id)
+
+      // 5. Delete user settings
+      await supabase
+        .from('user_settings')
+        .delete()
+        .eq('user_id', authUser.id)
+
+      // 6. Delete user profile
+      await supabase
+        .from('users')
+        .delete()
+        .eq('id', authUser.id)
+
+      // 7. Sign out and redirect (auth user deletion requires admin API)
+      await supabase.auth.signOut()
+      router.push('/login')
+      router.refresh()
+    } catch {
+      setMessage({ type: 'error', text: 'Failed to delete account. Please try again.' })
+      setDeleting(false)
+      setShowDeleteModal(false)
+    }
   }
 
   if (loading) {
@@ -365,11 +429,97 @@ export default function SettingsPage() {
         {/* Sign Out */}
         <button
           onClick={handleSignOut}
-          className="w-full py-3 px-4 bg-lavender-100 hover:bg-lavender-200 text-lavender-600 font-medium rounded-xl transition-colors"
+          className="w-full py-3 px-4 bg-lavender-100 hover:bg-lavender-200 text-lavender-600 font-medium rounded-xl transition-colors mb-8"
         >
           Sign out
         </button>
+
+        {/* Danger Zone */}
+        <div className="border-t border-lavender-200 pt-8">
+          <h2 className="text-sm font-medium text-red-500 uppercase tracking-wide mb-4">
+            Danger Zone
+          </h2>
+          <button
+            onClick={() => setShowDeleteModal(true)}
+            className="w-full py-3 px-4 bg-red-500 hover:bg-red-600 text-white font-medium rounded-xl transition-colors"
+          >
+            Delete Account
+          </button>
+        </div>
       </div>
+
+      {/* Delete Account Modal */}
+      {showDeleteModal && (
+        <div
+          className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+          onClick={(e) => {
+            if (e.target === e.currentTarget && !deleting) {
+              setShowDeleteModal(false)
+              setDeleteConfirmText('')
+            }
+          }}
+        >
+          <div className="bg-white rounded-2xl w-full max-w-md shadow-xl p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center">
+                <svg className="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+              </div>
+              <h2 className="text-xl font-semibold text-lavender-800">Delete Account</h2>
+            </div>
+
+            <div className="bg-red-50 border border-red-200 rounded-xl p-4 mb-6">
+              <p className="text-red-700 text-sm font-medium mb-2">
+                This action cannot be undone.
+              </p>
+              <p className="text-red-600 text-sm">
+                All your data will be permanently deleted, including:
+              </p>
+              <ul className="text-red-600 text-sm mt-2 ml-4 list-disc">
+                <li>Your profile and settings</li>
+                <li>All your connections</li>
+                <li>All interaction history and memories</li>
+                <li>Streaks and achievements</li>
+              </ul>
+            </div>
+
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-lavender-700 mb-2">
+                Type <span className="font-bold text-red-500">delete</span> to confirm
+              </label>
+              <input
+                type="text"
+                value={deleteConfirmText}
+                onChange={(e) => setDeleteConfirmText(e.target.value)}
+                placeholder="delete"
+                disabled={deleting}
+                className="w-full px-4 py-3 rounded-xl border border-lavender-200 bg-white text-lavender-800 focus:outline-none focus:ring-2 focus:ring-red-400 focus:border-transparent transition-all disabled:opacity-50"
+              />
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                onClick={() => {
+                  setShowDeleteModal(false)
+                  setDeleteConfirmText('')
+                }}
+                disabled={deleting}
+                className="flex-1 py-3 px-4 bg-lavender-100 hover:bg-lavender-200 text-lavender-600 font-medium rounded-xl transition-colors disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDeleteAccount}
+                disabled={deleteConfirmText.toLowerCase() !== 'delete' || deleting}
+                className="flex-1 py-3 px-4 bg-red-500 hover:bg-red-600 text-white font-medium rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {deleting ? 'Deleting...' : 'Delete Account'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   )
 }
