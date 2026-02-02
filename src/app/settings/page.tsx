@@ -189,13 +189,14 @@ export default function SettingsPage() {
       }
 
       // Determine the API URL - use full URL for Capacitor, relative for web
-      let apiUrl = '/api/delete-account'
+      // Note: trailing slash is required due to next.config trailingSlash: true
+      let apiUrl = '/api/delete-account/'
       if (isCapacitor()) {
         const deployedUrl = process.env.NEXT_PUBLIC_APP_URL
         if (!deployedUrl) {
           throw new Error('Account deletion is not available in the app yet. Please use the web version.')
         }
-        apiUrl = `${deployedUrl}/api/delete-account`
+        apiUrl = `${deployedUrl}/api/delete-account/`
       }
 
       // Call the API route to delete account (requires admin privileges)
