@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { Connection, CatchupFrequency, PreferredContactMethod } from '@/types/database'
+import { Connection, CatchupFrequency } from '@/types/database'
 import { parsePhone } from '@/lib/phone'
 
 interface EditConnectionModalProps {
@@ -22,20 +22,10 @@ const frequencyOptions: { value: CatchupFrequency; label: string }[] = [
   { value: 'annually', label: 'Annually' },
 ]
 
-const contactMethodOptions: { value: PreferredContactMethod; label: string; icon: string }[] = [
-  { value: 'call', label: 'Call', icon: '📞' },
-  { value: 'whatsapp', label: 'WhatsApp', icon: '💬' },
-  { value: 'text', label: 'Text', icon: '📱' },
-  { value: 'email', label: 'Email', icon: '📧' },
-]
-
 export default function EditConnectionModal({ connection, isOpen, onClose, onSuccess }: EditConnectionModalProps) {
   const [name, setName] = useState(connection.name)
   const [phoneNumber, setPhoneNumber] = useState(connection.phone_raw || '')
   const [email, setEmail] = useState(connection.email || '')
-  const [preferredMethod, setPreferredMethod] = useState<PreferredContactMethod | null>(
-    connection.preferred_contact_method || null
-  )
   const [frequency, setFrequency] = useState<CatchupFrequency>(connection.catchup_frequency)
   const [loading, setLoading] = useState(false)
   const [deleteConfirm, setDeleteConfirm] = useState(false)
@@ -48,7 +38,6 @@ export default function EditConnectionModal({ connection, isOpen, onClose, onSuc
       setName(connection.name)
       setPhoneNumber(connection.phone_raw || '')
       setEmail(connection.email || '')
-      setPreferredMethod(connection.preferred_contact_method || null)
       setFrequency(connection.catchup_frequency)
       setDeleteConfirm(false)
       setError(null)
@@ -88,7 +77,6 @@ export default function EditConnectionModal({ connection, isOpen, onClose, onSuc
           phone_raw: phoneRaw,
           phone_e164: phoneE164,
           email: email.trim() || null,
-          preferred_contact_method: preferredMethod,
         })
         .eq('id', connection.id)
 
@@ -203,32 +191,6 @@ export default function EditConnectionModal({ connection, isOpen, onClose, onSuc
                 className="w-full px-4 py-3 rounded-xl border border-lavender-200 bg-white text-lavender-800 placeholder-lavender-400 focus:outline-none focus:ring-2 focus:ring-muted-teal-400 focus:border-transparent transition-all"
                 placeholder="e.g., sarah@example.com"
               />
-            </div>
-
-            {/* Preferred Contact Method */}
-            <div>
-              <label className="block text-sm font-medium text-lavender-700 mb-2">
-                Preferred way to reach out <span className="text-lavender-400">(optional)</span>
-              </label>
-              <div className="grid grid-cols-4 gap-2">
-                {contactMethodOptions.map((method) => (
-                  <button
-                    key={method.value}
-                    type="button"
-                    onClick={() => setPreferredMethod(
-                      preferredMethod === method.value ? null : method.value
-                    )}
-                    className={`py-2 px-2 rounded-xl text-center transition-all ${
-                      preferredMethod === method.value
-                        ? 'bg-muted-teal-400 text-white'
-                        : 'bg-lavender-50 text-lavender-600 hover:bg-lavender-100'
-                    }`}
-                  >
-                    <div className="text-lg mb-0.5">{method.icon}</div>
-                    <div className="text-xs font-medium">{method.label}</div>
-                  </button>
-                ))}
-              </div>
             </div>
 
             {/* Frequency */}
