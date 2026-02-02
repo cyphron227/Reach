@@ -14,6 +14,7 @@ import ConnectionDetailModal from '@/components/ConnectionDetailModal'
 import PlanCatchupModal from '@/components/PlanCatchupModal'
 import CatchupMethodModal from '@/components/CatchupMethodModal'
 import AchievementUnlockModal from '@/components/AchievementUnlockModal'
+import PendingCatchupPrompt from '@/components/PendingCatchupPrompt'
 import Link from 'next/link'
 import { getOrCreateUserStreak, getNextMilestone, getDaysToNextMilestone } from '@/lib/streakUtils'
 import { useRouter } from 'next/navigation'
@@ -23,6 +24,7 @@ import {
   scheduleConnectionNotifications,
   registerNotificationTapListener,
 } from '@/lib/capacitor'
+import { checkPendingIntents, PendingIntent, methodToInteractionType } from '@/lib/pendingIntents'
 
 const CONNECTIONS_TO_SHOW = 3
 
@@ -102,6 +104,8 @@ export default function TodayPage() {
   const [userStreak, setUserStreak] = useState<UserStreak | null>(null)
   const [newAchievements, setNewAchievements] = useState<AchievementDefinition[]>([])
   const [showStreakInfo, setShowStreakInfo] = useState(false)
+  const [pendingIntents, setPendingIntents] = useState<PendingIntent[]>([])
+  const [pendingIntentForLog, setPendingIntentForLog] = useState<PendingIntent | null>(null)
   const menuRef = useRef<HTMLDivElement>(null)
 
   const supabase = createClient()
@@ -231,13 +235,21 @@ export default function TodayPage() {
     setUser(userData)
     setConnections(connectionsData)
 
-    // Fetch user streak
+    // Fetch user streak and pending intents
     if (userData) {
       try {
         const streak = await getOrCreateUserStreak(supabase, userData.id)
         setUserStreak(streak)
       } catch (error) {
         console.error('Failed to fetch streak:', error)
+      }
+
+      // Check for pending catch-up intents
+      try {
+        const pending = await checkPendingIntents(supabase, userData.id)
+        setPendingIntents(pending)
+      } catch (error) {
+        console.error('Failed to check pending intents:', error)
       }
     }
 
@@ -320,6 +332,11 @@ export default function TodayPage() {
   }
 
   const handleLogSuccess = (achievements?: AchievementDefinition[]) => {
+    // If this was from a pending intent, clear it
+    if (pendingIntentForLog) {
+      setPendingIntents(prev => prev.filter(p => p.intent.id !== pendingIntentForLog.intent.id))
+      setPendingIntentForLog(null)
+    }
     setSelectedConnection(null)
     setShowAllConnections(false)
     setSearchQuery('')
@@ -450,6 +467,26 @@ export default function TodayPage() {
       <div className="max-w-lg mx-auto px-6 pb-8">
         {/* Greeting */}
         <Greeting userName={user?.full_name} />
+
+        {/* Pending Catch-up Prompts */}
+        {pendingIntents.length > 0 && (
+          <div className="mb-4">
+            {pendingIntents.slice(0, 2).map((pendingIntent) => (
+              <PendingCatchupPrompt
+                key={pendingIntent.intent.id}
+                pendingIntent={pendingIntent}
+                onRecordCatchup={() => {
+                  setPendingIntentForLog(pendingIntent)
+                  setSelectedConnection(pendingIntent.connection)
+                  setShowLogModal(true)
+                }}
+                onDismiss={() => {
+                  setPendingIntents(prev => prev.filter(p => p.intent.id !== pendingIntent.intent.id))
+                }}
+              />
+            ))}
+          </div>
+        )}
 
         {/* Search and Sort Controls */}
         {connections.length > 0 && (
@@ -619,8 +656,10 @@ export default function TodayPage() {
             onClose={() => {
               setShowLogModal(false)
               setSelectedConnection(null)
+              setPendingIntentForLog(null)
             }}
             onSuccess={handleLogSuccess}
+            defaultInteractionType={pendingIntentForLog ? methodToInteractionType(pendingIntentForLog.intent.method) : undefined}
           />
 
           <EditConnectionModal

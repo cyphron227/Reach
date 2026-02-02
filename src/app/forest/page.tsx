@@ -4,9 +4,10 @@ export const dynamic = 'force-dynamic'
 
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { Connection, CatchupFrequency } from '@/types/database'
+import { Connection, CatchupFrequency, Interaction } from '@/types/database'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import CatchupMethodModal from '@/components/CatchupMethodModal'
 
 // Growth stages based on relationship longevity and interaction frequency
 type GrowthStage = 'seed' | 'seedling' | 'sapling' | 'young' | 'mature' | 'ancient'
@@ -390,8 +391,10 @@ function TreeCard({ connection, stats, onClick }: TreeCardProps) {
 export default function ForestPage() {
   const [connections, setConnections] = useState<Connection[]>([])
   const [interactionCounts, setInteractionCounts] = useState<Record<string, number>>({})
+  const [recentInteractions, setRecentInteractions] = useState<Record<string, Interaction[]>>({})
   const [loading, setLoading] = useState(true)
   const [selectedConnection, setSelectedConnection] = useState<Connection | null>(null)
+  const [showCatchupModal, setShowCatchupModal] = useState(false)
   const router = useRouter()
   const supabase = createClient()
 
@@ -423,8 +426,30 @@ export default function ForestPage() {
       }
     }
 
+    // Fetch recent interactions for detail view (last 5 per connection)
+    const { data: recentInteractionsData } = await supabase
+      .from('interactions')
+      .select('*')
+      .eq('user_id', authUser.id)
+      .order('interaction_date', { ascending: false })
+      .limit(100)
+
+    // Group recent interactions by connection (max 5 each)
+    const recentByConnection: Record<string, Interaction[]> = {}
+    if (recentInteractionsData) {
+      for (const interaction of recentInteractionsData) {
+        if (!recentByConnection[interaction.connection_id]) {
+          recentByConnection[interaction.connection_id] = []
+        }
+        if (recentByConnection[interaction.connection_id].length < 5) {
+          recentByConnection[interaction.connection_id].push(interaction as Interaction)
+        }
+      }
+    }
+
     setConnections(connectionsData || [])
     setInteractionCounts(counts)
+    setRecentInteractions(recentByConnection)
     setLoading(false)
   }, [supabase, router])
 
@@ -652,31 +677,92 @@ export default function ForestPage() {
             <div className="p-6">
               <TreeStatsDisplay stats={selectedStats} />
 
+              {/* Contact Info */}
+              {(selectedConnection.phone_raw || selectedConnection.email) && (
+                <div className="mt-4 p-3 bg-lavender-50 rounded-xl space-y-2">
+                  <div className="text-xs text-lavender-500 uppercase tracking-wide">Contact Info</div>
+                  {selectedConnection.phone_raw && (
+                    <div className="flex items-center gap-2 text-sm text-lavender-700">
+                      <span>📞</span>
+                      <span>{selectedConnection.phone_raw}</span>
+                    </div>
+                  )}
+                  {selectedConnection.email && (
+                    <div className="flex items-center gap-2 text-sm text-lavender-700">
+                      <span>📧</span>
+                      <span>{selectedConnection.email}</span>
+                    </div>
+                  )}
+                </div>
+              )}
+
               {/* Catch-up frequency */}
               <div className="mt-4 p-3 bg-lavender-50 rounded-xl">
                 <div className="flex justify-between items-center">
                   <span className="text-sm text-lavender-600">Catch-up frequency</span>
                   <span className="text-sm font-medium text-lavender-800">
+                    {selectedConnection.catchup_frequency === 'daily' && 'Daily'}
                     {selectedConnection.catchup_frequency === 'weekly' && 'Weekly'}
                     {selectedConnection.catchup_frequency === 'biweekly' && 'Every 2 weeks'}
                     {selectedConnection.catchup_frequency === 'monthly' && 'Monthly'}
                     {selectedConnection.catchup_frequency === 'quarterly' && 'Every 3 months'}
                     {selectedConnection.catchup_frequency === 'biannually' && 'Every 6 months'}
+                    {selectedConnection.catchup_frequency === 'annually' && 'Annually'}
                   </span>
                 </div>
               </div>
 
+              {/* Recent Catch-ups */}
+              {recentInteractions[selectedConnection.id] && recentInteractions[selectedConnection.id].length > 0 && (
+                <div className="mt-4">
+                  <div className="text-xs text-lavender-500 uppercase tracking-wide mb-2">Recent Catch-ups</div>
+                  <div className="space-y-2">
+                    {recentInteractions[selectedConnection.id].slice(0, 3).map((interaction) => (
+                      <div key={interaction.id} className="flex items-center gap-2 text-sm bg-white p-2 rounded-lg">
+                        <span>
+                          {interaction.interaction_type === 'call' && '📞'}
+                          {interaction.interaction_type === 'text' && '💬'}
+                          {interaction.interaction_type === 'in_person' && '🤝'}
+                          {interaction.interaction_type === 'other' && '✨'}
+                        </span>
+                        <span className="text-lavender-600 flex-1">
+                          {interaction.interaction_type === 'call' && 'Call'}
+                          {interaction.interaction_type === 'text' && 'Text'}
+                          {interaction.interaction_type === 'in_person' && 'In person'}
+                          {interaction.interaction_type === 'other' && 'Other'}
+                        </span>
+                        <span className="text-xs text-lavender-400">
+                          {new Date(interaction.interaction_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               {/* CTA */}
-              <Link
-                href="/"
-                onClick={() => setSelectedConnection(null)}
-                className="mt-6 block w-full py-3 px-4 bg-muted-teal-500 hover:bg-muted-teal-600 text-white font-medium rounded-xl transition-colors text-center"
+              <button
+                onClick={() => setShowCatchupModal(true)}
+                className="mt-6 w-full py-3 px-4 bg-muted-teal-500 hover:bg-muted-teal-600 text-white font-medium rounded-xl transition-colors text-center"
               >
-                Water this tree 💧
-              </Link>
+                Catch-up
+              </button>
             </div>
           </div>
         </div>
+      )}
+
+      {/* Catch-up Method Modal */}
+      {selectedConnection && (
+        <CatchupMethodModal
+          connection={selectedConnection}
+          isOpen={showCatchupModal}
+          onClose={() => setShowCatchupModal(false)}
+          onSuccess={() => {
+            setShowCatchupModal(false)
+            // Optionally close the detail modal too
+          }}
+        />
       )}
     </main>
   )

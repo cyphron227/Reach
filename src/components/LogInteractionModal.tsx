@@ -12,6 +12,7 @@ interface LogInteractionModalProps {
   isOpen: boolean
   onClose: () => void
   onSuccess: (newAchievements?: AchievementDefinition[]) => void
+  defaultInteractionType?: InteractionType
 }
 
 const interactionTypes: { value: InteractionType; label: string; icon: string }[] = [
@@ -43,8 +44,8 @@ function formatRelativeDate(dateString: string): string {
   return `${Math.floor(diffDays / 30)} months ago`
 }
 
-export default function LogInteractionModal({ connection, isOpen, onClose, onSuccess }: LogInteractionModalProps) {
-  const [interactionType, setInteractionType] = useState<InteractionType>('call')
+export default function LogInteractionModal({ connection, isOpen, onClose, onSuccess, defaultInteractionType }: LogInteractionModalProps) {
+  const [interactionType, setInteractionType] = useState<InteractionType>(defaultInteractionType || 'call')
   const [memory, setMemory] = useState('')
   const [interactionDate, setInteractionDate] = useState(new Date().toISOString().split('T')[0])
   const [planNextCatchup, setPlanNextCatchup] = useState(false)
@@ -61,8 +62,10 @@ export default function LogInteractionModal({ connection, isOpen, onClose, onSuc
     if (isOpen) {
       fetchLastInteraction()
       checkReflectionPriority()
+      // Reset interaction type to default when modal opens
+      setInteractionType(defaultInteractionType || 'call')
     }
-  }, [isOpen, connection.id])
+  }, [isOpen, connection.id, defaultInteractionType])
 
   // Lock body scroll when modal is open
   useEffect(() => {
