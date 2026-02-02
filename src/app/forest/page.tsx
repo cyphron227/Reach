@@ -457,6 +457,16 @@ export default function ForestPage() {
     fetchData()
   }, [fetchData])
 
+  // Lock body scroll when detail modal is open
+  useEffect(() => {
+    if (selectedConnection) {
+      document.body.style.overflow = 'hidden'
+    }
+    return () => {
+      document.body.style.overflow = ''
+    }
+  }, [selectedConnection])
+
   // Calculate stats for all connections
   const treeStats = useMemo(() => {
     const stats: Record<string, TreeStats> = {}
@@ -676,25 +686,6 @@ export default function ForestPage() {
             {/* Stats */}
             <div className="p-6">
               <TreeStatsDisplay stats={selectedStats} />
-
-              {/* Contact Info */}
-              {(selectedConnection.phone_raw || selectedConnection.email) && (
-                <div className="mt-4 p-3 bg-lavender-50 rounded-xl space-y-2">
-                  <div className="text-xs text-lavender-500 uppercase tracking-wide">Contact Info</div>
-                  {selectedConnection.phone_raw && (
-                    <div className="flex items-center gap-2 text-sm text-lavender-700">
-                      <span>📞</span>
-                      <span>{selectedConnection.phone_raw}</span>
-                    </div>
-                  )}
-                  {selectedConnection.email && (
-                    <div className="flex items-center gap-2 text-sm text-lavender-700">
-                      <span>📧</span>
-                      <span>{selectedConnection.email}</span>
-                    </div>
-                  )}
-                </div>
-              )}
 
               {/* Catch-up frequency */}
               <div className="mt-4 p-3 bg-lavender-50 rounded-xl">
