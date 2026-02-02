@@ -1,7 +1,5 @@
 'use client'
 
-import { useState } from 'react'
-import { createClient } from '@/lib/supabase/client'
 import { PendingIntent, getMethodLabel, dismissPendingIntent } from '@/lib/pendingIntents'
 
 interface PendingCatchupPromptProps {
@@ -15,19 +13,9 @@ export default function PendingCatchupPrompt({
   onRecordCatchup,
   onDismiss,
 }: PendingCatchupPromptProps) {
-  const [dismissing, setDismissing] = useState(false)
-  const supabase = createClient()
-
-  const handleDismiss = async () => {
-    setDismissing(true)
-    try {
-      await dismissPendingIntent(supabase, pendingIntent.intent.id)
-      onDismiss()
-    } catch (error) {
-      console.error('Failed to dismiss intent:', error)
-    } finally {
-      setDismissing(false)
-    }
+  const handleDismiss = () => {
+    dismissPendingIntent(pendingIntent.intent.id)
+    onDismiss()
   }
 
   const methodLabel = getMethodLabel(pendingIntent.intent.method)
@@ -61,10 +49,9 @@ export default function PendingCatchupPrompt({
         </button>
         <button
           onClick={handleDismiss}
-          disabled={dismissing}
-          className="py-2.5 px-4 bg-lavender-100 hover:bg-lavender-200 text-lavender-600 text-sm font-medium rounded-xl transition-colors disabled:opacity-50"
+          className="py-2.5 px-4 bg-lavender-100 hover:bg-lavender-200 text-lavender-600 text-sm font-medium rounded-xl transition-colors"
         >
-          {dismissing ? '...' : 'Skip'}
+          Skip
         </button>
       </div>
     </div>

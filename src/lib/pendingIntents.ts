@@ -1,9 +1,42 @@
 import { SupabaseClient } from '@supabase/supabase-js'
 import { CommunicationIntent, Connection, CommunicationMethod } from '@/types/database'
 
+const DISMISSED_INTENTS_KEY = 'ringur_dismissed_intents'
+
 export interface PendingIntent {
   intent: CommunicationIntent
   connection: Connection
+}
+
+/**
+ * Get the list of dismissed intent IDs from localStorage
+ */
+function getDismissedIntentIds(): string[] {
+  if (typeof window === 'undefined') return []
+  try {
+    const stored = localStorage.getItem(DISMISSED_INTENTS_KEY)
+    return stored ? JSON.parse(stored) : []
+  } catch {
+    return []
+  }
+}
+
+/**
+ * Add an intent ID to the dismissed list in localStorage
+ */
+function addDismissedIntentId(intentId: string): void {
+  if (typeof window === 'undefined') return
+  try {
+    const dismissed = getDismissedIntentIds()
+    if (!dismissed.includes(intentId)) {
+      dismissed.push(intentId)
+      // Keep only the last 100 dismissed intents to prevent unbounded growth
+      const trimmed = dismissed.slice(-100)
+      localStorage.setItem(DISMISSED_INTENTS_KEY, JSON.stringify(trimmed))
+    }
+  } catch {
+    // Ignore localStorage errors
+  }
 }
 
 /**
@@ -31,8 +64,16 @@ export async function checkPendingIntents(
     return []
   }
 
+  // Filter out dismissed intents
+  const dismissedIds = getDismissedIntentIds()
+  const activeIntents = intents.filter(i => !dismissedIds.includes(i.id))
+
+  if (activeIntents.length === 0) {
+    return []
+  }
+
   // Get unique connection IDs
-  const connectionIds = Array.from(new Set(intents.map(i => i.connection_id)))
+  const connectionIds = Array.from(new Set(activeIntents.map(i => i.connection_id)))
 
   // Fetch connections for these intents
   const { data: connections, error: connectionsError } = await supabase
@@ -49,7 +90,7 @@ export async function checkPendingIntents(
   // Check each intent to see if there's a follow-up interaction
   const pendingIntents: PendingIntent[] = []
 
-  for (const intent of intents) {
+  for (const intent of activeIntents) {
     // Check if there's an interaction for this connection after the intent was created
     const { data: followUpInteraction } = await supabase
       .from('interactions')
@@ -116,14 +157,8 @@ export function methodToInteractionType(method: CommunicationMethod): 'call' | '
 }
 
 /**
- * Dismiss a pending intent by deleting it from the database
+ * Dismiss a pending intent - stores in localStorage so it won't reappear
  */
-export async function dismissPendingIntent(
-  supabase: SupabaseClient,
-  intentId: string
-): Promise<void> {
-  await supabase
-    .from('communication_intents')
-    .delete()
-    .eq('id', intentId)
+export function dismissPendingIntent(intentId: string): void {
+  addDismissedIntentId(intentId)
 }
