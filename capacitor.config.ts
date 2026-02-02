@@ -5,8 +5,16 @@ const config: CapacitorConfig = {
   appName: 'Ringur',
   webDir: 'out',
   server: {
-    // Allow loading from the local file system
     androidScheme: 'https'
+  },
+  plugins: {
+    SplashScreen: {
+      launchShowDuration: 1500,          // 1.5s is plenty
+      launchAutoHide: true,
+      backgroundColor: '#0F2A1D',         // dark, calm, non-flashy
+      androidSplashResourceName: 'splash',
+      showSpinner: false
+    }
   }
 };
 
