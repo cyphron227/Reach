@@ -166,11 +166,14 @@ export default function ConnectionDetailModal({ connection, isOpen, onClose, onE
   return (
     <div
       className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-end sm:items-center justify-center z-50 p-4 overscroll-contain"
-      onClick={onClose}
+      onClick={(e) => {
+        if (e.target === e.currentTarget) {
+          onClose()
+        }
+      }}
     >
       <div
         className="bg-white rounded-2xl w-full max-w-md max-h-[90vh] shadow-xl flex flex-col overscroll-contain"
-        onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
         <div className="p-6 border-b border-lavender-100">
