@@ -1,8 +1,7 @@
 import { createClient } from '@supabase/supabase-js'
-import { createClient as createServerClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
 
-// CORS headers for Capacitor app
+// CORS headers for cross-origin requests
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Methods': 'DELETE, OPTIONS',
@@ -16,45 +15,26 @@ export async function OPTIONS() {
 
 export async function DELETE(request: NextRequest) {
   try {
-    let userId: string | undefined
-
-    // Check for Authorization header (from Capacitor app)
+    // Authorization header is required (token-based auth)
     const authHeader = request.headers.get('Authorization')
-    if (authHeader?.startsWith('Bearer ')) {
-      const token = authHeader.substring(7)
-
-      // Create admin client to verify the token
-      const supabaseAdmin = createClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.SUPABASE_SERVICE_ROLE_KEY!,
-        { auth: { autoRefreshToken: false, persistSession: false } }
-      )
-
-      // Verify the token and get the user
-      const { data: { user }, error } = await supabaseAdmin.auth.getUser(token)
-      if (error || !user) {
-        return NextResponse.json({ error: 'Invalid token' }, { status: 401, headers: corsHeaders })
-      }
-      userId = user.id
-    } else {
-      // Fall back to cookie-based auth (for web)
-      const supabase = await createServerClient()
-      const { data: { user } } = await supabase.auth.getUser()
-      userId = user?.id
+    if (!authHeader?.startsWith('Bearer ')) {
+      return NextResponse.json({ error: 'Authorization header required' }, { status: 401, headers: corsHeaders })
     }
 
-    if (!userId) {
-      return NextResponse.json({ error: 'Not authenticated' }, { status: 401, headers: corsHeaders })
-    }
+    const token = authHeader.substring(7)
 
-    const user = { id: userId }
-
-    // Create admin client to delete auth user (reuse if already created for token verification)
+    // Create admin client
     const supabaseAdmin = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.SUPABASE_SERVICE_ROLE_KEY!,
       { auth: { autoRefreshToken: false, persistSession: false } }
     )
+
+    // Verify the token and get the user
+    const { data: { user }, error } = await supabaseAdmin.auth.getUser(token)
+    if (error || !user) {
+      return NextResponse.json({ error: 'Invalid token' }, { status: 401, headers: corsHeaders })
+    }
 
     // Delete all user data in order (respecting foreign key constraints)
     // 1. Delete communication intents

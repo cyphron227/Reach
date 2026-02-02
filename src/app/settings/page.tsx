@@ -182,35 +182,40 @@ export default function SettingsPage() {
     setMessage(null)
 
     try {
+      // Get the access token to authenticate the request
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session?.access_token) {
+        throw new Error('Not authenticated')
+      }
+
       // Determine the API URL - use full URL for Capacitor, relative for web
       let apiUrl = '/api/delete-account'
-      const headers: Record<string, string> = {}
-
       if (isCapacitor()) {
-        // In Capacitor, we need to call the deployed API
         const deployedUrl = process.env.NEXT_PUBLIC_APP_URL
         if (!deployedUrl) {
           throw new Error('Account deletion is not available in the app yet. Please use the web version.')
         }
         apiUrl = `${deployedUrl}/api/delete-account`
-
-        // Get the access token to authenticate the request
-        const { data: { session } } = await supabase.auth.getSession()
-        if (!session?.access_token) {
-          throw new Error('Not authenticated')
-        }
-        headers['Authorization'] = `Bearer ${session.access_token}`
       }
 
       // Call the API route to delete account (requires admin privileges)
       const response = await fetch(apiUrl, {
         method: 'DELETE',
-        headers,
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`,
+        },
       })
 
       if (!response.ok) {
-        const data = await response.json()
-        throw new Error(data.error || 'Failed to delete account')
+        let errorMessage = 'Failed to delete account'
+        try {
+          const data = await response.json()
+          errorMessage = data.error || errorMessage
+        } catch {
+          // Response wasn't valid JSON
+          errorMessage = `Server error (${response.status})`
+        }
+        throw new Error(errorMessage)
       }
 
       // Sign out locally and redirect
