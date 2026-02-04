@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { Connection, Interaction, CatchupFrequency, InteractionType } from '@/types/database'
+import { useScrollLock } from '@/lib/useScrollLock'
 
 interface ConnectionDetailModalProps {
   connection: Connection
@@ -87,14 +88,7 @@ export default function ConnectionDetailModal({ connection, isOpen, onClose, onE
   }, [isOpen, connection.id])
 
   // Lock body scroll when modal is open
-  useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = 'hidden'
-    }
-    return () => {
-      document.body.style.overflow = ''
-    }
-  }, [isOpen])
+  useScrollLock(isOpen)
 
   const fetchInteractions = async () => {
     setLoading(true)

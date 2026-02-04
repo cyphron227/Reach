@@ -5,7 +5,15 @@ import { createClient } from '@/lib/supabase/client'
 import { CatchupFrequency } from '@/types/database'
 import { isCapacitor, pickContact, SelectedContact } from '@/lib/capacitor'
 import { parsePhone } from '@/lib/phone'
+import { useScrollLock } from '@/lib/useScrollLock'
 import ContactSelectionModal from './ContactSelectionModal'
+
+// Simple email validation
+function isValidEmail(email: string): boolean {
+  if (!email) return true // Empty is valid (optional field)
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+  return emailRegex.test(email)
+}
 
 interface AddConnectionModalProps {
   isOpen: boolean
@@ -58,14 +66,7 @@ export default function AddConnectionModal({ isOpen, onClose, onSuccess }: AddCo
   }, [isOpen, isNative])
 
   // Lock body scroll when modal is open
-  useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = 'hidden'
-    }
-    return () => {
-      document.body.style.overflow = ''
-    }
-  }, [isOpen])
+  useScrollLock(isOpen)
 
   const handleImportFromContacts = async () => {
     setError(null)
@@ -119,6 +120,14 @@ export default function AddConnectionModal({ isOpen, onClose, onSuccess }: AddCo
     e.preventDefault()
     setLoading(true)
     setError(null)
+
+    // Validate email format if provided
+    const emailTrimmed = email.trim()
+    if (emailTrimmed && !isValidEmail(emailTrimmed)) {
+      setError('Please enter a valid email address')
+      setLoading(false)
+      return
+    }
 
     try {
       const { data: { user } } = await supabase.auth.getUser()

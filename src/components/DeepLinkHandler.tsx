@@ -16,41 +16,53 @@ export function DeepLinkHandler() {
     if (!isCapacitor()) return
 
     let cleanup: (() => void) | undefined
+    let mounted = true
 
     const setupListener = async () => {
-      const { App } = await import('@capacitor/app')
-      const { Browser } = await import('@capacitor/browser')
+      try {
+        const { App } = await import('@capacitor/app')
+        const { Browser } = await import('@capacitor/browser')
 
-      const listener = await App.addListener('appUrlOpen', async (event) => {
-        // Close the browser that was opened for OAuth
-        try {
-          await Browser.close()
-        } catch {
-          // Browser may already be closed
+        // Check if component is still mounted before setting up listener
+        if (!mounted) return
+
+        const listener = await App.addListener('appUrlOpen', async (event) => {
+          // Close the browser that was opened for OAuth
+          try {
+            await Browser.close()
+          } catch {
+            // Browser may already be closed
+          }
+
+          // Parse the deep link URL
+          // Format: com.dangur.ringur://auth/callback?code=...
+          // Note: In this URL format, 'auth' becomes the host and '/callback' is the path
+          const url = new URL(event.url)
+          const fullPath = `${url.host || ''}${url.pathname || ''}`
+          const search = url.search || ''
+
+          if (fullPath.includes('auth/callback')) {
+            router.push(`/auth/callback${search}`)
+          } else if (fullPath.includes('auth/update-password')) {
+            router.push(`/auth/update-password${search}`)
+          }
+        })
+
+        cleanup = () => {
+          listener.remove()
         }
-
-        // Parse the deep link URL
-        // Format: com.dangur.ringur://auth/callback?code=...
-        // Note: In this URL format, 'auth' becomes the host and '/callback' is the path
-        const url = new URL(event.url)
-        const fullPath = `${url.host || ''}${url.pathname || ''}`
-        const search = url.search || ''
-
-        if (fullPath.includes('auth/callback')) {
-          router.push(`/auth/callback${search}`)
-        } else if (fullPath.includes('auth/update-password')) {
-          router.push(`/auth/update-password${search}`)
+      } catch (error) {
+        // Log error but don't crash - deep links will just not work
+        if (process.env.NODE_ENV === 'development') {
+          console.error('Failed to setup deep link handler:', error)
         }
-      })
-
-      cleanup = () => {
-        listener.remove()
       }
     }
 
     setupListener()
 
     return () => {
+      mounted = false
       cleanup?.()
     }
   }, [router])

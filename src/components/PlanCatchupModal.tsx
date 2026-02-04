@@ -1,8 +1,9 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { Connection } from '@/types/database'
+import { useScrollLock } from '@/lib/useScrollLock'
 
 interface PlanCatchupModalProps {
   connection: Connection
@@ -19,14 +20,7 @@ export default function PlanCatchupModal({ connection, isOpen, onClose, onSucces
   const supabase = createClient()
 
   // Lock body scroll when modal is open
-  useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = 'hidden'
-    }
-    return () => {
-      document.body.style.overflow = ''
-    }
-  }, [isOpen])
+  useScrollLock(isOpen)
 
   // Get suggested dates
   const today = new Date()

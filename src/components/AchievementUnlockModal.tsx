@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { AchievementDefinition } from '@/types/database'
+import { useScrollLock } from '@/lib/useScrollLock'
 
 interface AchievementUnlockModalProps {
   achievements: AchievementDefinition[]
@@ -28,14 +29,7 @@ export default function AchievementUnlockModal({
   }, [isOpen, achievements])
 
   // Lock body scroll when modal is open
-  useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = 'hidden'
-    }
-    return () => {
-      document.body.style.overflow = ''
-    }
-  }, [isOpen])
+  useScrollLock(isOpen)
 
   if (!isOpen || achievements.length === 0) return null
 

@@ -6,6 +6,7 @@ import { Connection, InteractionType, Interaction, AchievementDefinition } from 
 import { getWeekStartDate } from '@/lib/reflectionUtils'
 import { cancelConnectionNotification } from '@/lib/capacitor'
 import { updateDailyStreak } from '@/lib/streakUtils'
+import { useScrollLock } from '@/lib/useScrollLock'
 
 interface LogInteractionModalProps {
   connection: Connection
@@ -68,14 +69,7 @@ export default function LogInteractionModal({ connection, isOpen, onClose, onSuc
   }, [isOpen, connection.id, defaultInteractionType])
 
   // Lock body scroll when modal is open
-  useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = 'hidden'
-    }
-    return () => {
-      document.body.style.overflow = ''
-    }
-  }, [isOpen])
+  useScrollLock(isOpen)
 
   const checkReflectionPriority = async () => {
     const { data: { user } } = await supabase.auth.getUser()

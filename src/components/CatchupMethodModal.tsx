@@ -1,9 +1,10 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { Connection, CommunicationMethod } from '@/types/database'
 import { initiateCall, initiateWhatsApp, initiateText, initiateEmail } from '@/lib/capacitor'
+import { useScrollLock } from '@/lib/useScrollLock'
 
 interface CatchupMethodModalProps {
   connection: Connection
@@ -44,14 +45,7 @@ export default function CatchupMethodModal({
   const hasEmail = !!connection.email
 
   // Lock body scroll when modal is open
-  useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = 'hidden'
-    }
-    return () => {
-      document.body.style.overflow = ''
-    }
-  }, [isOpen])
+  useScrollLock(isOpen)
 
   const handleMethodSelect = async (method: CommunicationMethod) => {
     setLoading(method)

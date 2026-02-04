@@ -1,19 +1,33 @@
 import { createClient } from '@supabase/supabase-js'
 import { NextRequest, NextResponse } from 'next/server'
 
-// CORS headers for cross-origin requests
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Methods': 'DELETE, OPTIONS',
-  'Access-Control-Allow-Headers': 'Authorization, Content-Type',
+// Allowed origins for CORS (app domain + Capacitor)
+const ALLOWED_ORIGINS = [
+  process.env.NEXT_PUBLIC_APP_URL,
+  'capacitor://localhost',
+  'http://localhost',
+  'http://localhost:3000',
+].filter(Boolean) as string[]
+
+function getCorsHeaders(request: NextRequest) {
+  const origin = request.headers.get('origin')
+  const allowedOrigin = origin && ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0]
+
+  return {
+    'Access-Control-Allow-Origin': allowedOrigin || '',
+    'Access-Control-Allow-Methods': 'DELETE, OPTIONS',
+    'Access-Control-Allow-Headers': 'Authorization, Content-Type',
+  }
 }
 
 // Handle preflight requests
-export async function OPTIONS() {
-  return NextResponse.json({}, { headers: corsHeaders })
+export async function OPTIONS(request: NextRequest) {
+  return NextResponse.json({}, { headers: getCorsHeaders(request) })
 }
 
 export async function DELETE(request: NextRequest) {
+  const corsHeaders = getCorsHeaders(request)
+
   try {
     // Authorization header is required (token-based auth)
     const authHeader = request.headers.get('Authorization')

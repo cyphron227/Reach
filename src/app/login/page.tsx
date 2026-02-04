@@ -12,9 +12,20 @@ import { signInWithOAuth } from '@/lib/oauth'
 const EMAIL_RATE_LIMIT_SECONDS = 60
 const RATE_LIMIT_STORAGE_KEY = 'email_rate_limit'
 
+// Simple hash function to avoid storing plain-text email
+function simpleHash(str: string): string {
+  let hash = 0
+  for (let i = 0; i < str.length; i++) {
+    const char = str.charCodeAt(i)
+    hash = ((hash << 5) - hash) + char
+    hash = hash & hash
+  }
+  return hash.toString(36)
+}
+
 interface RateLimitData {
   lastEmailSent: number
-  email: string
+  emailHash: string
 }
 
 export default function LoginPage() {
@@ -39,7 +50,8 @@ export default function LoginPage() {
     }
 
     try {
-      const storedData = localStorage.getItem(RATE_LIMIT_STORAGE_KEY)
+      // Use sessionStorage to avoid persisting email data
+      const storedData = sessionStorage.getItem(RATE_LIMIT_STORAGE_KEY)
       if (!storedData) {
         setRateLimitSecondsRemaining(0)
         return
@@ -47,8 +59,8 @@ export default function LoginPage() {
 
       const rateLimitData: RateLimitData = JSON.parse(storedData)
 
-      // Check if the rate limit is for the same email
-      if (rateLimitData.email !== email) {
+      // Check if the rate limit is for the same email (using hash comparison)
+      if (rateLimitData.emailHash !== simpleHash(email.toLowerCase())) {
         setRateLimitSecondsRemaining(0)
         return
       }
@@ -86,9 +98,10 @@ export default function LoginPage() {
   const setRateLimit = (emailAddress: string) => {
     const rateLimitData: RateLimitData = {
       lastEmailSent: Date.now(),
-      email: emailAddress,
+      emailHash: simpleHash(emailAddress.toLowerCase()),
     }
-    localStorage.setItem(RATE_LIMIT_STORAGE_KEY, JSON.stringify(rateLimitData))
+    // Use sessionStorage to avoid persisting email data
+    sessionStorage.setItem(RATE_LIMIT_STORAGE_KEY, JSON.stringify(rateLimitData))
     setRateLimitSecondsRemaining(EMAIL_RATE_LIMIT_SECONDS)
   }
 

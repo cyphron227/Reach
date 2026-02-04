@@ -4,6 +4,14 @@ import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { Connection, CatchupFrequency } from '@/types/database'
 import { parsePhone } from '@/lib/phone'
+import { useScrollLock } from '@/lib/useScrollLock'
+
+// Simple email validation
+function isValidEmail(email: string): boolean {
+  if (!email) return true // Empty is valid (optional field)
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+  return emailRegex.test(email)
+}
 
 interface EditConnectionModalProps {
   connection: Connection
@@ -45,19 +53,20 @@ export default function EditConnectionModal({ connection, isOpen, onClose, onSuc
   }, [isOpen, connection])
 
   // Lock body scroll when modal is open
-  useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = 'hidden'
-    }
-    return () => {
-      document.body.style.overflow = ''
-    }
-  }, [isOpen])
+  useScrollLock(isOpen)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
     setError(null)
+
+    // Validate email format if provided
+    const emailTrimmed = email.trim()
+    if (emailTrimmed && !isValidEmail(emailTrimmed)) {
+      setError('Please enter a valid email address')
+      setLoading(false)
+      return
+    }
 
     try {
       // Parse and normalize phone number

@@ -1,7 +1,8 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { formatPhoneNumber } from '@/lib/capacitor'
+import { useScrollLock } from '@/lib/useScrollLock'
 
 interface ContactSelectionModalProps {
   isOpen: boolean
@@ -31,14 +32,7 @@ export default function ContactSelectionModal({
   const showEmailSelection = emails.length > 1
 
   // Lock body scroll when modal is open
-  useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = 'hidden'
-    }
-    return () => {
-      document.body.style.overflow = ''
-    }
-  }, [isOpen])
+  useScrollLock(isOpen)
 
   const handleContinue = () => {
     onSelect(
