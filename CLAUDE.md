@@ -178,9 +178,41 @@ Required URLs:
 - `https://ringur.dan-gur.com/auth/callback/` (OAuth login)
 - `com.dangur.ringur://auth/callback` (mobile app - NO trailing slash)
 
+## Deployment
+
+### Web (Vercel)
+Push to `main` branch - Vercel auto-deploys to `ringur.dan-gur.com`
+
+### Android (Capacitor)
+Capacitor requires a **static export** - it can't use Next.js server features.
+
+```bash
+# 1. Build static export (outputs to /out directory)
+STATIC_EXPORT=true npm run build
+
+# 2. Sync to Android project
+npx cap sync android
+
+# 3. Open in Android Studio
+npx cap open android
+
+# 4. Build APK/AAB from Android Studio
+```
+
+**Why static export?**
+- Capacitor serves files from the device filesystem, not a server
+- `next.config.mjs` conditionally enables `output: 'export'` when `STATIC_EXPORT=true`
+- The `webDir: 'out'` in `capacitor.config.ts` points to the export directory
+
+**Limitations of static export:**
+- No API routes (`/api/*`) - use Supabase directly from client
+- No server components - all pages must be client components
+- No middleware - auth checks happen client-side
+
 ## Testing Checklist
 Before submitting changes:
-- [ ] `npm run build` passes
+- [ ] `npm run build` passes (web)
+- [ ] `STATIC_EXPORT=true npm run build` passes (mobile)
 - [ ] No TypeScript errors
 - [ ] Test on web and mobile (Capacitor)
 - [ ] Database types updated if schema changed
