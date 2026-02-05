@@ -25,11 +25,15 @@ export default function UpdatePasswordPage() {
     const handleRecovery = async () => {
       // Check for hash fragment (Supabase sends tokens in URL hash for recovery)
       const hash = window.location.hash
+      console.log('[UpdatePassword] Hash:', hash ? hash.substring(0, 50) + '...' : 'none')
+
       if (hash) {
         const hashParams = new URLSearchParams(hash.substring(1))
         const accessToken = hashParams.get('access_token')
         const refreshToken = hashParams.get('refresh_token')
         const type = hashParams.get('type')
+
+        console.log('[UpdatePassword] Hash params - type:', type, 'hasAccessToken:', !!accessToken)
 
         if (accessToken && type === 'recovery') {
           // Set the session from the recovery tokens
@@ -39,11 +43,13 @@ export default function UpdatePasswordPage() {
           })
 
           if (error) {
+            console.error('[UpdatePassword] setSession error:', error.message)
             setLinkExpired(true)
             setChecking(false)
             return
           }
 
+          console.log('[UpdatePassword] Session set from hash tokens')
           // Clear the hash from URL for cleaner look
           window.history.replaceState(null, '', window.location.pathname)
           setChecking(false)
@@ -64,6 +70,7 @@ export default function UpdatePasswordPage() {
 
       // Also check immediately for existing session
       const { data: { session } } = await supabase.auth.getSession()
+      console.log('[UpdatePassword] Checking session:', !!session, session?.user?.email)
       if (session) {
         setChecking(false)
         return

@@ -36,18 +36,14 @@ export function getAuthRedirectUrl(path: string): string {
 
 /**
  * Get the redirect URL for password reset
- * Note: We redirect to /auth/callback/ (not /auth/update-password) because Supabase
- * uses PKCE flow - the callback page exchanges the code for a session, then
- * detects the recovery flow and redirects to /auth/update-password
- *
- * IMPORTANT: We include type=recovery in the URL because Supabase doesn't pass it through
- * after the PKCE code exchange. The AMR claim also isn't reliably available.
+ * We redirect directly to /auth/update-password/ - Supabase will put the tokens
+ * in the URL hash (#access_token=...&type=recovery), and the page handles setting
+ * the session from there. This is simpler than using the PKCE callback flow.
  *
  * IMPORTANT: Trailing slash required because next.config.mjs has trailingSlash: true
- * Without it, Next.js redirects from /auth/callback to /auth/callback/ and loses query params
  */
 export function getPasswordResetRedirectUrl(): string {
-  return getAuthRedirectUrl('/auth/callback/?type=recovery')
+  return getAuthRedirectUrl('/auth/update-password/')
 }
 
 /**

@@ -53,7 +53,11 @@ export async function GET(request: NextRequest) {
       return NextResponse.redirect(`${origin}/login/?error=${encodeURIComponent(exchangeError.message)}`)
     }
 
+    // Log what cookies are being set
+    const cookieHeader = response.headers.get('set-cookie')
     console.log('[AuthCallback Route] Session established, redirecting to:', redirectUrl)
+    console.log('[AuthCallback Route] Set-Cookie header:', cookieHeader?.substring(0, 200))
+
     return response
   }
 
