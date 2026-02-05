@@ -2,14 +2,30 @@
  * Feature Flags Utility
  *
  * Provides client-side feature flag checking for gradual rollout
- * of Habit Engine v1 features.
+ * of new features.
  *
- * Flags default to OFF, so if the database is unavailable or there's
- * an error, the app falls back to v1 behavior.
+ * NOTE: Habit Engine v1 features are now permanently enabled (main branch).
+ * The following flags always return true:
+ * - habit_engine_v1
+ * - relationship_strength_v2
+ * - ring_structure
+ * - escalation_ladder
+ * - weekly_pattern_reviews
+ * - replacement_mechanism
  */
 
 import { createClient } from '@/lib/supabase/client'
 import { FeatureFlag, FeatureFlagId } from '@/types/habitEngine'
+
+// Flags that are permanently enabled (no longer configurable)
+const ALWAYS_ENABLED_FLAGS: Set<FeatureFlagId> = new Set([
+  'habit_engine_v1',
+  'relationship_strength_v2',
+  'ring_structure',
+  'escalation_ladder',
+  'weekly_pattern_reviews',
+  'replacement_mechanism',
+])
 
 // Cache for feature flags to avoid repeated database calls
 let flagsCache: Map<string, FeatureFlag> | null = null
@@ -79,6 +95,11 @@ export async function isFeatureEnabled(
   flagId: FeatureFlagId,
   userId?: string
 ): Promise<boolean> {
+  // Permanently enabled flags - always return true
+  if (ALWAYS_ENABLED_FLAGS.has(flagId)) {
+    return true
+  }
+
   try {
     const flags = await fetchFeatureFlags()
     const flag = flags.get(flagId)
@@ -130,6 +151,12 @@ export async function checkFeatureFlags(
     const flags = await fetchFeatureFlags()
 
     for (const flagId of flagIds) {
+      // Permanently enabled flags - always return true
+      if (ALWAYS_ENABLED_FLAGS.has(flagId)) {
+        result[flagId] = true
+        continue
+      }
+
       const flag = flags.get(flagId)
 
       if (!flag) {
@@ -159,9 +186,9 @@ export async function checkFeatureFlags(
     }
   } catch (err) {
     console.error('Error checking feature flags:', err)
-    // Default all to OFF on error
+    // Default all to OFF on error, except permanently enabled ones
     for (const flagId of flagIds) {
-      result[flagId] = false
+      result[flagId] = ALWAYS_ENABLED_FLAGS.has(flagId)
     }
   }
 
@@ -185,16 +212,17 @@ function hashUserId(userId: string): number {
 
 /**
  * React hook helper - check if habit engine is enabled
- * Returns null while loading, then the actual value
+ * NOTE: Habit engine is now permanently enabled
  */
-export async function isHabitEngineEnabled(userId?: string): Promise<boolean> {
-  return isFeatureEnabled('habit_engine_v1', userId)
+export async function isHabitEngineEnabled(_userId?: string): Promise<boolean> {
+  return true // Permanently enabled
 }
 
 /**
  * Get all Habit Engine v1 related flags at once
+ * NOTE: All these flags are now permanently enabled
  */
-export async function getHabitEngineFlags(userId?: string): Promise<{
+export async function getHabitEngineFlags(_userId?: string): Promise<{
   habitEngine: boolean
   strengthV2: boolean
   ringStructure: boolean
@@ -202,24 +230,13 @@ export async function getHabitEngineFlags(userId?: string): Promise<{
   patternReviews: boolean
   replacementMechanism: boolean
 }> {
-  const flags = await checkFeatureFlags(
-    [
-      'habit_engine_v1',
-      'relationship_strength_v2',
-      'ring_structure',
-      'escalation_ladder',
-      'weekly_pattern_reviews',
-      'replacement_mechanism',
-    ],
-    userId
-  )
-
+  // All habit engine flags are now permanently enabled
   return {
-    habitEngine: flags.habit_engine_v1,
-    strengthV2: flags.relationship_strength_v2,
-    ringStructure: flags.ring_structure,
-    escalationLadder: flags.escalation_ladder,
-    patternReviews: flags.weekly_pattern_reviews,
-    replacementMechanism: flags.replacement_mechanism,
+    habitEngine: true,
+    strengthV2: true,
+    ringStructure: true,
+    escalationLadder: true,
+    patternReviews: true,
+    replacementMechanism: true,
   }
 }
