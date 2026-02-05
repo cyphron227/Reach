@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { createServerClient } from '@supabase/ssr'
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
@@ -21,29 +21,40 @@ export async function GET(request: NextRequest) {
   }
 
   if (code) {
-    const supabase = await createClient()
-    const { data, error: exchangeError } = await supabase.auth.exchangeCodeForSession(code)
+    // Create a response that we'll add cookies to
+    const redirectUrl = type === 'recovery'
+      ? `${origin}/auth/update-password/`
+      : `${origin}/`
+
+    const response = NextResponse.redirect(redirectUrl)
+
+    // Create Supabase client that will set cookies on our response
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          getAll() {
+            return request.cookies.getAll()
+          },
+          setAll(cookiesToSet) {
+            cookiesToSet.forEach(({ name, value, options }) => {
+              response.cookies.set(name, value, options)
+            })
+          },
+        },
+      }
+    )
+
+    const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(code)
 
     if (exchangeError) {
       console.error('[AuthCallback Route] Exchange error:', exchangeError.message)
       return NextResponse.redirect(`${origin}/login/?error=${encodeURIComponent(exchangeError.message)}`)
     }
 
-    console.log('[AuthCallback Route] Session established')
-
-    // Check if this is a password recovery flow
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const userAmr = (data.session?.user as any)?.amr as Array<{ method: string }> | undefined
-    const isRecovery = type === 'recovery' || userAmr?.some(m => m.method === 'recovery')
-
-    console.log('[AuthCallback Route] isRecovery:', isRecovery, 'AMR:', userAmr)
-
-    if (isRecovery) {
-      // Trailing slash required due to next.config.mjs trailingSlash: true
-      return NextResponse.redirect(`${origin}/auth/update-password/`)
-    }
-
-    return NextResponse.redirect(`${origin}/`)
+    console.log('[AuthCallback Route] Session established, redirecting to:', redirectUrl)
+    return response
   }
 
   // No code provided
