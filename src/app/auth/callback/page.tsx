@@ -17,18 +17,25 @@ function AuthCallbackContent() {
       const errorParam = searchParams.get('error')
       const errorDescription = searchParams.get('error_description')
 
+      // Debug logging
+      console.log('[AuthCallback] URL params:', { code: code?.slice(0, 10) + '...', type, errorParam })
+
       if (errorParam) {
         setError(errorDescription || errorParam)
         return
       }
 
       if (code) {
+        console.log('[AuthCallback] Exchanging code for session...')
         const { data, error: exchangeError } = await supabase.auth.exchangeCodeForSession(code)
 
         if (exchangeError) {
+          console.error('[AuthCallback] Exchange error:', exchangeError.message)
           setError(exchangeError.message)
           return
         }
+
+        console.log('[AuthCallback] Session established, checking AMR...')
 
         // Wait a moment for session to persist before redirecting
         await new Promise(resolve => setTimeout(resolve, 100))
@@ -37,14 +44,20 @@ function AuthCallbackContent() {
         // Either from URL param or from the session's amr (authentication methods reference)
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const userAmr = (data.session?.user as any)?.amr as Array<{ method: string }> | undefined
+        console.log('[AuthCallback] AMR:', userAmr, 'type param:', type)
+
         const isRecovery = type === 'recovery' ||
           userAmr?.some(m => m.method === 'recovery')
 
+        console.log('[AuthCallback] isRecovery:', isRecovery)
+
         if (isRecovery) {
+          console.log('[AuthCallback] Redirecting to update-password')
           router.replace('/auth/update-password')
           return
         }
 
+        console.log('[AuthCallback] Redirecting to home')
         router.replace('/')
         return
       }

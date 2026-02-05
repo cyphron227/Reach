@@ -190,8 +190,11 @@ export default function LoginPage() {
         return
       }
 
+      const redirectUrl = getPasswordResetRedirectUrl()
+      console.log('[PasswordReset] Redirect URL:', redirectUrl)
+
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: getPasswordResetRedirectUrl(),
+        redirectTo: redirectUrl,
       })
 
       if (error) {

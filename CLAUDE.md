@@ -157,11 +157,34 @@ WHERE column_name IS NULL;
 - PKCE flow with code exchange
 - Session stored in cookies via SSR middleware
 
-### Password Reset
-1. User requests reset → Supabase sends email
-2. Email links to `/auth/callback?code=xxx&type=recovery`
-3. Callback exchanges code, detects recovery via AMR
-4. Redirects to `/auth/update-password`
+### Password Reset (PKCE Flow)
+1. User requests reset via `resetPasswordForEmail()` with `redirectTo: /auth/callback`
+2. Supabase sends email with link to `https://xxx.supabase.co/auth/v1/verify?...`
+3. Supabase verifies token and redirects to `redirectTo` URL with `?code=xxx`
+4. `/auth/callback` exchanges code for session
+5. Callback detects recovery via:
+   - URL param `type=recovery` OR
+   - Session AMR containing `{ method: 'recovery' }`
+6. Redirects to `/auth/update-password`
+
+### CRITICAL: Supabase Dashboard Configuration
+For password reset to work, these URLs MUST be whitelisted in:
+**Supabase Dashboard → Authentication → URL Configuration → Redirect URLs**
+
+Required URLs:
+- `https://www.dan-gur.com/auth/callback`
+- `com.dangur.ringur://auth/callback`
+
+If not whitelisted, Supabase falls back to Site URL (root), causing issues.
+
+### Fallback Handling
+If auth codes land on root URL (`/?code=xxx`), the home page catches them and redirects to `/auth/callback`. This is in `src/app/page.tsx`:
+```typescript
+const authCode = searchParams.get('code')
+if (authCode) {
+  router.replace(`/auth/callback?code=${authCode}&type=${type}`)
+}
+```
 
 ## Testing Checklist
 Before submitting changes:
