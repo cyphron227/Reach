@@ -61,11 +61,12 @@ const SIZE_CLASSES = {
  */
 export default function RelationshipStrengthBadge({
   strength,
-  daysSinceAction,
+  daysSinceAction: _daysSinceAction,
   showLabel = true,
   size = 'md',
   className = '',
 }: RelationshipStrengthBadgeProps) {
+  void _daysSinceAction // Reserved for future tooltip enhancement
   const config = STRENGTH_CONFIG[strength]
 
   return (

@@ -29,12 +29,13 @@ interface ReplacementFlowProps {
 export default function ReplacementFlow({
   isOpen,
   connectionName,
-  connectionId,
+  connectionId: _connectionId,
   daysSinceAction,
   currentStrength,
   onSelect,
   onClose,
 }: ReplacementFlowProps) {
+  void _connectionId // Reserved for API call when implementing backend
   const [selectedAction, setSelectedAction] = useState<ReplacementAction | null>(null)
   const [confirming, setConfirming] = useState(false)
 

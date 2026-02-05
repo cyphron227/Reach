@@ -52,6 +52,7 @@ function formatRelativeDate(dateString: string): string {
 // Helper to update daily habit log aggregation
 // Note: Uses 'any' type for new tables not yet in Supabase type definitions
 async function updateDailyHabitLog(userId: string, date: string) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const supabase = createClient() as unknown as { from: (table: string) => any }
 
   // Get all actions for this day
@@ -210,6 +211,7 @@ export default function LogInteractionModal({ connection, isOpen, onClose, onSuc
       // If habit engine is enabled, also log to daily_actions table
       // Note: Uses type assertion for new table not yet in Supabase type definitions
       if (habitEngineEnabled && interactionData) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const supabaseAny = supabase as unknown as { from: (table: string) => any }
         const { error: dailyActionError } = await supabaseAny
           .from('daily_actions')

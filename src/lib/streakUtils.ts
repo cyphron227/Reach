@@ -327,7 +327,19 @@ export function getStreakStatusMessage(streak: UserStreak): string {
 // Habit Engine v2 Streak Functions
 // ============================================================
 
-import { DailyHabitLog, VALID_DAY_THRESHOLD } from '@/types/habitEngine'
+import { VALID_DAY_THRESHOLD } from '@/types/habitEngine'
+
+// Type for streak with v2 fields (not yet in generated types)
+interface StreakWithV2 extends UserStreak {
+  valid_days_streak_v2?: number
+  longest_valid_days_v2?: number
+}
+
+// Type for habit log query result
+interface HabitLogRecord {
+  log_date: string
+  is_valid_day: boolean
+}
 
 /**
  * Update the v2 valid days streak based on habit log
@@ -339,13 +351,11 @@ export async function updateValidDaysStreakV2(
   logDate: string,
   isValidDay: boolean
 ): Promise<{ validDaysStreak: number; longestValidDays: number }> {
-  const streak = await getOrCreateUserStreak(supabase, userId)
-  const today = getToday()
-  const yesterday = getYesterday()
+  const streak = await getOrCreateUserStreak(supabase, userId) as StreakWithV2
 
   // Get current v2 streak values (default to 0 if not set)
-  let currentValidDaysStreak = (streak as any).valid_days_streak_v2 || 0
-  let longestValidDays = (streak as any).longest_valid_days_v2 || 0
+  let currentValidDaysStreak = streak.valid_days_streak_v2 || 0
+  let longestValidDays = streak.longest_valid_days_v2 || 0
 
   if (!isValidDay) {
     // Not a valid day - don't update streak
@@ -353,14 +363,15 @@ export async function updateValidDaysStreakV2(
   }
 
   // Check if this is consecutive with previous valid day
-  const { data: previousLog } = await (supabase as any)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: previousLog } = await (supabase as unknown as { from: (t: string) => any })
     .from('daily_habit_log')
     .select('log_date, is_valid_day')
     .eq('user_id', userId)
     .lt('log_date', logDate)
     .order('log_date', { ascending: false })
     .limit(1)
-    .single()
+    .single() as { data: HabitLogRecord | null }
 
   if (!previousLog) {
     // First valid day ever
@@ -410,18 +421,20 @@ export async function getValidDaysStreakV2(
     .single()
 
   // Get the last valid day date
-  const { data: lastValidLog } = await (supabase as any)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: lastValidLog } = await (supabase as unknown as { from: (t: string) => any })
     .from('daily_habit_log')
     .select('log_date')
     .eq('user_id', userId)
     .eq('is_valid_day', true)
     .order('log_date', { ascending: false })
     .limit(1)
-    .single()
+    .single() as { data: { log_date: string } | null }
 
+  const streakData = streak as StreakWithV2 | null
   return {
-    validDaysStreak: (streak as any)?.valid_days_streak_v2 || 0,
-    longestValidDays: (streak as any)?.longest_valid_days_v2 || 0,
+    validDaysStreak: streakData?.valid_days_streak_v2 || 0,
+    longestValidDays: streakData?.longest_valid_days_v2 || 0,
     lastValidDate: lastValidLog?.log_date || null,
   }
 }
@@ -491,7 +504,8 @@ export async function getWeeklyValidDaysCount(
   weekAgo.setDate(weekAgo.getDate() - 7)
   const weekAgoStr = weekAgo.toISOString().split('T')[0]
 
-  const { data, count } = await (supabase as any)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { count } = await (supabase as unknown as { from: (t: string) => any })
     .from('daily_habit_log')
     .select('*', { count: 'exact', head: true })
     .eq('user_id', userId)

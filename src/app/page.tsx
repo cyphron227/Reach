@@ -4,7 +4,7 @@ export const dynamic = 'force-dynamic'
 
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { Connection, User, UserStreak, AchievementDefinition, DailyHabitLog, ConnectionHealthV2, RelationshipStrength, RingTier } from '@/types/database'
+import { Connection, User, UserStreak, AchievementDefinition, DailyHabitLog, ConnectionHealthV2 } from '@/types/database'
 import Greeting from '@/components/Greeting'
 import ConnectionCard from '@/components/ConnectionCard'
 import LogInteractionModal from '@/components/LogInteractionModal'

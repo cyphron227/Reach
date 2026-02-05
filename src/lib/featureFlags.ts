@@ -39,6 +39,7 @@ async function fetchFeatureFlags(): Promise<Map<string, FeatureFlag>> {
 
   try {
     // Note: Uses type assertion for new table not yet in Supabase type definitions
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const supabase = createClient() as unknown as { from: (table: string) => any }
     const { data, error } = await supabase.from('feature_flags').select('*')
 

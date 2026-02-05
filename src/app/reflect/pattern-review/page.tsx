@@ -66,7 +66,8 @@ export default function PatternReviewPage() {
     setConnections(connectionsData || [])
 
     // Fetch connection health v2
-    const supabaseAny = supabase as any
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const supabaseAny = supabase as unknown as { from: (t: string) => any }
     const { data: healthData } = await supabaseAny
       .from('connection_health_v2')
       .select('*')
@@ -169,8 +170,9 @@ export default function PatternReviewPage() {
     weekStart.setDate(weekStart.getDate() - weekStart.getDay())
     const weekStartStr = weekStart.toISOString().split('T')[0]
 
-    const supabaseAny = supabase as any
-    await supabaseAny.from('weekly_pattern_reviews').upsert({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const supabaseAny2 = supabase as unknown as { from: (t: string) => any }
+    await supabaseAny2.from('weekly_pattern_reviews').upsert({
       user_id: user.id,
       week_start_date: weekStartStr,
       depth_score: weeklyPattern.depth_score,
