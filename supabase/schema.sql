@@ -15,6 +15,7 @@ create table public.users (
   id uuid references auth.users on delete cascade primary key,
   email text not null,
   full_name text,
+  onboarding_completed_at timestamp with time zone, -- NULL = onboarding not completed
   created_at timestamp with time zone default timezone('utc'::text, now()) not null,
   updated_at timestamp with time zone default timezone('utc'::text, now()) not null
 );

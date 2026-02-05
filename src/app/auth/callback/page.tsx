@@ -23,15 +23,24 @@ function AuthCallbackContent() {
       }
 
       if (code) {
-        const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(code)
+        const { data, error: exchangeError } = await supabase.auth.exchangeCodeForSession(code)
 
         if (exchangeError) {
           setError(exchangeError.message)
           return
         }
 
+        // Wait a moment for session to persist before redirecting
+        await new Promise(resolve => setTimeout(resolve, 100))
+
         // Check if this is a password recovery flow
-        if (type === 'recovery') {
+        // Either from URL param or from the session's amr (authentication methods reference)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const userAmr = (data.session?.user as any)?.amr as Array<{ method: string }> | undefined
+        const isRecovery = type === 'recovery' ||
+          userAmr?.some(m => m.method === 'recovery')
+
+        if (isRecovery) {
           router.replace('/auth/update-password')
           return
         }

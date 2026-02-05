@@ -2,7 +2,8 @@
 
 export const dynamic = 'force-dynamic'
 
-import { useState, useEffect, useCallback, useRef, useMemo } from 'react'
+import { useState, useEffect, useCallback, useRef, useMemo, Suspense } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { Connection, User, UserStreak, AchievementDefinition, DailyHabitLog, ConnectionHealthV2 } from '@/types/database'
 import Greeting from '@/components/Greeting'
@@ -85,7 +86,7 @@ function calculatePriorityScore(connection: Connection): number {
   return daysUntilDue
 }
 
-export default function TodayPage() {
+function TodayPageContent() {
   const [user, setUser] = useState<User | null>(null)
   const [connections, setConnections] = useState<Connection[]>([])
   const [lastMemories, setLastMemories] = useState<Record<string, string>>({})
@@ -115,6 +116,23 @@ export default function TodayPage() {
 
   const supabase = createClient()
   const router = useRouter()
+  const searchParams = useSearchParams()
+
+  // Check synchronously if we have an auth code to handle
+  const authCode = searchParams.get('code')
+  const hasAuthCode = !!authCode
+
+  // Handle auth codes that land on home page (fallback for misconfigured redirects)
+  // This MUST run before any other effects that might redirect
+  useEffect(() => {
+    if (authCode) {
+      // Preserve any other params like type=recovery
+      const type = searchParams.get('type')
+      const params = new URLSearchParams({ code: authCode })
+      if (type) params.set('type', type)
+      router.replace(`/auth/callback?${params.toString()}`)
+    }
+  }, [authCode, searchParams, router])
 
   // Track scroll position for shrinking header
   useEffect(() => {
@@ -158,6 +176,9 @@ export default function TodayPage() {
   }, [notificationConnectionId, connections])
 
   const fetchUser = useCallback(async () => {
+    // Don't redirect if we're handling an auth code
+    if (hasAuthCode) return null
+
     const { data: { user: authUser } } = await supabase.auth.getUser()
     if (!authUser) {
       router.push('/login')
@@ -170,8 +191,14 @@ export default function TodayPage() {
       .eq('id', authUser.id)
       .single()
 
+    // Check if onboarding is complete - redirect if not
+    if (data && !data.onboarding_completed_at) {
+      router.push('/onboarding')
+      return null
+    }
+
     return data
-  }, [supabase, router])
+  }, [supabase, router, hasAuthCode])
 
   const fetchConnections = useCallback(async (): Promise<Connection[]> => {
     const { data: { user: authUser } } = await supabase.auth.getUser()
@@ -854,5 +881,17 @@ export default function TodayPage() {
         </div>
       )}
     </main>
+  )
+}
+
+export default function TodayPage() {
+  return (
+    <Suspense fallback={
+      <main className="min-h-screen bg-lavender-50 flex items-center justify-center">
+        <div className="text-lavender-400">Loading...</div>
+      </main>
+    }>
+      <TodayPageContent />
+    </Suspense>
   )
 }

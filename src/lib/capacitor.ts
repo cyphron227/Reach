@@ -36,9 +36,12 @@ export function getAuthRedirectUrl(path: string): string {
 
 /**
  * Get the redirect URL for password reset
+ * Note: We redirect to /auth/callback (not /auth/update-password) because Supabase
+ * uses PKCE flow - the callback page exchanges the code for a session, then
+ * detects the recovery flow and redirects to /auth/update-password
  */
 export function getPasswordResetRedirectUrl(): string {
-  return getAuthRedirectUrl('/auth/update-password')
+  return getAuthRedirectUrl('/auth/callback')
 }
 
 /**

@@ -19,6 +19,9 @@ export default function UpdatePasswordPage() {
   const supabase = createClient()
 
   useEffect(() => {
+    let timeoutId: NodeJS.Timeout | null = null
+    let unsubscribe: (() => void) | null = null
+
     const handleRecovery = async () => {
       // Check for hash fragment (Supabase sends tokens in URL hash for recovery)
       const hash = window.location.hash
@@ -48,17 +51,37 @@ export default function UpdatePasswordPage() {
         }
       }
 
-      // No hash fragment, check if user has a valid session
+      // No hash fragment - session may have been set by auth callback
+      // Use onAuthStateChange to properly detect the session
+      const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+        if (session) {
+          // Session found, allow password update
+          setChecking(false)
+          if (timeoutId) clearTimeout(timeoutId)
+        }
+      })
+      unsubscribe = () => subscription.unsubscribe()
+
+      // Also check immediately for existing session
       const { data: { session } } = await supabase.auth.getSession()
-      if (!session) {
-        // No session and no recovery token, redirect to login
-        router.push('/login')
+      if (session) {
+        setChecking(false)
         return
       }
-      setChecking(false)
+
+      // Give it a few seconds for session to propagate from callback
+      timeoutId = setTimeout(() => {
+        // Still no session after waiting, redirect to login
+        router.push('/login')
+      }, 3000)
     }
 
     handleRecovery()
+
+    return () => {
+      if (timeoutId) clearTimeout(timeoutId)
+      if (unsubscribe) unsubscribe()
+    }
   }, [supabase, router])
 
   const handleUpdatePassword = async (e: React.FormEvent) => {
