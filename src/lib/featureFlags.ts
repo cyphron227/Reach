@@ -44,7 +44,7 @@ async function fetchFeatureFlags(): Promise<Map<string, FeatureFlag>> {
     const { data, error } = await supabase.from('feature_flags').select('*')
 
     if (error) {
-      console.error('Error fetching feature flags:', error)
+      console.error('[FeatureFlags] Error fetching feature flags:', error)
       // Return empty map on error - all flags will default to OFF
       return new Map()
     }
@@ -58,7 +58,7 @@ async function fetchFeatureFlags(): Promise<Map<string, FeatureFlag>> {
 
     return flagsCache
   } catch (err) {
-    console.error('Failed to fetch feature flags:', err)
+    console.error('[FeatureFlags] Failed to fetch feature flags:', err)
     return new Map()
   }
 }
@@ -111,7 +111,7 @@ export async function isFeatureEnabled(
 
     return false
   } catch (err) {
-    console.error('Error checking feature flag:', err)
+    console.error('[FeatureFlags] Error checking feature flag:', err)
     return false // Default to OFF on error
   }
 }
