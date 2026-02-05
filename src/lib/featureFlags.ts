@@ -18,7 +18,7 @@ import { createClient } from '@/lib/supabase/client'
 import { FeatureFlag, FeatureFlagId } from '@/types/habitEngine'
 
 // Flags that are permanently enabled (no longer configurable)
-const ALWAYS_ENABLED_FLAGS: Set<FeatureFlagId> = new Set([
+const ALWAYS_ENABLED_FLAGS = new Set<FeatureFlagId>([
   'habit_engine_v1',
   'relationship_strength_v2',
   'ring_structure',
@@ -214,7 +214,8 @@ function hashUserId(userId: string): number {
  * React hook helper - check if habit engine is enabled
  * NOTE: Habit engine is now permanently enabled
  */
-export async function isHabitEngineEnabled(_userId?: string): Promise<boolean> {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export async function isHabitEngineEnabled(userId?: string): Promise<boolean> {
   return true // Permanently enabled
 }
 
@@ -222,7 +223,8 @@ export async function isHabitEngineEnabled(_userId?: string): Promise<boolean> {
  * Get all Habit Engine v1 related flags at once
  * NOTE: All these flags are now permanently enabled
  */
-export async function getHabitEngineFlags(_userId?: string): Promise<{
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export async function getHabitEngineFlags(userId?: string): Promise<{
   habitEngine: boolean
   strengthV2: boolean
   ringStructure: boolean

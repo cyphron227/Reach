@@ -5,7 +5,9 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "prebuild:capacitor": "node -e \"require('fs').renameSync('src/app/auth/callback/route.ts', 'src/app/auth/callback/route.ts.bak')\" 2>nul || true",
     "build:capacitor": "cross-env STATIC_EXPORT=true next build",
+    "postbuild:capacitor": "node -e \"require('fs').renameSync('src/app/auth/callback/route.ts.bak', 'src/app/auth/callback/route.ts')\" 2>nul || true",
     "start": "next start",
     "lint": "next lint",
     "deploy": "git push && npm run build:capacitor && npx cap sync android"
