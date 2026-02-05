@@ -4,19 +4,33 @@ import { NextRequest, NextResponse } from 'next/server'
 // Allowed origins for CORS (app domain + Capacitor)
 const ALLOWED_ORIGINS = [
   process.env.NEXT_PUBLIC_APP_URL,
-  'capacitor://localhost',
-  'http://localhost',
-  'http://localhost:3000',
+  'capacitor://localhost',  // iOS Capacitor
+  'http://localhost',       // Android Capacitor
+  'https://localhost',      // Android Capacitor (secure)
+  'http://localhost:3000',  // Local dev
 ].filter(Boolean) as string[]
 
 function getCorsHeaders(request: NextRequest) {
   const origin = request.headers.get('origin')
-  const allowedOrigin = origin && ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0]
+
+  // For Capacitor apps, origin may be null or a localhost variant
+  // If no origin or origin matches allowed list, permit the request
+  let allowedOrigin: string
+  if (!origin) {
+    // No origin header - likely a native app request, allow it
+    allowedOrigin = '*'
+  } else if (ALLOWED_ORIGINS.includes(origin)) {
+    allowedOrigin = origin
+  } else {
+    // Default to the app URL for unknown origins
+    allowedOrigin = ALLOWED_ORIGINS[0] || ''
+  }
 
   return {
-    'Access-Control-Allow-Origin': allowedOrigin || '',
+    'Access-Control-Allow-Origin': allowedOrigin,
     'Access-Control-Allow-Methods': 'DELETE, OPTIONS',
     'Access-Control-Allow-Headers': 'Authorization, Content-Type',
+    'Access-Control-Allow-Credentials': 'true',
   }
 }
 
