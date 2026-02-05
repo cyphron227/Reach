@@ -157,40 +157,26 @@ WHERE column_name IS NULL;
 - PKCE flow with code exchange
 - Session stored in cookies via SSR middleware
 
-### Password Reset (PKCE Flow)
-1. User requests reset via `resetPasswordForEmail()` with `redirectTo: /auth/callback`
-2. Supabase sends email with link to `https://xxx.supabase.co/auth/v1/verify?...`
-3. Supabase verifies token and redirects to `redirectTo` URL with `?code=xxx`
-4. `/auth/callback` **route handler** (route.ts) exchanges code server-side
-5. Server detects recovery via session AMR containing `{ method: 'recovery' }`
-6. Redirects to `/auth/update-password`
+### Password Reset (Hash Token Flow)
+1. User requests reset via `resetPasswordForEmail()` with `redirectTo: /auth/update-password/`
+2. Supabase sends email with verification link
+3. User clicks link, Supabase redirects to `/auth/update-password/#access_token=...&type=recovery`
+4. Page reads tokens from URL hash and calls `setSession()`
+5. User enters new password
 
-**IMPORTANT**: Use route.ts (server-side), not page.tsx (client-side) for auth callback.
-Client-side PKCE fails because localStorage code verifier is lost when clicking email links.
+This is simpler than the PKCE callback flow and works reliably.
 
-**IMPORTANT**: Redirect URLs MUST have trailing slashes (e.g., `/auth/callback/`) because
-`next.config.mjs` has `trailingSlash: true`. Without trailing slash, Next.js redirects and
-loses query parameters.
+**IMPORTANT**: Redirect URLs MUST have trailing slashes (e.g., `/auth/update-password/`) because
+`next.config.mjs` has `trailingSlash: true`.
 
-### CRITICAL: Supabase Dashboard Configuration
-For password reset to work, these URLs MUST be whitelisted in:
+### Supabase Dashboard Configuration
+These URLs MUST be whitelisted in:
 **Supabase Dashboard → Authentication → URL Configuration → Redirect URLs**
 
-Required URLs (WITH trailing slashes for web):
-- `https://ringur.dan-gur.com/auth/callback/` (production web - MUST have trailing slash)
-- `https://www.dan-gur.com/auth/callback/` (legacy/redirect - MUST have trailing slash)
-- `com.dangur.ringur://auth/callback` (mobile app - NO trailing slash for deep links)
-
-If not whitelisted, Supabase falls back to Site URL (root), causing issues.
-
-### Fallback Handling
-If auth codes land on root URL (`/?code=xxx`), the home page catches them and redirects to `/auth/callback`. This is in `src/app/page.tsx`:
-```typescript
-const authCode = searchParams.get('code')
-if (authCode) {
-  router.replace(`/auth/callback?code=${authCode}&type=${type}`)
-}
-```
+Required URLs:
+- `https://ringur.dan-gur.com/auth/update-password/` (password reset)
+- `https://ringur.dan-gur.com/auth/callback/` (OAuth login)
+- `com.dangur.ringur://auth/callback` (mobile app - NO trailing slash)
 
 ## Testing Checklist
 Before submitting changes:
