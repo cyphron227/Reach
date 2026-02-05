@@ -3,18 +3,21 @@ import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
 export async function GET(request: NextRequest) {
-  const { searchParams, origin } = new URL(request.url)
+  const url = new URL(request.url)
+  const { searchParams, origin } = url
   const code = searchParams.get('code')
   const type = searchParams.get('type')
   const error = searchParams.get('error')
   const errorDescription = searchParams.get('error_description')
 
+  console.log('[AuthCallback Route] Full URL:', url.toString())
+  console.log('[AuthCallback Route] Origin:', origin)
   console.log('[AuthCallback Route] Params:', { code: code?.slice(0, 10), type, error })
 
   // Handle errors from Supabase
   if (error) {
     console.error('[AuthCallback Route] Error:', error, errorDescription)
-    return NextResponse.redirect(`${origin}/login?error=${encodeURIComponent(errorDescription || error)}`)
+    return NextResponse.redirect(`${origin}/login/?error=${encodeURIComponent(errorDescription || error)}`)
   }
 
   if (code) {
@@ -23,7 +26,7 @@ export async function GET(request: NextRequest) {
 
     if (exchangeError) {
       console.error('[AuthCallback Route] Exchange error:', exchangeError.message)
-      return NextResponse.redirect(`${origin}/login?error=${encodeURIComponent(exchangeError.message)}`)
+      return NextResponse.redirect(`${origin}/login/?error=${encodeURIComponent(exchangeError.message)}`)
     }
 
     console.log('[AuthCallback Route] Session established')
@@ -36,7 +39,8 @@ export async function GET(request: NextRequest) {
     console.log('[AuthCallback Route] isRecovery:', isRecovery, 'AMR:', userAmr)
 
     if (isRecovery) {
-      return NextResponse.redirect(`${origin}/auth/update-password`)
+      // Trailing slash required due to next.config.mjs trailingSlash: true
+      return NextResponse.redirect(`${origin}/auth/update-password/`)
     }
 
     return NextResponse.redirect(`${origin}/`)
@@ -44,5 +48,5 @@ export async function GET(request: NextRequest) {
 
   // No code provided
   console.error('[AuthCallback Route] No code provided')
-  return NextResponse.redirect(`${origin}/login?error=No authentication code provided`)
+  return NextResponse.redirect(`${origin}/login/?error=No authentication code provided`)
 }

@@ -176,10 +176,10 @@ loses query parameters.
 For password reset to work, these URLs MUST be whitelisted in:
 **Supabase Dashboard → Authentication → URL Configuration → Redirect URLs**
 
-Required URLs:
-- `https://ringur.dan-gur.com/auth/callback` (production web)
-- `https://www.dan-gur.com/auth/callback` (legacy/redirect)
-- `com.dangur.ringur://auth/callback` (mobile app)
+Required URLs (WITH trailing slashes for web):
+- `https://ringur.dan-gur.com/auth/callback/` (production web - MUST have trailing slash)
+- `https://www.dan-gur.com/auth/callback/` (legacy/redirect - MUST have trailing slash)
+- `com.dangur.ringur://auth/callback` (mobile app - NO trailing slash for deep links)
 
 If not whitelisted, Supabase falls back to Site URL (root), causing issues.
 
