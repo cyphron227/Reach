@@ -161,19 +161,25 @@ WHERE column_name IS NULL;
 1. User requests reset via `resetPasswordForEmail()` with `redirectTo: /auth/callback`
 2. Supabase sends email with link to `https://xxx.supabase.co/auth/v1/verify?...`
 3. Supabase verifies token and redirects to `redirectTo` URL with `?code=xxx`
-4. `/auth/callback` exchanges code for session
-5. Callback detects recovery via:
-   - URL param `type=recovery` OR
-   - Session AMR containing `{ method: 'recovery' }`
+4. `/auth/callback` **route handler** (route.ts) exchanges code server-side
+5. Server detects recovery via session AMR containing `{ method: 'recovery' }`
 6. Redirects to `/auth/update-password`
+
+**IMPORTANT**: Use route.ts (server-side), not page.tsx (client-side) for auth callback.
+Client-side PKCE fails because localStorage code verifier is lost when clicking email links.
+
+**IMPORTANT**: Redirect URLs MUST have trailing slashes (e.g., `/auth/callback/`) because
+`next.config.mjs` has `trailingSlash: true`. Without trailing slash, Next.js redirects and
+loses query parameters.
 
 ### CRITICAL: Supabase Dashboard Configuration
 For password reset to work, these URLs MUST be whitelisted in:
 **Supabase Dashboard → Authentication → URL Configuration → Redirect URLs**
 
 Required URLs:
-- `https://www.dan-gur.com/auth/callback`
-- `com.dangur.ringur://auth/callback`
+- `https://ringur.dan-gur.com/auth/callback` (production web)
+- `https://www.dan-gur.com/auth/callback` (legacy/redirect)
+- `com.dangur.ringur://auth/callback` (mobile app)
 
 If not whitelisted, Supabase falls back to Site URL (root), causing issues.
 

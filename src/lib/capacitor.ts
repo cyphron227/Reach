@@ -36,19 +36,23 @@ export function getAuthRedirectUrl(path: string): string {
 
 /**
  * Get the redirect URL for password reset
- * Note: We redirect to /auth/callback (not /auth/update-password) because Supabase
+ * Note: We redirect to /auth/callback/ (not /auth/update-password) because Supabase
  * uses PKCE flow - the callback page exchanges the code for a session, then
  * detects the recovery flow and redirects to /auth/update-password
+ *
+ * IMPORTANT: Trailing slash required because next.config.mjs has trailingSlash: true
+ * Without it, Next.js redirects from /auth/callback to /auth/callback/ and loses query params
  */
 export function getPasswordResetRedirectUrl(): string {
-  return getAuthRedirectUrl('/auth/callback')
+  return getAuthRedirectUrl('/auth/callback/')
 }
 
 /**
  * Get the redirect URL for OAuth callback
+ * IMPORTANT: Trailing slash required (see getPasswordResetRedirectUrl)
  */
 export function getOAuthCallbackUrl(): string {
-  return getAuthRedirectUrl('/auth/callback')
+  return getAuthRedirectUrl('/auth/callback/')
 }
 
 // Re-export notification utilities
