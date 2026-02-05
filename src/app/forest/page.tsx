@@ -4,10 +4,13 @@ export const dynamic = 'force-dynamic'
 
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { Connection, CatchupFrequency, Interaction } from '@/types/database'
+import { Connection, CatchupFrequency, Interaction, ConnectionHealthV2, RelationshipStrength } from '@/types/database'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import CatchupMethodModal from '@/components/CatchupMethodModal'
+import { RelationshipStrengthCard } from '@/components/RelationshipStrengthBadge'
+import { RingBadge } from '@/components/RingSelector'
+import { isFeatureEnabled } from '@/lib/featureFlags'
 
 // Growth stages based on relationship longevity and interaction frequency
 type GrowthStage = 'seed' | 'seedling' | 'sapling' | 'young' | 'mature' | 'ancient'
@@ -352,14 +355,26 @@ interface TreeCardProps {
   connection: Connection
   stats: TreeStats
   onClick: () => void
+  // V2 Habit Engine props (optional)
+  strengthV2?: RelationshipStrength
+  ringTier?: 'core' | 'outer'
+  ringPosition?: number | null
+  showV2Badge?: boolean
 }
 
-function TreeCard({ connection, stats, onClick }: TreeCardProps) {
+function TreeCard({ connection, stats, onClick, strengthV2, ringTier, ringPosition, showV2Badge }: TreeCardProps) {
   return (
     <button
       onClick={onClick}
       className="flex flex-col items-center p-3 rounded-2xl hover:bg-white/70 transition-all group relative"
     >
+      {/* V2: Ring badge for core connections */}
+      {showV2Badge && ringTier === 'core' && (
+        <div className="absolute top-1 right-1">
+          <span className="text-xs" title={`Core #${ringPosition || ''}`}>💎</span>
+        </div>
+      )}
+
       {/* Tree visualization */}
       <div className="relative mb-2 transform group-hover:scale-110 transition-transform">
         <TreeVisualization stats={stats} />
@@ -370,13 +385,24 @@ function TreeCard({ connection, stats, onClick }: TreeCardProps) {
         {connection.name}
       </div>
 
-      {/* Status */}
-      <div className={`text-xs text-center ${
-        stats.health === 'wilting' ? 'text-red-500' :
-        stats.health === 'needs_water' ? 'text-amber-600' : 'text-lavender-500'
-      }`}>
-        {getTimeAgoText(connection.last_interaction_date)}
-      </div>
+      {/* Status - use V2 strength if available */}
+      {showV2Badge && strengthV2 ? (
+        <div className={`text-xs text-center ${
+          strengthV2 === 'decaying' ? 'text-red-500' :
+          strengthV2 === 'thinning' ? 'text-orange-500' :
+          strengthV2 === 'stable' ? 'text-yellow-600' :
+          strengthV2 === 'strong' ? 'text-lime-600' : 'text-green-600'
+        }`}>
+          {strengthV2.charAt(0).toUpperCase() + strengthV2.slice(1)}
+        </div>
+      ) : (
+        <div className={`text-xs text-center ${
+          stats.health === 'wilting' ? 'text-red-500' :
+          stats.health === 'needs_water' ? 'text-amber-600' : 'text-lavender-500'
+        }`}>
+          {getTimeAgoText(connection.last_interaction_date)}
+        </div>
+      )}
 
       {/* Overdue indicator */}
       {stats.isOverdue && (
@@ -395,6 +421,9 @@ export default function ForestPage() {
   const [loading, setLoading] = useState(true)
   const [selectedConnection, setSelectedConnection] = useState<Connection | null>(null)
   const [showCatchupModal, setShowCatchupModal] = useState(false)
+  const [strengthV2Enabled, setStrengthV2Enabled] = useState(false)
+  const [ringStructureEnabled, setRingStructureEnabled] = useState(false)
+  const [connectionHealthMap, setConnectionHealthMap] = useState<Record<string, ConnectionHealthV2>>({})
   const router = useRouter()
   const supabase = createClient()
 
@@ -450,6 +479,34 @@ export default function ForestPage() {
     setConnections(connectionsData || [])
     setInteractionCounts(counts)
     setRecentInteractions(recentByConnection)
+
+    // Check feature flags and fetch V2 health data
+    try {
+      const [strengthEnabled, ringEnabled] = await Promise.all([
+        isFeatureEnabled('relationship_strength_v2', authUser.id),
+        isFeatureEnabled('ring_structure', authUser.id),
+      ])
+      setStrengthV2Enabled(strengthEnabled)
+      setRingStructureEnabled(ringEnabled)
+
+      if (strengthEnabled && connectionsData && connectionsData.length > 0) {
+        const { data: healthData } = await (supabase as ReturnType<typeof createClient>)
+          .from('connection_health_v2' as 'users')
+          .select('*')
+          .eq('user_id', authUser.id)
+
+        if (healthData && Array.isArray(healthData)) {
+          const healthMap: Record<string, ConnectionHealthV2> = {}
+          for (const h of healthData as unknown as ConnectionHealthV2[]) {
+            healthMap[h.connection_id] = h
+          }
+          setConnectionHealthMap(healthMap)
+        }
+      }
+    } catch (error) {
+      console.error('Failed to fetch habit engine data:', error)
+    }
+
     setLoading(false)
   }, [supabase, router])
 
@@ -636,14 +693,21 @@ export default function ForestPage() {
         ) : (
           <div className="bg-white/60 backdrop-blur rounded-2xl p-4 shadow-sm border border-lavender-100">
             <div className="grid grid-cols-3 sm:grid-cols-4 gap-1">
-              {connections.map((connection) => (
-                <TreeCard
-                  key={connection.id}
-                  connection={connection}
-                  stats={treeStats[connection.id]}
-                  onClick={() => setSelectedConnection(connection)}
-                />
-              ))}
+              {connections.map((connection) => {
+                const health = connectionHealthMap[connection.id]
+                return (
+                  <TreeCard
+                    key={connection.id}
+                    connection={connection}
+                    stats={treeStats[connection.id]}
+                    onClick={() => setSelectedConnection(connection)}
+                    strengthV2={health?.current_strength}
+                    ringTier={health?.ring_tier}
+                    ringPosition={health?.ring_position}
+                    showV2Badge={strengthV2Enabled}
+                  />
+                )
+              })}
             </div>
           </div>
         )}
@@ -685,6 +749,25 @@ export default function ForestPage() {
 
             {/* Stats */}
             <div className="p-6">
+              {/* V2: Relationship Strength Card */}
+              {strengthV2Enabled && connectionHealthMap[selectedConnection.id] && (
+                <div className="mb-4">
+                  <RelationshipStrengthCard
+                    strength={connectionHealthMap[selectedConnection.id].current_strength}
+                    daysSinceAction={connectionHealthMap[selectedConnection.id].days_since_action}
+                    connectionName={selectedConnection.name}
+                  />
+                  {ringStructureEnabled && connectionHealthMap[selectedConnection.id].ring_tier && (
+                    <div className="mt-2">
+                      <RingBadge
+                        tier={connectionHealthMap[selectedConnection.id].ring_tier}
+                        position={connectionHealthMap[selectedConnection.id].ring_position}
+                      />
+                    </div>
+                  )}
+                </div>
+              )}
+
               <TreeStatsDisplay stats={selectedStats} />
 
               {/* Catch-up frequency */}

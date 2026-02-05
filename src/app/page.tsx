@@ -4,7 +4,7 @@ export const dynamic = 'force-dynamic'
 
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { Connection, User, UserStreak, AchievementDefinition } from '@/types/database'
+import { Connection, User, UserStreak, AchievementDefinition, DailyHabitLog, ConnectionHealthV2, RelationshipStrength, RingTier } from '@/types/database'
 import Greeting from '@/components/Greeting'
 import ConnectionCard from '@/components/ConnectionCard'
 import LogInteractionModal from '@/components/LogInteractionModal'
@@ -15,6 +15,7 @@ import PlanCatchupModal from '@/components/PlanCatchupModal'
 import CatchupMethodModal from '@/components/CatchupMethodModal'
 import AchievementUnlockModal from '@/components/AchievementUnlockModal'
 import PendingCatchupPrompt from '@/components/PendingCatchupPrompt'
+import DailyProgressIndicator from '@/components/DailyProgressIndicator'
 import Link from 'next/link'
 import { getOrCreateUserStreak, getNextMilestone, getDaysToNextMilestone } from '@/lib/streakUtils'
 import { useRouter } from 'next/navigation'
@@ -25,6 +26,7 @@ import {
   registerNotificationTapListener,
 } from '@/lib/capacitor'
 import { checkPendingIntents, PendingIntent, methodToInteractionType } from '@/lib/pendingIntents'
+import { isFeatureEnabled } from '@/lib/featureFlags'
 
 const CONNECTIONS_TO_SHOW = 3
 
@@ -106,6 +108,9 @@ export default function TodayPage() {
   const [showStreakInfo, setShowStreakInfo] = useState(false)
   const [pendingIntents, setPendingIntents] = useState<PendingIntent[]>([])
   const [pendingIntentForLog, setPendingIntentForLog] = useState<PendingIntent | null>(null)
+  const [habitEngineEnabled, setHabitEngineEnabled] = useState(false)
+  const [todayHabitLog, setTodayHabitLog] = useState<DailyHabitLog | null>(null)
+  const [connectionHealthMap, setConnectionHealthMap] = useState<Record<string, ConnectionHealthV2>>({})
   const menuRef = useRef<HTMLDivElement>(null)
 
   const supabase = createClient()
@@ -250,6 +255,45 @@ export default function TodayPage() {
         setPendingIntents(pending)
       } catch (error) {
         console.error('Failed to check pending intents:', error)
+      }
+
+      // Check if habit engine is enabled and fetch data
+      try {
+        const enabled = await isFeatureEnabled('habit_engine_v1', userData.id)
+        setHabitEngineEnabled(enabled)
+
+        if (enabled) {
+          // Fetch today's habit log (new table - use type assertion)
+          const today = new Date().toISOString().split('T')[0]
+          const { data: habitLog } = await (supabase as ReturnType<typeof createClient>)
+            .from('daily_habit_log' as 'users')
+            .select('*')
+            .eq('user_id', userData.id)
+            .eq('log_date', today)
+            .single()
+
+          if (habitLog) {
+            setTodayHabitLog(habitLog as unknown as DailyHabitLog)
+          }
+
+          // Fetch connection health data (new table - use type assertion)
+          if (connectionsData.length > 0) {
+            const { data: healthData } = await (supabase as ReturnType<typeof createClient>)
+              .from('connection_health_v2' as 'users')
+              .select('*')
+              .eq('user_id', userData.id)
+
+            if (healthData && Array.isArray(healthData)) {
+              const healthMap: Record<string, ConnectionHealthV2> = {}
+              for (const h of healthData as unknown as ConnectionHealthV2[]) {
+                healthMap[h.connection_id] = h
+              }
+              setConnectionHealthMap(healthMap)
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Failed to fetch habit engine data:', error)
       }
     }
 
@@ -468,6 +512,16 @@ export default function TodayPage() {
         {/* Greeting */}
         <Greeting userName={user?.full_name} />
 
+        {/* Daily Progress Indicator (Habit Engine V2) */}
+        {habitEngineEnabled && (
+          <DailyProgressIndicator
+            totalWeight={todayHabitLog?.total_weight ?? 0}
+            actionCount={todayHabitLog?.action_count ?? 0}
+            highestAction={todayHabitLog?.highest_action ?? null}
+            className="mb-4"
+          />
+        )}
+
         {/* Pending Catch-up Prompts */}
         {pendingIntents.length > 0 && (
           <div className="mb-4">
@@ -545,18 +599,24 @@ export default function TodayPage() {
         {filteredConnections.length > 0 ? (
           <>
             <div className="space-y-4">
-              {(showAllConnections || sortMode === 'alphabetical' ? filteredConnections : filteredConnections.slice(0, CONNECTIONS_TO_SHOW)).map((conn) => (
-                <ConnectionCard
-                  key={conn.id}
-                  connection={conn}
-                  lastMemory={lastMemories[conn.id]}
-                  onLogInteraction={() => handleLogInteraction(conn)}
-                  onPlanCatchup={() => handlePlanCatchup(conn)}
-                  onCatchup={() => handleCatchup(conn)}
-                  onEdit={() => handleEdit(conn)}
-                  onViewDetails={() => handleViewDetails(conn)}
-                />
-              ))}
+              {(showAllConnections || sortMode === 'alphabetical' ? filteredConnections : filteredConnections.slice(0, CONNECTIONS_TO_SHOW)).map((conn) => {
+                const health = connectionHealthMap[conn.id]
+                return (
+                  <ConnectionCard
+                    key={conn.id}
+                    connection={conn}
+                    lastMemory={lastMemories[conn.id]}
+                    onLogInteraction={() => handleLogInteraction(conn)}
+                    onPlanCatchup={() => handlePlanCatchup(conn)}
+                    onCatchup={() => handleCatchup(conn)}
+                    onEdit={() => handleEdit(conn)}
+                    onViewDetails={() => handleViewDetails(conn)}
+                    strengthV2={health?.current_strength}
+                    ringTier={health?.ring_tier}
+                    ringPosition={health?.ring_position}
+                  />
+                )
+              })}
             </div>
 
             {/* Show all button */}

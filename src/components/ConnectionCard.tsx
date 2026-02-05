@@ -1,6 +1,8 @@
 'use client'
 
-import { Connection, CatchupFrequency } from '@/types/database'
+import { Connection, CatchupFrequency, RelationshipStrength, RingTier } from '@/types/database'
+import { StrengthDot } from './RelationshipStrengthBadge'
+import { RingBadge } from './RingSelector'
 
 interface ConnectionCardProps {
   connection: Connection
@@ -10,6 +12,10 @@ interface ConnectionCardProps {
   onCatchup: () => void
   onEdit: () => void
   onViewDetails: () => void
+  // V2 Habit Engine props (optional - shown when provided)
+  strengthV2?: RelationshipStrength
+  ringTier?: RingTier
+  ringPosition?: number | null
 }
 
 function getDaysSince(dateString: string | null): number | null {
@@ -96,7 +102,7 @@ function getConnectionStatusText(lastInteractionDate: string | null): { text: st
   return { text: `Caught-up ${days} days ago`, isUrgent: false }
 }
 
-export default function ConnectionCard({ connection, lastMemory, onLogInteraction, onPlanCatchup, onCatchup, onEdit, onViewDetails }: ConnectionCardProps) {
+export default function ConnectionCard({ connection, lastMemory, onLogInteraction, onPlanCatchup, onCatchup, onEdit, onViewDetails, strengthV2, ringTier, ringPosition }: ConnectionCardProps) {
   const status = getConnectionStatusText(connection.last_interaction_date)
   const nextCatchup = getNextCatchupInfo(connection)
 
@@ -108,9 +114,13 @@ export default function ConnectionCard({ connection, lastMemory, onLogInteractio
         className="w-full text-left mb-4 cursor-pointer"
       >
         <div className="flex items-center justify-between mb-1">
-          <span className="text-xl font-semibold text-lavender-800">
-            {connection.name}
-          </span>
+          <div className="flex items-center gap-2">
+            {/* V2: Strength indicator dot */}
+            {strengthV2 && <StrengthDot strength={strengthV2} />}
+            <span className="text-xl font-semibold text-lavender-800">
+              {connection.name}
+            </span>
+          </div>
           <div
             className="flex items-center gap-2"
             onClick={(e) => e.stopPropagation()}
@@ -126,6 +136,13 @@ export default function ConnectionCard({ connection, lastMemory, onLogInteractio
             </button>
           </div>
         </div>
+
+        {/* V2: Ring badge for core connections */}
+        {ringTier === 'core' && (
+          <div className="mb-1">
+            <RingBadge tier={ringTier} position={ringPosition} />
+          </div>
+        )}
 
         {nextCatchup.text && (
           <div className={`text-sm font-bold ${nextCatchup.isOverdue ? 'text-red-500' : 'text-muted-teal-600'}`}>

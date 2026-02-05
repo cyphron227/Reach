@@ -17,6 +17,7 @@ import {
   MaintenanceGap,
   ReflectionStreak
 } from '@/lib/reflectionUtils'
+import { isFeatureEnabled } from '@/lib/featureFlags'
 
 type ReflectionStep = 'connected' | 'grow_closer' | 'insights' | 'complete'
 
@@ -49,6 +50,13 @@ export default function ReflectPage() {
     const { data: { user: authUser } } = await supabase.auth.getUser()
     if (!authUser) {
       router.push('/login')
+      return
+    }
+
+    // Check if pattern reviews feature is enabled - redirect to new flow
+    const patternReviewEnabled = await isFeatureEnabled('weekly_pattern_reviews', authUser.id)
+    if (patternReviewEnabled) {
+      router.push('/reflect/pattern-review')
       return
     }
 

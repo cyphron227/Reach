@@ -322,3 +322,181 @@ export function getStreakStatusMessage(streak: UserStreak): string {
 
   return 'Your streak is at risk!'
 }
+
+// ============================================================
+// Habit Engine v2 Streak Functions
+// ============================================================
+
+import { DailyHabitLog, VALID_DAY_THRESHOLD } from '@/types/habitEngine'
+
+/**
+ * Update the v2 valid days streak based on habit log
+ * A valid day requires total_weight >= 0.5
+ */
+export async function updateValidDaysStreakV2(
+  supabase: SupabaseClient,
+  userId: string,
+  logDate: string,
+  isValidDay: boolean
+): Promise<{ validDaysStreak: number; longestValidDays: number }> {
+  const streak = await getOrCreateUserStreak(supabase, userId)
+  const today = getToday()
+  const yesterday = getYesterday()
+
+  // Get current v2 streak values (default to 0 if not set)
+  let currentValidDaysStreak = (streak as any).valid_days_streak_v2 || 0
+  let longestValidDays = (streak as any).longest_valid_days_v2 || 0
+
+  if (!isValidDay) {
+    // Not a valid day - don't update streak
+    return { validDaysStreak: currentValidDaysStreak, longestValidDays }
+  }
+
+  // Check if this is consecutive with previous valid day
+  const { data: previousLog } = await (supabase as any)
+    .from('daily_habit_log')
+    .select('log_date, is_valid_day')
+    .eq('user_id', userId)
+    .lt('log_date', logDate)
+    .order('log_date', { ascending: false })
+    .limit(1)
+    .single()
+
+  if (!previousLog) {
+    // First valid day ever
+    currentValidDaysStreak = 1
+  } else {
+    const daysSincePrevious = daysBetween(previousLog.log_date, logDate)
+
+    if (daysSincePrevious === 1 && previousLog.is_valid_day) {
+      // Consecutive valid day - increment
+      currentValidDaysStreak += 1
+    } else if (daysSincePrevious === 0) {
+      // Same day - already counted
+    } else {
+      // Gap in valid days - restart streak
+      currentValidDaysStreak = 1
+    }
+  }
+
+  // Update longest if current exceeds it
+  if (currentValidDaysStreak > longestValidDays) {
+    longestValidDays = currentValidDaysStreak
+  }
+
+  // Update user_streaks with v2 values
+  await supabase
+    .from('user_streaks')
+    .update({
+      valid_days_streak_v2: currentValidDaysStreak,
+      longest_valid_days_v2: longestValidDays,
+    })
+    .eq('user_id', userId)
+
+  return { validDaysStreak: currentValidDaysStreak, longestValidDays }
+}
+
+/**
+ * Get the user's current valid days streak (v2)
+ */
+export async function getValidDaysStreakV2(
+  supabase: SupabaseClient,
+  userId: string
+): Promise<{ validDaysStreak: number; longestValidDays: number; lastValidDate: string | null }> {
+  const { data: streak } = await supabase
+    .from('user_streaks')
+    .select('valid_days_streak_v2, longest_valid_days_v2')
+    .eq('user_id', userId)
+    .single()
+
+  // Get the last valid day date
+  const { data: lastValidLog } = await (supabase as any)
+    .from('daily_habit_log')
+    .select('log_date')
+    .eq('user_id', userId)
+    .eq('is_valid_day', true)
+    .order('log_date', { ascending: false })
+    .limit(1)
+    .single()
+
+  return {
+    validDaysStreak: (streak as any)?.valid_days_streak_v2 || 0,
+    longestValidDays: (streak as any)?.longest_valid_days_v2 || 0,
+    lastValidDate: lastValidLog?.log_date || null,
+  }
+}
+
+/**
+ * Check if the valid days streak is at risk (no valid day logged today)
+ */
+export function isValidDaysStreakAtRisk(
+  currentStreak: number,
+  lastValidDate: string | null
+): boolean {
+  if (currentStreak === 0) return false
+  if (!lastValidDate) return false
+
+  const today = getToday()
+  return lastValidDate !== today
+}
+
+/**
+ * Get v2 streak status message
+ */
+export function getValidDaysStreakMessage(
+  validDaysStreak: number,
+  lastValidDate: string | null,
+  todayProgress: number
+): string {
+  const today = getToday()
+  const isValidToday = todayProgress >= VALID_DAY_THRESHOLD
+
+  if (validDaysStreak === 0) {
+    if (todayProgress > 0) {
+      const remaining = VALID_DAY_THRESHOLD - todayProgress
+      return `${remaining.toFixed(1)} more points to start your streak!`
+    }
+    return 'Log an action to start your streak!'
+  }
+
+  if (isValidToday || lastValidDate === today) {
+    const nextMilestone = getNextMilestone(validDaysStreak)
+    if (nextMilestone) {
+      const daysToNext = nextMilestone - validDaysStreak
+      if (daysToNext <= 3) {
+        return `${daysToNext} day${daysToNext === 1 ? '' : 's'} to ${nextMilestone}-day milestone!`
+      }
+    }
+    return `${validDaysStreak} valid days and counting!`
+  }
+
+  // Streak at risk
+  if (todayProgress > 0) {
+    const remaining = VALID_DAY_THRESHOLD - todayProgress
+    return `${remaining.toFixed(1)} more points to keep your streak!`
+  }
+
+  return 'Log an action to protect your streak!'
+}
+
+/**
+ * Calculate rolling 7-day valid day count
+ */
+export async function getWeeklyValidDaysCount(
+  supabase: SupabaseClient,
+  userId: string
+): Promise<number> {
+  const today = new Date()
+  const weekAgo = new Date(today)
+  weekAgo.setDate(weekAgo.getDate() - 7)
+  const weekAgoStr = weekAgo.toISOString().split('T')[0]
+
+  const { data, count } = await (supabase as any)
+    .from('daily_habit_log')
+    .select('*', { count: 'exact', head: true })
+    .eq('user_id', userId)
+    .eq('is_valid_day', true)
+    .gte('log_date', weekAgoStr)
+
+  return count || 0
+}

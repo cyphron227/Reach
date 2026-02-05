@@ -337,3 +337,49 @@ export interface MonthlyReport {
   viewed_at: string | null
   generated_at: string
 }
+
+// ============================================================================
+// HABIT ENGINE V1 TYPES
+// Re-exported from habitEngine.ts for convenience
+// ============================================================================
+export {
+  // Action types
+  type ActionTypeV2,
+  ACTION_WEIGHTS,
+  ACTION_LABELS,
+  ACTION_DESCRIPTIONS,
+
+  // Relationship strength
+  type RelationshipStrength,
+  STRENGTH_LABELS,
+  STRENGTH_COLORS,
+  DECAY_THRESHOLDS,
+
+  // Ring structure
+  type RingTier,
+  CORE_RING_MAX,
+  RING_LABELS,
+
+  // Connection lifecycle
+  type ConnectionLifecycle,
+  LIFECYCLE_LABELS,
+  type ReplacementAction,
+  REPLACEMENT_OPTIONS,
+
+  // Escalation
+  ESCALATION_LADDER,
+
+  // Database types
+  type DailyAction,
+  type DailyActionInsert,
+  type DailyHabitLog,
+  type ConnectionHealthV2,
+  type WeeklyPatternData,
+  type SuggestedAction,
+  type WeeklyPatternReview,
+  type FeatureFlag,
+  type FeatureFlagId,
+
+  // Insight messages
+  INSIGHT_MESSAGES,
+} from './habitEngine'

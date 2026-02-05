@@ -2,11 +2,15 @@
 
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { Connection, InteractionType, Interaction, AchievementDefinition } from '@/types/database'
+import { Connection, InteractionType, Interaction, AchievementDefinition, ActionTypeV2, ACTION_WEIGHTS } from '@/types/database'
 import { getWeekStartDate } from '@/lib/reflectionUtils'
 import { cancelConnectionNotification } from '@/lib/capacitor'
 import { updateDailyStreak } from '@/lib/streakUtils'
 import { useScrollLock } from '@/lib/useScrollLock'
+import { isFeatureEnabled } from '@/lib/featureFlags'
+import { mapLegacyInteractionType } from '@/lib/habitEngineUtils'
+import ActionTypePicker from './ActionTypePicker'
+import { EscalationHint } from './EscalationNudge'
 
 interface LogInteractionModalProps {
   connection: Connection
@@ -45,8 +49,51 @@ function formatRelativeDate(dateString: string): string {
   return `${Math.floor(diffDays / 30)} months ago`
 }
 
+// Helper to update daily habit log aggregation
+// Note: Uses 'any' type for new tables not yet in Supabase type definitions
+async function updateDailyHabitLog(userId: string, date: string) {
+  const supabase = createClient() as unknown as { from: (table: string) => any }
+
+  // Get all actions for this day
+  const { data: actions } = await supabase
+    .from('daily_actions')
+    .select('action_type, action_weight')
+    .eq('user_id', userId)
+    .eq('action_date', date)
+
+  if (!actions) return
+
+  const totalWeight = (actions as Array<{ action_type: string; action_weight: number }>)
+    .reduce((sum, a) => sum + Number(a.action_weight), 0)
+  const actionCount = actions.length
+
+  // Find highest action
+  let highestAction: ActionTypeV2 | null = null
+  let highestWeight = 0
+  for (const action of actions as Array<{ action_type: string; action_weight: number }>) {
+    if (Number(action.action_weight) > highestWeight) {
+      highestWeight = Number(action.action_weight)
+      highestAction = action.action_type as ActionTypeV2
+    }
+  }
+
+  // Upsert the daily habit log
+  await supabase
+    .from('daily_habit_log')
+    .upsert({
+      user_id: userId,
+      log_date: date,
+      total_weight: totalWeight,
+      action_count: actionCount,
+      highest_action: highestAction,
+    }, {
+      onConflict: 'user_id,log_date',
+    })
+}
+
 export default function LogInteractionModal({ connection, isOpen, onClose, onSuccess, defaultInteractionType }: LogInteractionModalProps) {
   const [interactionType, setInteractionType] = useState<InteractionType>(defaultInteractionType || 'call')
+  const [actionTypeV2, setActionTypeV2] = useState<ActionTypeV2>('call')
   const [memory, setMemory] = useState('')
   const [interactionDate, setInteractionDate] = useState(new Date().toISOString().split('T')[0])
   const [planNextCatchup, setPlanNextCatchup] = useState(false)
@@ -56,6 +103,7 @@ export default function LogInteractionModal({ connection, isOpen, onClose, onSuc
   const [lastInteraction, setLastInteraction] = useState<Interaction | null>(null)
   const [loadingLastInteraction, setLoadingLastInteraction] = useState(false)
   const [isReflectionPriority, setIsReflectionPriority] = useState(false)
+  const [habitEngineEnabled, setHabitEngineEnabled] = useState(false)
 
   const supabase = createClient()
 
@@ -63,10 +111,39 @@ export default function LogInteractionModal({ connection, isOpen, onClose, onSuc
     if (isOpen) {
       fetchLastInteraction()
       checkReflectionPriority()
+      checkHabitEngineFlag()
       // Reset interaction type to default when modal opens
-      setInteractionType(defaultInteractionType || 'call')
+      const defaultType = defaultInteractionType || 'call'
+      setInteractionType(defaultType)
+      setActionTypeV2(mapLegacyInteractionType(defaultType))
     }
   }, [isOpen, connection.id, defaultInteractionType])
+
+  const checkHabitEngineFlag = async () => {
+    const { data: { user } } = await supabase.auth.getUser()
+    const enabled = await isFeatureEnabled('habit_engine_v1', user?.id)
+    setHabitEngineEnabled(enabled)
+  }
+
+  // Sync v1 and v2 action types
+  const handleInteractionTypeChange = (type: InteractionType) => {
+    setInteractionType(type)
+    setActionTypeV2(mapLegacyInteractionType(type))
+  }
+
+  const handleActionTypeV2Change = (type: ActionTypeV2) => {
+    setActionTypeV2(type)
+    // Map back to legacy type for backwards compatibility
+    const legacyMap: Record<ActionTypeV2, InteractionType> = {
+      self_reflection: 'other',
+      text: 'text',
+      social_planning: 'other',
+      call: 'call',
+      group_activity: 'in_person',
+      in_person_1on1: 'in_person',
+    }
+    setInteractionType(legacyMap[type])
+  }
 
   // Lock body scroll when modal is open
   useScrollLock(isOpen)
@@ -111,7 +188,7 @@ export default function LogInteractionModal({ connection, isOpen, onClose, onSuc
       if (!user) throw new Error('Not authenticated')
 
       // Create the interaction record
-      const { error: interactionError } = await supabase
+      const { data: interactionData, error: interactionError } = await supabase
         .from('interactions')
         .insert({
           connection_id: connection.id,
@@ -119,9 +196,41 @@ export default function LogInteractionModal({ connection, isOpen, onClose, onSuc
           interaction_type: interactionType,
           memory: memory || null,
           interaction_date: interactionDate,
+          // Add v2 columns if habit engine is enabled
+          ...(habitEngineEnabled ? {
+            action_type_v2: actionTypeV2,
+            action_weight_v2: ACTION_WEIGHTS[actionTypeV2],
+          } : {}),
         })
+        .select('id')
+        .single()
 
       if (interactionError) throw interactionError
+
+      // If habit engine is enabled, also log to daily_actions table
+      // Note: Uses type assertion for new table not yet in Supabase type definitions
+      if (habitEngineEnabled && interactionData) {
+        const supabaseAny = supabase as unknown as { from: (table: string) => any }
+        const { error: dailyActionError } = await supabaseAny
+          .from('daily_actions')
+          .insert({
+            user_id: user.id,
+            connection_id: connection.id,
+            action_type: actionTypeV2,
+            action_weight: ACTION_WEIGHTS[actionTypeV2],
+            action_date: interactionDate,
+            notes: memory || null,
+            legacy_interaction_id: interactionData.id,
+          })
+
+        if (dailyActionError) {
+          console.error('Failed to log daily action:', dailyActionError)
+          // Don't fail the whole operation
+        }
+
+        // Update daily habit log aggregation
+        await updateDailyHabitLog(user.id, interactionDate)
+      }
 
       // Update the connection's last_interaction_date and optionally next_catchup_date
       const updateData: { last_interaction_date: string; next_catchup_date?: string | null } = {
@@ -167,6 +276,7 @@ export default function LogInteractionModal({ connection, isOpen, onClose, onSuc
 
       // Reset form and close
       setInteractionType('call')
+      setActionTypeV2('call')
       setMemory('')
       setInteractionDate(new Date().toISOString().split('T')[0])
       setPlanNextCatchup(false)
@@ -258,23 +368,38 @@ export default function LogInteractionModal({ connection, isOpen, onClose, onSuc
               <label className="block text-sm font-medium text-lavender-700 mb-2">
                 How did you catch-up?
               </label>
-              <div className="grid grid-cols-4 gap-2">
-                {interactionTypes.map((type) => (
-                  <button
-                    key={type.value}
-                    type="button"
-                    onClick={() => setInteractionType(type.value)}
-                    className={`py-3 px-2 rounded-xl text-center transition-all ${
-                      interactionType === type.value
-                        ? 'bg-muted-teal-400 text-white'
-                        : 'bg-lavender-50 text-lavender-600 hover:bg-lavender-100'
-                    }`}
-                  >
-                    <div className="text-xl mb-1">{type.icon}</div>
-                    <div className="text-xs font-medium">{type.label}</div>
-                  </button>
-                ))}
-              </div>
+
+              {habitEngineEnabled ? (
+                /* V2: Action Type Picker with weights */
+                <div className="space-y-2">
+                  <ActionTypePicker
+                    value={actionTypeV2}
+                    onChange={handleActionTypeV2Change}
+                    showWeights={true}
+                    showDescriptions={false}
+                  />
+                  <EscalationHint currentActionType={actionTypeV2} />
+                </div>
+              ) : (
+                /* V1: Original grid */
+                <div className="grid grid-cols-4 gap-2">
+                  {interactionTypes.map((type) => (
+                    <button
+                      key={type.value}
+                      type="button"
+                      onClick={() => handleInteractionTypeChange(type.value)}
+                      className={`py-3 px-2 rounded-xl text-center transition-all ${
+                        interactionType === type.value
+                          ? 'bg-muted-teal-400 text-white'
+                          : 'bg-lavender-50 text-lavender-600 hover:bg-lavender-100'
+                      }`}
+                    >
+                      <div className="text-xl mb-1">{type.icon}</div>
+                      <div className="text-xs font-medium">{type.label}</div>
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* Memory */}
