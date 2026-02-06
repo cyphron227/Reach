@@ -40,11 +40,14 @@ export function DeepLinkHandler() {
           const url = new URL(event.url)
           const fullPath = `${url.host || ''}${url.pathname || ''}`
           const search = url.search || ''
+          const hash = url.hash || ''
 
           if (fullPath.includes('auth/callback')) {
-            router.push(`/auth/callback${search}`)
+            router.push(`/auth/callback${search}${hash}`)
           } else if (fullPath.includes('auth/update-password')) {
-            router.push(`/auth/update-password${search}`)
+            // Hash fragment contains access_token and type=recovery
+            // needed by the update-password page to set the session
+            router.push(`/auth/update-password${search}${hash}`)
           }
         })
 
