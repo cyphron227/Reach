@@ -174,9 +174,10 @@ These URLs MUST be whitelisted in:
 **Supabase Dashboard → Authentication → URL Configuration → Redirect URLs**
 
 Required URLs:
-- `https://ringur.dan-gur.com/auth/update-password/` (password reset)
-- `https://ringur.dan-gur.com/auth/callback/` (OAuth login)
-- `com.dangur.ringur://auth/callback` (mobile app - NO trailing slash)
+- `https://ringur.dan-gur.com/auth/update-password/` (web password reset)
+- `https://ringur.dan-gur.com/auth/callback/` (web OAuth login)
+- `com.dangur.ringur://auth/callback` (mobile OAuth - NO trailing slash)
+- `com.dangur.ringur://auth/update-password` (mobile password reset - NO trailing slash)
 
 ## Deployment
 
