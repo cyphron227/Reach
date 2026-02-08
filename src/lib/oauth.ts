@@ -1,9 +1,14 @@
 /**
  * OAuth utilities for Google Sign-In
  * Handles both web and Capacitor native app flows
+ *
+ * Uses @supabase/supabase-js directly (not @supabase/ssr) with flowType: 'implicit'
+ * because @supabase/ssr forces PKCE flow and the code_verifier cookie gets lost
+ * during OAuth redirects. Implicit flow returns hash tokens instead, which the
+ * callback page handles via setSession().
  */
 
-import { createClient } from '@/lib/supabase/client'
+import { createClient } from '@supabase/supabase-js'
 import { getOAuthCallbackUrl, isCapacitor } from '@/lib/capacitor'
 import { Browser } from '@capacitor/browser'
 
@@ -14,14 +19,21 @@ export type OAuthProvider = 'google'
  * Opens the OAuth provider in the appropriate way for web vs native
  */
 export async function signInWithOAuth(provider: OAuthProvider): Promise<void> {
-  const supabase = createClient()
+  // Use base supabase-js with implicit flow to avoid PKCE code_verifier storage issues.
+  // @supabase/ssr's createBrowserClient forces PKCE which loses the verifier during redirects.
+  const supabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    { auth: { flowType: 'implicit' } }
+  )
+
   const redirectTo = getOAuthCallbackUrl()
 
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider,
     options: {
       redirectTo,
-      skipBrowserRedirect: isCapacitor(), // Don't auto-redirect in native
+      skipBrowserRedirect: true, // Always handle redirect manually
     },
   })
 
@@ -29,9 +41,14 @@ export async function signInWithOAuth(provider: OAuthProvider): Promise<void> {
     throw error
   }
 
-  // For Capacitor, open the OAuth URL in system browser
-  if (isCapacitor() && data.url) {
-    await Browser.open({ url: data.url })
+  if (!data.url) {
+    throw new Error('No OAuth URL returned')
   }
-  // For web, Supabase handles the redirect automatically when skipBrowserRedirect is false
+
+  if (isCapacitor()) {
+    await Browser.open({ url: data.url })
+  } else {
+    // Redirect manually on web
+    window.location.href = data.url
+  }
 }
