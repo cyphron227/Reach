@@ -5,9 +5,9 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "prebuild:capacitor": "node -e \"var fs=require('fs');['src/app/auth/callback/route.ts','middleware.ts'].forEach(f=>{try{fs.renameSync(f,f+'.bak')}catch(e){}})\"",
+    "prebuild:capacitor": "node -e \"try{require('fs').renameSync('middleware.ts','middleware.ts.bak')}catch(e){}\"",
     "build:capacitor": "cross-env STATIC_EXPORT=true next build",
-    "postbuild:capacitor": "node -e \"var fs=require('fs');['src/app/auth/callback/route.ts.bak','middleware.ts.bak'].forEach(f=>{try{fs.renameSync(f,f.replace('.bak',''))}catch(e){}})\"",
+    "postbuild:capacitor": "node -e \"try{require('fs').renameSync('middleware.ts.bak','middleware.ts')}catch(e){}\"",
     "start": "next start",
     "lint": "next lint",
     "deploy": "git push && npm run build:capacitor && npx cap sync android"
