@@ -125,14 +125,32 @@ function TodayPageContent() {
   // Handle auth codes that land on home page (fallback for misconfigured redirects)
   // This MUST run before any other effects that might redirect
   useEffect(() => {
-    if (authCode) {
-      // Preserve any other params like type=recovery
-      const type = searchParams.get('type')
-      const params = new URLSearchParams({ code: authCode })
-      if (type) params.set('type', type)
-      router.replace(`/auth/callback?${params.toString()}`)
+    if (!authCode) return
+
+    const handleAuthCode = async () => {
+      if (isCapacitor()) {
+        // On Capacitor, exchange code client-side (no server route available)
+        console.log('[Home] Exchanging auth code client-side...')
+        const { error } = await supabase.auth.exchangeCodeForSession(authCode)
+        if (error) {
+          console.error('[Home] Code exchange failed:', error.message)
+          router.replace('/login')
+        } else {
+          console.log('[Home] Session established, reloading...')
+          router.replace('/')
+          router.refresh()
+        }
+      } else {
+        // On web, use the server route for proper cookie handling
+        const type = searchParams.get('type')
+        const params = new URLSearchParams({ code: authCode })
+        if (type) params.set('type', type)
+        router.replace(`/auth/callback?${params.toString()}`)
+      }
     }
-  }, [authCode, searchParams, router])
+
+    handleAuthCode()
+  }, [authCode, searchParams, router, supabase])
 
   // Track scroll position for shrinking header
   useEffect(() => {
@@ -264,6 +282,11 @@ function TodayPageContent() {
       fetchUser(),
       fetchConnections(),
     ])
+
+    // If user is not authenticated, fetchUser() already triggered redirect.
+    // Keep showing loading state while redirect happens (prevents flash).
+    if (!userData) return
+
     setUser(userData)
     setConnections(connectionsData)
 

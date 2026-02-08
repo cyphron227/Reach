@@ -23,7 +23,30 @@ export default function UpdatePasswordPage() {
     let unsubscribe: (() => void) | null = null
 
     const handleRecovery = async () => {
-      // Check for hash fragment (Supabase sends tokens in URL hash for recovery)
+      // Check for PKCE code first (mobile/Capacitor sends ?code=xxx instead of hash tokens)
+      const urlParams = new URLSearchParams(window.location.search)
+      const code = urlParams.get('code')
+      console.log('[UpdatePassword] Code param:', code ? code.substring(0, 10) + '...' : 'none')
+
+      if (code) {
+        console.log('[UpdatePassword] Exchanging PKCE code for session...')
+        const { error } = await supabase.auth.exchangeCodeForSession(code)
+
+        if (error) {
+          console.error('[UpdatePassword] Code exchange error:', error.message)
+          setLinkExpired(true)
+          setChecking(false)
+          return
+        }
+
+        console.log('[UpdatePassword] Session set from PKCE code exchange')
+        // Clear the code from URL for cleaner look
+        window.history.replaceState(null, '', window.location.pathname)
+        setChecking(false)
+        return
+      }
+
+      // Check for hash fragment (Supabase sends tokens in URL hash for recovery on web)
       const hash = window.location.hash
       console.log('[UpdatePassword] Hash:', hash ? hash.substring(0, 50) + '...' : 'none')
 

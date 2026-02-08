@@ -8,6 +8,7 @@
 import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { isCapacitor } from '@/lib/capacitor'
+import { createClient } from '@/lib/supabase/client'
 
 export function DeepLinkHandler() {
   const router = useRouter()
@@ -43,6 +44,21 @@ export function DeepLinkHandler() {
           const hash = url.hash || ''
 
           if (fullPath.includes('auth/callback')) {
+            // On Capacitor, /auth/callback has no page (server route excluded from static build).
+            // Exchange the PKCE code client-side and navigate to home.
+            const code = url.searchParams.get('code')
+            if (code) {
+              console.log('[DeepLink] Exchanging OAuth code client-side...')
+              const supabase = createClient()
+              const { error } = await supabase.auth.exchangeCodeForSession(code)
+              if (error) {
+                console.error('[DeepLink] Code exchange failed:', error.message)
+              } else {
+                console.log('[DeepLink] Session established, navigating to home')
+              }
+              router.push('/')
+              return
+            }
             router.push(`/auth/callback${search}${hash}`)
           } else if (fullPath.includes('auth/update-password')) {
             // Hash fragment contains access_token and type=recovery

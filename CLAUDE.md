@@ -110,9 +110,15 @@ await initiateText(phoneNumber) // Opens SMS app
 ```
 
 ### Auth Redirects
-- Web: `window.location.origin + '/auth/callback'`
+- Web: `window.location.origin + '/auth/callback/'`
 - Mobile: `com.dangur.ringur://auth/callback`
 - Use `getAuthRedirectUrl()` helper
+
+### OAuth on Capacitor
+On Capacitor, `/auth/callback` only has a server `route.ts` (excluded from static export).
+The `DeepLinkHandler` intercepts the deep link and exchanges the PKCE code **client-side**
+via `exchangeCodeForSession()`, then navigates to `/`. Same pattern applies if an auth code
+lands on the home page as a fallback.
 
 ## Feature Flags
 
@@ -155,16 +161,34 @@ WHERE column_name IS NULL;
 ### Login
 - Email/password OR Google OAuth
 - PKCE flow with code exchange
-- Session stored in cookies via SSR middleware
+- Session stored in cookies via SSR middleware (web) or client-side (Capacitor)
 
-### Password Reset (Hash Token Flow)
-1. User requests reset via `resetPasswordForEmail()` with `redirectTo: /auth/update-password/`
-2. Supabase sends email with verification link
-3. User clicks link, Supabase redirects to `/auth/update-password/#access_token=...&type=recovery`
-4. Page reads tokens from URL hash and calls `setSession()`
-5. User enters new password
+### Middleware (Web Only)
+- `middleware.ts` provides server-side auth redirects on Vercel (unauthenticated → `/login`)
+- Also redirects logged-in users away from `/login` → `/`
+- Allows through: `/login`, `/auth/*`, `/onboarding`
+- **Excluded from Capacitor builds**: pre/post build scripts in `package.json` rename
+  `middleware.ts` → `middleware.ts.bak` during static export (same pattern as `route.ts`)
 
-This is simpler than the PKCE callback flow and works reliably.
+### Password Reset
+The update-password page handles TWO different flows because Supabase behaves differently
+depending on the redirect URL scheme:
+
+**Web (hash tokens):**
+1. User requests reset → `redirectTo: /auth/update-password/`
+2. Supabase redirects to `/auth/update-password/#access_token=...&type=recovery`
+3. Page reads tokens from URL hash and calls `setSession()`
+
+**Mobile/Capacitor (PKCE codes):**
+1. User requests reset → `redirectTo: com.dangur.ringur://auth/update-password/`
+2. Supabase sends PKCE code: `com.dangur.ringur://auth/update-password/?code=xxx`
+3. DeepLinkHandler routes to `/auth/update-password/?code=xxx`
+4. Page detects `?code` param and calls `exchangeCodeForSession(code)` client-side
+
+**KEY INSIGHT**: Supabase uses hash tokens for standard HTTPS redirects but PKCE codes
+for custom URL schemes (`com.dangur.ringur://`). The update-password page must handle both.
+The PKCE code exchange happens client-side (not via the server callback route) because
+Capacitor uses static export with no server-side routes.
 
 **IMPORTANT**: Redirect URLs MUST have trailing slashes (e.g., `/auth/update-password/`) because
 `next.config.mjs` has `trailingSlash: true`.
@@ -177,7 +201,7 @@ Required URLs:
 - `https://ringur.dan-gur.com/auth/update-password/` (web password reset)
 - `https://ringur.dan-gur.com/auth/callback/` (web OAuth login)
 - `com.dangur.ringur://auth/callback` (mobile OAuth - NO trailing slash)
-- `com.dangur.ringur://auth/update-password` (mobile password reset - NO trailing slash)
+- `com.dangur.ringur://auth/update-password/` (mobile password reset)
 
 ## Deployment
 
@@ -209,6 +233,12 @@ npx cap open android
 - No API routes (`/api/*`) - use Supabase directly from client
 - No server components - all pages must be client components
 - No middleware - auth checks happen client-side
+- No server route at `/auth/callback` - OAuth code exchange happens client-side in `DeepLinkHandler`
+
+**Build scripts handle incompatible files** by temporarily renaming them during Capacitor builds:
+- `middleware.ts` → `middleware.ts.bak`
+- `src/app/auth/callback/route.ts` → `route.ts.bak`
+See `prebuild:capacitor` / `postbuild:capacitor` in `package.json`.
 
 ## Testing Checklist
 Before submitting changes:
