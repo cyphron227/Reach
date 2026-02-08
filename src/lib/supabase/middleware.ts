@@ -27,15 +27,21 @@ export async function updateSession(request: NextRequest) {
     }
   )
 
+  // Skip auth check for auth-related paths (/auth/callback, /auth/update-password).
+  // Calling getUser() here would interfere with the callback route's cookie setting
+  // (middleware cookie-refresh can overwrite the session cookies being established).
+  if (request.nextUrl.pathname.startsWith('/auth')) {
+    return supabaseResponse
+  }
+
   const {
     data: { user },
   } = await supabase.auth.getUser()
 
-  // Protected routes
+  // Protected routes - redirect to login if not authenticated
   if (
     !user &&
     !request.nextUrl.pathname.startsWith('/login') &&
-    !request.nextUrl.pathname.startsWith('/auth') &&
     !request.nextUrl.pathname.startsWith('/onboarding')
   ) {
     const url = request.nextUrl.clone()
