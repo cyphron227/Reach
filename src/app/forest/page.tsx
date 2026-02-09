@@ -580,7 +580,7 @@ export default function ForestPage() {
     <main className="min-h-screen bg-gradient-to-b from-lavender-50 via-muted-teal-50/30 to-lavender-50 relative">
       <ForestHabitat healthScore={forestHealthScore} totalTrees={connections.length} />
 
-      <div className="max-w-2xl mx-auto px-6 py-8 relative z-10">
+      <div className="max-w-2xl mx-auto px-6 pt-8 pb-safe relative z-10">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <Link

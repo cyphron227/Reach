@@ -1,10 +1,8 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
-import { isCapacitor, pickContact, SelectedContact } from '@/lib/capacitor'
-import { parsePhone } from '@/lib/phone'
 import OnboardingProgress from '@/components/OnboardingProgress'
 import OnboardingStep, {
   OnboardingTitle,
@@ -12,180 +10,71 @@ import OnboardingStep, {
   OnboardingButton,
   OnboardingList,
 } from '@/components/OnboardingStep'
-import ContactSelectionModal from '@/components/ContactSelectionModal'
+import AddConnectionModal from '@/components/AddConnectionModal'
+import PlanCatchupModal from '@/components/PlanCatchupModal'
 import CatchupMethodModal from '@/components/CatchupMethodModal'
 import { Connection } from '@/types/database'
 
 const TOTAL_STEPS = 5
 
-interface OnboardingConnection {
-  name: string
-  phoneRaw: string | null
-  phoneE164: string | null
-  email: string | null
-}
-
 export default function OnboardingPage() {
   const [step, setStep] = useState(1)
-  const [connections, setConnections] = useState<OnboardingConnection[]>([])
-  const [isNative, setIsNative] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const router = useRouter()
   const supabase = createClient()
 
-  // Contact selection modal state
-  const [showContactSelection, setShowContactSelection] = useState(false)
-  const [pendingContact, setPendingContact] = useState<SelectedContact | null>(null)
+  // Step 4: DB connections + AddConnectionModal
+  const [dbConnections, setDbConnections] = useState<Connection[]>([])
+  const [showAddConnectionModal, setShowAddConnectionModal] = useState(false)
 
-  // Manual entry state
-  const [showManualEntry, setShowManualEntry] = useState(false)
-  const [manualName, setManualName] = useState('')
-  const [manualPhone, setManualPhone] = useState('')
-
-  // First action selection
-  const [selectedAction, setSelectedAction] = useState<'plan' | 'catchup' | null>(null)
+  // Step 5: Plan/Catchup modals
+  const [selectedOnboardingConnection, setSelectedOnboardingConnection] = useState<Connection | null>(null)
+  const [showPlanModal, setShowPlanModal] = useState(false)
   const [showCatchupModal, setShowCatchupModal] = useState(false)
-  const [savedFirstConnection, setSavedFirstConnection] = useState<Connection | null>(null)
 
+  const fetchDbConnections = useCallback(async () => {
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return
+    const { data } = await supabase
+      .from('connections')
+      .select('*')
+      .eq('user_id', user.id)
+    setDbConnections((data as Connection[]) || [])
+  }, [supabase])
+
+  // Fetch connections when entering step 4 or 5
   useEffect(() => {
-    setIsNative(isCapacitor())
-  }, [])
-
-  const handleImportFromContacts = async () => {
-    setError(null)
-    try {
-      const contact = await pickContact()
-      if (!contact) return
-
-      const needsSelection = contact.phoneNumbers.length > 1 || contact.emails.length > 1
-      if (needsSelection) {
-        setPendingContact(contact)
-        setShowContactSelection(true)
-      } else {
-        addConnection(contact.name, contact.phoneNumbers[0] || null, contact.emails[0] || null)
-      }
-    } catch (err) {
-      console.error('Contact picker error:', err)
-      setError('Could not access contacts. You can enter details manually.')
+    if (step === 4 || step === 5) {
+      fetchDbConnections()
     }
+  }, [step, fetchDbConnections])
+
+  const removeDbConnection = async (connectionId: string) => {
+    await supabase.from('connections').delete().eq('id', connectionId)
+    await fetchDbConnections()
   }
 
-  const handleContactSelectionComplete = (phone: string | null, email: string | null) => {
-    if (pendingContact) {
-      addConnection(pendingContact.name, phone, email)
-    }
-    setShowContactSelection(false)
-    setPendingContact(null)
-  }
-
-  const addConnection = (name: string, phoneRaw: string | null, email: string | null) => {
-    if (connections.length >= 3) return
-
-    let phoneE164: string | null = null
-    if (phoneRaw) {
-      const parsed = parsePhone(phoneRaw)
-      phoneE164 = parsed.e164
-    }
-
-    setConnections([...connections, { name, phoneRaw, phoneE164, email }])
-    setShowManualEntry(false)
-    setManualName('')
-    setManualPhone('')
-  }
-
-  const handleManualSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (manualName.trim()) {
-      addConnection(manualName.trim(), manualPhone.trim() || null, null)
-    }
-  }
-
-  const removeConnection = (index: number) => {
-    setConnections(connections.filter((_, i) => i !== index))
-  }
-
-  const saveConnectionsAndComplete = async (openCatchupModal = false) => {
+  const completeOnboarding = async () => {
     setLoading(true)
-    setError(null)
-
     try {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
 
-      const today = new Date().toISOString().split('T')[0]
+      const { error: updateError } = await supabase
+        .from('users')
+        .update({ onboarding_completed_at: new Date().toISOString() })
+        .eq('id', user.id)
 
-      // Save all connections
-      for (const conn of connections) {
-        const nextWeek = new Date()
-        nextWeek.setDate(nextWeek.getDate() + 7)
-        const nextCatchupDate = selectedAction === 'plan' ? nextWeek.toISOString().split('T')[0] : null
-
-        const { error: insertError } = await supabase
-          .from('connections')
-          .insert({
-            user_id: user.id,
-            name: conn.name,
-            catchup_frequency: 'weekly',
-            last_interaction_date: today,
-            next_catchup_date: nextCatchupDate,
-            phone_raw: conn.phoneRaw,
-            phone_e164: conn.phoneE164,
-            email: conn.email,
-          })
-
-        if (insertError) {
-          console.error('Error inserting connection:', insertError)
-        }
+      if (updateError) {
+        console.error('Error updating onboarding status:', updateError)
       }
 
-      // If user wants to catch-up, fetch the saved first connection to open the modal
-      if (openCatchupModal && connections.length > 0) {
-        const { data: savedConn } = await supabase
-          .from('connections')
-          .select('*')
-          .eq('user_id', user.id)
-          .eq('name', connections[0].name)
-          .single()
-
-        if (savedConn) {
-          setSavedFirstConnection(savedConn as Connection)
-          setShowCatchupModal(true)
-          setLoading(false)
-          return // Don't complete onboarding yet - wait for modal
-        }
-      }
-
-      await completeOnboarding(user.id)
+      router.push('/')
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Something went wrong')
       setLoading(false)
     }
-  }
-
-  const completeOnboarding = async (userId: string) => {
-    const { error: updateError } = await supabase
-      .from('users')
-      .update({ onboarding_completed_at: new Date().toISOString() })
-      .eq('id', userId)
-
-    if (updateError) {
-      console.error('Error updating onboarding status:', updateError)
-    }
-
-    router.push('/')
-  }
-
-  const handleCatchupModalSuccess = async () => {
-    const { data: { user } } = await supabase.auth.getUser()
-    if (user) {
-      await completeOnboarding(user.id)
-    }
-  }
-
-  const handleSkip = () => {
-    setSelectedAction(null)
-    saveConnectionsAndComplete()
   }
 
   const nextStep = () => {
@@ -195,7 +84,7 @@ export default function OnboardingPage() {
   }
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-white to-gray-50 flex flex-col">
+    <main className="min-h-screen bg-gradient-to-b from-white to-gray-50 flex flex-col pb-safe">
       {/* Progress indicator */}
       <div className="pt-8 pb-4">
         <OnboardingProgress currentStep={step} totalSteps={TOTAL_STEPS} />
@@ -287,18 +176,18 @@ export default function OnboardingPage() {
 
           {/* Added connections */}
           <div className="w-full max-w-sm space-y-3 mb-6">
-            {connections.map((conn, index) => (
+            {dbConnections.map((conn) => (
               <div
-                key={index}
+                key={conn.id}
                 className="flex items-center justify-between bg-emerald-50 px-4 py-3 rounded-xl"
               >
                 <div className="flex items-center gap-3">
                   <span className="text-emerald-600">&#10003;</span>
                   <span className="font-medium text-gray-900">{conn.name}</span>
-                  {conn.phoneE164 && <span className="text-emerald-600">📱</span>}
+                  {conn.phone_e164 && <span className="text-emerald-600">📱</span>}
                 </div>
                 <button
-                  onClick={() => removeConnection(index)}
+                  onClick={() => removeDbConnection(conn.id)}
                   className="text-gray-400 hover:text-gray-600"
                 >
                   &times;
@@ -306,74 +195,14 @@ export default function OnboardingPage() {
               </div>
             ))}
 
-            {/* Add more slots */}
-            {connections.length < 3 && !showManualEntry && (
-              <div className="space-y-3">
-                {isNative ? (
-                  <>
-                    <button
-                      onClick={handleImportFromContacts}
-                      className="w-full py-3 px-4 bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-xl transition-colors flex items-center justify-center gap-2"
-                    >
-                      <span>+</span> Add from contacts
-                    </button>
-                    <button
-                      onClick={() => setShowManualEntry(true)}
-                      className="w-full text-center text-sm text-gray-500 hover:text-gray-700"
-                    >
-                      Or enter manually
-                    </button>
-                  </>
-                ) : (
-                  <button
-                    onClick={() => setShowManualEntry(true)}
-                    className="w-full py-3 px-4 border-2 border-dashed border-gray-300 hover:border-emerald-500 text-gray-500 hover:text-emerald-600 font-medium rounded-xl transition-colors"
-                  >
-                    + Add a connection
-                  </button>
-                )}
-              </div>
-            )}
-
-            {/* Manual entry form */}
-            {showManualEntry && (
-              <form onSubmit={handleManualSubmit} className="space-y-3">
-                <input
-                  type="text"
-                  value={manualName}
-                  onChange={(e) => setManualName(e.target.value)}
-                  placeholder="Their name"
-                  className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                  autoFocus
-                />
-                <input
-                  type="tel"
-                  value={manualPhone}
-                  onChange={(e) => setManualPhone(e.target.value)}
-                  placeholder="Phone number (recommended)"
-                  className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                />
-                <div className="flex gap-2">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setShowManualEntry(false)
-                      setManualName('')
-                      setManualPhone('')
-                    }}
-                    className="flex-1 py-2 px-4 text-gray-500 hover:text-gray-700"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    disabled={!manualName.trim()}
-                    className="flex-1 py-2 px-4 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl disabled:opacity-50"
-                  >
-                    Add
-                  </button>
-                </div>
-              </form>
+            {/* Add button */}
+            {dbConnections.length < 3 && (
+              <button
+                onClick={() => setShowAddConnectionModal(true)}
+                className="w-full py-3 px-4 border-2 border-dashed border-gray-300 hover:border-emerald-500 text-gray-500 hover:text-emerald-600 font-medium rounded-xl transition-colors"
+              >
+                + Add a connection
+              </button>
             )}
           </div>
 
@@ -385,12 +214,20 @@ export default function OnboardingPage() {
             You can add more later as you build the habit.
           </p>
 
-          <OnboardingButton
-            onClick={nextStep}
-            disabled={connections.length === 0}
-          >
-            Continue
-          </OnboardingButton>
+          <div className="flex flex-col items-center gap-3">
+            <OnboardingButton
+              onClick={nextStep}
+              disabled={dbConnections.length === 0}
+            >
+              Continue
+            </OnboardingButton>
+            <button
+              onClick={nextStep}
+              className="text-gray-500 hover:text-gray-700 text-sm"
+            >
+              Skip
+            </button>
+          </div>
         </OnboardingStep>
       )}
 
@@ -398,58 +235,58 @@ export default function OnboardingPage() {
       {step === 5 && (
         <OnboardingStep className="justify-start pt-8">
           <OnboardingTitle>Take your first action</OnboardingTitle>
-          {connections.length > 0 && (
-            <p className="text-emerald-600 font-medium mb-6">
-              {connections[0].name} - added to your circle
-            </p>
-          )}
           <OnboardingText className="mb-8">
-            What will you do today?
+            {dbConnections.length > 0
+              ? 'Plan a catch-up or reach out now.'
+              : 'You can always come back and add connections later.'}
           </OnboardingText>
 
-          <div className="w-full max-w-sm space-y-3 mb-8">
-            {/* Plan a catch-up */}
-            <button
-              onClick={() => setSelectedAction('plan')}
-              className={`w-full py-4 px-4 rounded-xl border-2 transition-all text-left ${
-                selectedAction === 'plan'
-                  ? 'border-emerald-600 bg-emerald-50'
-                  : 'border-gray-200 hover:border-emerald-300'
-              }`}
-            >
-              <div className="flex items-center gap-3">
-                <span className="text-xl">📅</span>
-                <span className="font-medium">Plan a catch-up</span>
-              </div>
-              <p className="text-sm text-gray-500 mt-1 ml-9">Schedule one for this week</p>
-            </button>
+          {dbConnections.length > 0 && (
+            <div className="w-full max-w-sm space-y-3 mb-8">
+              {dbConnections.map((conn) => (
+                <div
+                  key={conn.id}
+                  className="bg-white border border-gray-200 rounded-xl p-4"
+                >
+                  <p className="font-medium text-gray-900 mb-3">{conn.name}</p>
+                  <div className="grid grid-cols-2 gap-2">
+                    <button
+                      onClick={() => {
+                        setSelectedOnboardingConnection(conn)
+                        setShowPlanModal(true)
+                      }}
+                      className="py-2.5 px-3 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-sm font-medium rounded-xl transition-colors flex items-center justify-center gap-2"
+                    >
+                      <span>📅</span> Plan
+                    </button>
+                    <button
+                      onClick={() => {
+                        setSelectedOnboardingConnection(conn)
+                        setShowCatchupModal(true)
+                      }}
+                      className="py-2.5 px-3 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium rounded-xl transition-colors flex items-center justify-center gap-2"
+                    >
+                      <span>💬</span> Catch-up
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
 
-            {/* Catch-up now */}
-            <button
-              onClick={() => setSelectedAction('catchup')}
-              className={`w-full py-4 px-4 rounded-xl border-2 transition-all text-left ${
-                selectedAction === 'catchup'
-                  ? 'border-emerald-600 bg-emerald-50'
-                  : 'border-gray-200 hover:border-emerald-300'
-              }`}
-            >
-              <div className="flex items-center gap-3">
-                <span className="text-xl">💬</span>
-                <span className="font-medium">Catch-up</span>
-              </div>
-              <p className="text-sm text-gray-500 mt-1 ml-9">Message or call them now</p>
-            </button>
-          </div>
+          {error && (
+            <p className="text-red-600 text-sm mb-4">{error}</p>
+          )}
 
           <div className="flex flex-col items-center gap-3">
             <OnboardingButton
-              onClick={() => saveConnectionsAndComplete(selectedAction === 'catchup')}
-              disabled={loading || !selectedAction}
+              onClick={completeOnboarding}
+              disabled={loading}
             >
               {loading ? 'Setting up...' : 'Complete Setup'}
             </OnboardingButton>
             <button
-              onClick={handleSkip}
+              onClick={completeOnboarding}
               disabled={loading}
               className="text-gray-500 hover:text-gray-700 text-sm"
             >
@@ -459,34 +296,46 @@ export default function OnboardingPage() {
         </OnboardingStep>
       )}
 
-      {/* Contact Selection Modal */}
-      {pendingContact && (
-        <ContactSelectionModal
-          isOpen={showContactSelection}
-          contactName={pendingContact.name}
-          phoneNumbers={pendingContact.phoneNumbers}
-          emails={pendingContact.emails}
-          onSelect={handleContactSelectionComplete}
-          onCancel={() => {
-            setShowContactSelection(false)
-            setPendingContact(null)
+      {/* Add Connection Modal */}
+      <AddConnectionModal
+        isOpen={showAddConnectionModal}
+        onClose={() => setShowAddConnectionModal(false)}
+        onSuccess={() => {
+          setShowAddConnectionModal(false)
+          fetchDbConnections()
+        }}
+      />
+
+      {/* Plan Catchup Modal */}
+      {selectedOnboardingConnection && (
+        <PlanCatchupModal
+          connection={selectedOnboardingConnection}
+          isOpen={showPlanModal}
+          onClose={() => {
+            setShowPlanModal(false)
+            setSelectedOnboardingConnection(null)
+          }}
+          onSuccess={() => {
+            setShowPlanModal(false)
+            setSelectedOnboardingConnection(null)
+            fetchDbConnections()
           }}
         />
       )}
 
       {/* Catch-up Method Modal */}
-      {savedFirstConnection && (
+      {selectedOnboardingConnection && (
         <CatchupMethodModal
-          connection={savedFirstConnection}
+          connection={selectedOnboardingConnection}
           isOpen={showCatchupModal}
           onClose={() => {
             setShowCatchupModal(false)
-            // Complete onboarding even if they close the modal
-            supabase.auth.getUser().then(({ data: { user } }) => {
-              if (user) completeOnboarding(user.id)
-            })
+            setSelectedOnboardingConnection(null)
           }}
-          onSuccess={handleCatchupModalSuccess}
+          onSuccess={() => {
+            setShowCatchupModal(false)
+            setSelectedOnboardingConnection(null)
+          }}
         />
       )}
     </main>

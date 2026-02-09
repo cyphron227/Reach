@@ -243,7 +243,7 @@ export default function SettingsPage() {
 
   return (
     <main className="min-h-screen bg-lavender-50">
-      <div className="max-w-lg mx-auto px-6 py-8">
+      <div className="max-w-lg mx-auto px-6 pt-8 pb-safe">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <Link

@@ -230,7 +230,7 @@ export default function LoginPage() {
           <div className="absolute top-1/3 right-1/3 text-2xl opacity-10 animate-pulse-soft">✨</div>
         </div>
 
-        <div className="relative z-10 min-h-screen flex flex-col items-center justify-center p-6">
+        <div className="relative z-10 min-h-screen flex flex-col items-center justify-center px-6 pt-6 pb-safe">
           <div className="max-w-md w-full text-center">
             {/* Logo and Tagline */}
             <div className="mb-12">
@@ -328,7 +328,7 @@ export default function LoginPage() {
   // Password Reset Form
   if (showResetPassword) {
     return (
-      <main className="min-h-screen bg-lavender-50 flex flex-col items-center justify-center p-6">
+      <main className="min-h-screen bg-lavender-50 flex flex-col items-center justify-center px-6 pt-6 pb-safe">
         <div className="w-full max-w-sm">
           {/* Back button */}
           <button
@@ -399,7 +399,7 @@ export default function LoginPage() {
 
   // Auth Form
   return (
-    <main className="min-h-screen bg-lavender-50 flex flex-col items-center justify-center p-6">
+    <main className="min-h-screen bg-lavender-50 flex flex-col items-center justify-center px-6 pt-6 pb-safe">
       <div className="w-full max-w-sm">
         {/* Back button */}
         <button

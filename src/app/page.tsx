@@ -90,6 +90,7 @@ function TodayPageContent() {
   const [user, setUser] = useState<User | null>(null)
   const [connections, setConnections] = useState<Connection[]>([])
   const [lastMemories, setLastMemories] = useState<Record<string, string>>({})
+  const [lastMoods, setLastMoods] = useState<Record<string, string>>({})
   const [loading, setLoading] = useState(true)
   const [showLogModal, setShowLogModal] = useState(false)
   const [showAddModal, setShowAddModal] = useState(false)
@@ -213,28 +214,37 @@ function TodayPageContent() {
     return data as Connection[]
   }, [supabase])
 
-  const fetchLastMemories = useCallback(async (connectionIds: string[]): Promise<Record<string, string>> => {
-    if (connectionIds.length === 0) return {}
+  const fetchLastInteractionData = useCallback(async (connectionIds: string[]): Promise<{ memories: Record<string, string>, moods: Record<string, string> }> => {
+    if (connectionIds.length === 0) return { memories: {}, moods: {} }
 
-    // Get the last interaction with a memory for each connection
+    // Get recent interactions for each connection (mood + memory)
     const { data } = await supabase
       .from('interactions')
-      .select('connection_id, memory')
+      .select('connection_id, memory, mood')
       .in('connection_id', connectionIds)
-      .not('memory', 'is', null)
       .order('interaction_date', { ascending: false })
 
-    if (!data) return {}
+    if (!data) return { memories: {}, moods: {} }
 
-    // Build a map of connection_id -> last memory (first one found per connection since sorted desc)
     const memories: Record<string, string> = {}
+    const moods: Record<string, string> = {}
+    const seenForMood = new Set<string>()
+
     for (const interaction of data) {
+      // First occurrence per connection = most recent interaction (for mood)
+      if (!seenForMood.has(interaction.connection_id)) {
+        seenForMood.add(interaction.connection_id)
+        if (interaction.mood) {
+          moods[interaction.connection_id] = interaction.mood
+        }
+      }
+      // First non-null memory per connection
       if (!memories[interaction.connection_id] && interaction.memory) {
         memories[interaction.connection_id] = interaction.memory
       }
     }
 
-    return memories
+    return { memories, moods }
   }, [supabase])
 
   // Filter and sort connections client-side (no refetch on search/sort change)
@@ -327,11 +337,12 @@ function TodayPageContent() {
       }
     }
 
-    // Fetch last memories for all connections
+    // Fetch last memories and moods for all connections
     if (connectionsData.length > 0) {
       const connectionIds = connectionsData.map(c => c.id)
-      const memories = await fetchLastMemories(connectionIds)
+      const { memories, moods } = await fetchLastInteractionData(connectionIds)
       setLastMemories(memories)
+      setLastMoods(moods)
     }
 
     // Schedule notifications for native app
@@ -359,7 +370,7 @@ function TodayPageContent() {
     }
 
     setLoading(false)
-  }, [fetchUser, fetchConnections, fetchLastMemories, supabase])
+  }, [fetchUser, fetchConnections, fetchLastInteractionData, supabase])
 
   useEffect(() => {
     loadData()
@@ -538,7 +549,7 @@ function TodayPageContent() {
         </div>
       </div>
 
-      <div className="max-w-lg mx-auto px-6 pb-8">
+      <div className="max-w-lg mx-auto px-6 pb-safe">
         {/* Greeting */}
         <Greeting userName={user?.full_name} />
 
@@ -636,6 +647,7 @@ function TodayPageContent() {
                     key={conn.id}
                     connection={conn}
                     lastMemory={lastMemories[conn.id]}
+                    lastMood={lastMoods[conn.id] as 'happy' | 'neutral' | 'sad' | undefined}
                     onLogInteraction={() => handleLogInteraction(conn)}
                     onPlanCatchup={() => handlePlanCatchup(conn)}
                     onCatchup={() => handleCatchup(conn)}

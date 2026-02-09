@@ -59,9 +59,10 @@ const supabase = await createClient()
 
 ### Key Tables
 - `users` - User profiles (extends auth.users)
-- `connections` - People the user tracks
-- `interactions` - Logged touchpoints
-- `pending_intents` - Planned actions
+- `connections` - People the user tracks (includes `preferred_contact_method`)
+- `interactions` - Logged touchpoints (includes `mood`, `action_type_v2`, `action_weight_v2`)
+- `communication_intents` - Tracked outreach attempts
+- `daily_actions` - Habit engine daily action log
 - `feature_flags` - Rollout control
 
 ## Component Patterns
@@ -127,6 +128,29 @@ PKCE and the code_verifier cookie gets lost during OAuth redirects.
 **IMPORTANT:** Do NOT use `createClient` from `@/lib/supabase/client` for OAuth initiation.
 That client uses `@supabase/ssr` which forces PKCE and breaks the flow.
 
+## Interaction Types (Habit Engine V1)
+
+The app uses 3 unified interaction types across all surfaces:
+
+| Type | Label | Icon | Legacy Type | Weight |
+|------|-------|------|-------------|--------|
+| `text` | Message | 💬 | `text` | 1 |
+| `call` | Call | 📞 | `call` | 3 |
+| `in_person_1on1` | In-person | 🤝 | `in_person` | 6 |
+
+- **Weights are integers** (no decimals)
+- Valid day threshold: weight >= 1
+- Types defined in `src/types/habitEngine.ts` (`ActionTypeV2`)
+- Legacy `InteractionType` (`text|call|in_person|other`) kept for backwards compat
+- Old interactions with `other`/removed types still display in history
+- Mood tracking: optional `mood` column (`happy|neutral|sad|null`) on interactions
+
+### Key Components
+- **LogInteractionModal**: 3-button type grid + mood emojis + optional note
+- **CatchupMethodModal**: Shows last interaction note, highlights preferred contact method
+- **ConnectionDetailModal**: 3-button type picker in edit form
+- **Add/Edit Connection**: Preferred messaging app selector (Text/WhatsApp/Email)
+
 ## Feature Flags
 
 ### Check flag status
@@ -139,6 +163,7 @@ const { data } = await supabase
 ```
 
 ### Common flags
+- `habit_engine_v1` - Main habit engine (permanently enabled)
 - `onboarding_v2` - New onboarding flow
 
 ## Database Migrations

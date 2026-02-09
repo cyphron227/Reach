@@ -4,9 +4,12 @@ import { Connection, CatchupFrequency, RelationshipStrength, RingTier } from '@/
 import { StrengthDot } from './RelationshipStrengthBadge'
 import { RingBadge } from './RingSelector'
 
+const moodEmojis: Record<string, string> = { happy: '😊', neutral: '😐', sad: '😔' }
+
 interface ConnectionCardProps {
   connection: Connection
   lastMemory?: string
+  lastMood?: 'happy' | 'neutral' | 'sad' | null
   onLogInteraction: () => void
   onPlanCatchup: () => void
   onCatchup: () => void
@@ -102,7 +105,7 @@ function getConnectionStatusText(lastInteractionDate: string | null): { text: st
   return { text: `Caught-up ${days} days ago`, isUrgent: false }
 }
 
-export default function ConnectionCard({ connection, lastMemory, onLogInteraction, onPlanCatchup, onCatchup, onEdit, onViewDetails, strengthV2, ringTier, ringPosition }: ConnectionCardProps) {
+export default function ConnectionCard({ connection, lastMemory, lastMood, onLogInteraction, onPlanCatchup, onCatchup, onEdit, onViewDetails, strengthV2, ringTier, ringPosition }: ConnectionCardProps) {
   const status = getConnectionStatusText(connection.last_interaction_date)
   const nextCatchup = getNextCatchupInfo(connection)
 
@@ -120,6 +123,9 @@ export default function ConnectionCard({ connection, lastMemory, onLogInteractio
             <span className="text-xl font-semibold text-lavender-800">
               {connection.name}
             </span>
+            {lastMood && moodEmojis[lastMood] && (
+              <span className="text-lg">{moodEmojis[lastMood]}</span>
+            )}
           </div>
           <div
             className="flex items-center gap-2"

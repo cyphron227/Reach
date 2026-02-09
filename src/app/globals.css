@@ -21,6 +21,9 @@ body {
   .text-balance {
     text-wrap: balance;
   }
+  .pb-safe {
+    padding-bottom: max(2rem, env(safe-area-inset-bottom, 0px));
+  }
 }
 
 /* Animated gradient background for hero */

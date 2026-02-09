@@ -38,6 +38,8 @@ const interactionTypeLabels: Record<string, string> = {
   other: 'Other',
 }
 
+const moodEmojis: Record<string, string> = { happy: '😊', neutral: '😐', sad: '😔' }
+
 function formatDate(dateString: string): string {
   const date = new Date(dateString)
   const today = new Date()
@@ -229,6 +231,9 @@ export default function ConnectionDetailModal({ connection, isOpen, onClose, onE
                       <span className="text-sm font-medium text-lavender-700">
                         {interactionTypeLabels[interaction.interaction_type]}
                       </span>
+                      {interaction.mood && moodEmojis[interaction.mood] && (
+                        <span className="text-sm">{moodEmojis[interaction.mood]}</span>
+                      )}
                     </div>
                     <div className="flex items-center gap-2">
                       <span className="text-sm text-lavender-400">
