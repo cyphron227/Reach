@@ -13,11 +13,8 @@
  * Action types for weighted daily habit tracking
  */
 export type ActionTypeV2 =
-  | 'self_reflection'
   | 'text'
-  | 'social_planning'
   | 'call'
-  | 'group_activity'
   | 'in_person_1on1'
 
 /**
@@ -25,41 +22,32 @@ export type ActionTypeV2 =
  * These represent the "investment value" of each action
  */
 export const ACTION_WEIGHTS: Record<ActionTypeV2, number> = {
-  self_reflection: 0.5,
-  text: 1.0,
-  social_planning: 2.0,
-  call: 3.0,
-  group_activity: 4.0,
-  in_person_1on1: 6.0,
+  text: 1,
+  call: 3,
+  in_person_1on1: 6,
 }
 
 /**
  * Minimum weight required for a valid day
  */
-export const VALID_DAY_THRESHOLD = 0.5
+export const VALID_DAY_THRESHOLD = 1
 
 /**
  * Human-readable labels for action types
  */
 export const ACTION_LABELS: Record<ActionTypeV2, string> = {
-  self_reflection: 'Self-reflection',
-  text: 'Text message',
-  social_planning: 'Social planning',
-  call: 'Phone/video call',
-  group_activity: 'Group activity',
-  in_person_1on1: 'In-person 1:1',
+  text: 'Message',
+  call: 'Call',
+  in_person_1on1: 'In-person',
 }
 
 /**
  * Descriptions for action types (for UI tooltips)
  */
 export const ACTION_DESCRIPTIONS: Record<ActionTypeV2, string> = {
-  self_reflection: 'Thinking about or journaling about this connection',
   text: 'Sending a text, message, or email',
-  social_planning: 'Booking, scheduling, or organizing a meetup',
   call: 'Having a phone or video call',
-  group_activity: 'Participating in a group activity together',
-  in_person_1on1: 'Meeting one-on-one in person',
+  in_person_1on1: 'Meeting in person',
 }
 
 // ============================================================================

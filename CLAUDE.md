@@ -114,11 +114,18 @@ await initiateText(phoneNumber) // Opens SMS app
 - Mobile: `com.dangur.ringur://auth/callback`
 - Use `getAuthRedirectUrl()` helper
 
-### OAuth on Capacitor
-On Capacitor, `/auth/callback` only has a server `route.ts` (excluded from static export).
-The `DeepLinkHandler` intercepts the deep link and exchanges the PKCE code **client-side**
-via `exchangeCodeForSession()`, then navigates to `/`. Same pattern applies if an auth code
-lands on the home page as a fallback.
+### OAuth (Google Sign-In)
+OAuth uses **implicit flow** (not PKCE) because `@supabase/ssr`'s `createBrowserClient` forces
+PKCE and the code_verifier cookie gets lost during OAuth redirects.
+
+**How it works:**
+- `src/lib/oauth.ts` uses `createClient` from `@supabase/supabase-js` directly (NOT `@supabase/ssr`)
+  with `flowType: 'implicit'` so Supabase returns `#access_token=...` hash tokens instead of `?code=`
+- `src/app/auth/callback/page.tsx` is a client-side page that handles both hash tokens and PKCE codes
+- `DeepLinkHandler` routes Capacitor deep links to the callback page
+
+**IMPORTANT:** Do NOT use `createClient` from `@/lib/supabase/client` for OAuth initiation.
+That client uses `@supabase/ssr` which forces PKCE and breaks the flow.
 
 ## Feature Flags
 
@@ -160,7 +167,7 @@ WHERE column_name IS NULL;
 
 ### Login
 - Email/password OR Google OAuth
-- PKCE flow with code exchange
+- OAuth uses implicit flow (see "OAuth" section under Capacitor Patterns)
 - Session stored in cookies via SSR middleware (web) or client-side (Capacitor)
 
 ### Middleware (Web Only)
@@ -212,17 +219,21 @@ Push to `main` branch - Vercel auto-deploys to `ringur.dan-gur.com`
 Capacitor requires a **static export** - it can't use Next.js server features.
 
 ```bash
-# 1. Build static export (outputs to /out directory)
-STATIC_EXPORT=true npm run build
+# 1. Build static export (uses prebuild:capacitor to rename middleware.ts)
+npm run build:capacitor
 
 # 2. Sync to Android project
 npx cap sync android
 
-# 3. Open in Android Studio
+# 3. Build APK via Gradle CLI or Android Studio
+# Option A - CLI:
+cd android && ./gradlew assembleDebug
+# Option B - Android Studio:
 npx cap open android
-
-# 4. Build APK/AAB from Android Studio
+# Then: Build > Build Bundle(s) / APK(s) > Build APK(s)
 ```
+
+APK output: `android/app/build/outputs/apk/debug/app-debug.apk`
 
 **Why static export?**
 - Capacitor serves files from the device filesystem, not a server
@@ -237,8 +248,28 @@ npx cap open android
 
 **Build scripts handle incompatible files** by temporarily renaming them during Capacitor builds:
 - `middleware.ts` → `middleware.ts.bak`
-- `src/app/auth/callback/route.ts` → `route.ts.bak`
 See `prebuild:capacitor` / `postbuild:capacitor` in `package.json`.
+
+Note: `/auth/callback` is now a client-side `page.tsx` (not a server `route.ts`), so it works
+in both web and static export without any build script workarounds.
+
+### Android Gradle - Windows File Locking Fix
+Gradle builds on Windows fail with "Unable to delete directory" errors when Capacitor plugin
+build output is inside `node_modules/`. This is caused by Windows services (Search Indexer,
+cloud sync) locking files in the `Documents` folder.
+
+**Fix:** `android/build.gradle` contains a `subprojects` block that redirects any subproject
+whose source is in `node_modules/` to build inside `android/build/node_modules_builds/` instead:
+```groovy
+subprojects { subproject ->
+    if (subproject.projectDir.absolutePath.contains('node_modules')) {
+        subproject.buildDir = new File(rootProject.buildDir, "node_modules_builds/${subproject.name}")
+    }
+}
+```
+
+**Also note:** `android/gradle.properties` has `org.gradle.daemon=true` — the persistent daemon
+manages file handles properly and avoids race conditions on Windows.
 
 ## Testing Checklist
 Before submitting changes:

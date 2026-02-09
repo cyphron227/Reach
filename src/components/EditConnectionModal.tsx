@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { Connection, CatchupFrequency } from '@/types/database'
+import { Connection, CatchupFrequency, PreferredContactMethod } from '@/types/database'
 import { parsePhone } from '@/lib/phone'
 import { useScrollLock } from '@/lib/useScrollLock'
 
@@ -34,6 +34,7 @@ export default function EditConnectionModal({ connection, isOpen, onClose, onSuc
   const [name, setName] = useState(connection.name)
   const [phoneNumber, setPhoneNumber] = useState(connection.phone_raw || '')
   const [email, setEmail] = useState(connection.email || '')
+  const [preferredMethod, setPreferredMethod] = useState<PreferredContactMethod | null>(connection.preferred_contact_method)
   const [frequency, setFrequency] = useState<CatchupFrequency>(connection.catchup_frequency)
   const [loading, setLoading] = useState(false)
   const [deleteConfirm, setDeleteConfirm] = useState(false)
@@ -46,6 +47,7 @@ export default function EditConnectionModal({ connection, isOpen, onClose, onSuc
       setName(connection.name)
       setPhoneNumber(connection.phone_raw || '')
       setEmail(connection.email || '')
+      setPreferredMethod(connection.preferred_contact_method)
       setFrequency(connection.catchup_frequency)
       setDeleteConfirm(false)
       setError(null)
@@ -86,6 +88,7 @@ export default function EditConnectionModal({ connection, isOpen, onClose, onSuc
           phone_raw: phoneRaw,
           phone_e164: phoneE164,
           email: email.trim() || null,
+          preferred_contact_method: preferredMethod,
         })
         .eq('id', connection.id)
 
@@ -200,6 +203,34 @@ export default function EditConnectionModal({ connection, isOpen, onClose, onSuc
                 className="w-full px-4 py-3 rounded-xl border border-lavender-200 bg-white text-lavender-800 placeholder-lavender-400 focus:outline-none focus:ring-2 focus:ring-muted-teal-400 focus:border-transparent transition-all"
                 placeholder="e.g., sarah@example.com"
               />
+            </div>
+
+            {/* Preferred Messaging App */}
+            <div>
+              <label className="block text-sm font-medium text-lavender-700 mb-1">
+                Preferred messaging app <span className="text-lavender-400">(optional)</span>
+              </label>
+              <div className="flex gap-2">
+                {([
+                  { value: 'text' as PreferredContactMethod, label: 'Text', icon: '📱' },
+                  { value: 'whatsapp' as PreferredContactMethod, label: 'WhatsApp', icon: '💬' },
+                  { value: 'email' as PreferredContactMethod, label: 'Email', icon: '📧' },
+                ]).map((option) => (
+                  <button
+                    key={option.value}
+                    type="button"
+                    onClick={() => setPreferredMethod(preferredMethod === option.value ? null : option.value)}
+                    className={`flex-1 py-2.5 px-2 rounded-xl text-center transition-all ${
+                      preferredMethod === option.value
+                        ? 'bg-muted-teal-400 text-white'
+                        : 'bg-lavender-50 text-lavender-600 hover:bg-lavender-100'
+                    }`}
+                  >
+                    <div className="text-lg mb-0.5">{option.icon}</div>
+                    <div className="text-xs font-medium">{option.label}</div>
+                  </button>
+                ))}
+              </div>
             </div>
 
             {/* Frequency */}

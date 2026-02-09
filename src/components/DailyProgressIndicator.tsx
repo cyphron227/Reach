@@ -40,11 +40,8 @@ export default function DailyProgressIndicator({
 
   const getActionLabel = (action: ActionTypeV2): string => {
     const labels: Record<ActionTypeV2, string> = {
-      self_reflection: 'Reflection',
-      text: 'Text',
-      social_planning: 'Planning',
+      text: 'Message',
       call: 'Call',
-      group_activity: 'Group',
       in_person_1on1: 'In-person',
     }
     return labels[action]
@@ -64,7 +61,7 @@ export default function DailyProgressIndicator({
         </div>
         <div className="text-right">
           <span className="text-lg font-semibold text-lavender-800">
-            {totalWeight.toFixed(1)}
+            {totalWeight}
           </span>
           <span className="text-xs text-lavender-500 ml-1">weight</span>
         </div>
@@ -95,7 +92,7 @@ export default function DailyProgressIndicator({
       {!isValidDay && totalWeight === 0 && (
         <div className="mt-3 pt-3 border-t border-lavender-100">
           <p className="text-xs text-lavender-500">
-            Any action counts! Even a quick reflection ({ACTION_WEIGHTS.self_reflection} weight) makes today valid.
+            Any action counts! Even a quick message ({ACTION_WEIGHTS.text} weight) makes today valid.
           </p>
         </div>
       )}

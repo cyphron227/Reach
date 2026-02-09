@@ -1,8 +1,8 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { Connection, CommunicationMethod } from '@/types/database'
+import { Connection, CommunicationMethod, Interaction, InteractionType } from '@/types/database'
 import { initiateCall, initiateWhatsApp, initiateText, initiateEmail } from '@/lib/capacitor'
 import { useScrollLock } from '@/lib/useScrollLock'
 
@@ -27,6 +27,28 @@ const methodOptions: {
   { value: 'email', label: 'Email', icon: '📧', requiresPhone: false, requiresE164: false, requiresEmail: true },
 ]
 
+const interactionTypeLabels: Record<InteractionType, string> = {
+  call: 'call',
+  text: 'text',
+  in_person: 'in-person meeting',
+  other: 'catch-up',
+}
+
+function formatRelativeDate(dateString: string): string {
+  const date = new Date(dateString)
+  const today = new Date()
+  const diffTime = today.getTime() - date.getTime()
+  const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24))
+
+  if (diffDays === 0) return 'today'
+  if (diffDays === 1) return 'yesterday'
+  if (diffDays < 7) return `${diffDays} days ago`
+  if (diffDays < 14) return 'last week'
+  if (diffDays < 30) return `${Math.floor(diffDays / 7)} weeks ago`
+  if (diffDays < 60) return 'last month'
+  return `${Math.floor(diffDays / 30)} months ago`
+}
+
 export default function CatchupMethodModal({
   connection,
   isOpen,
@@ -35,6 +57,7 @@ export default function CatchupMethodModal({
 }: CatchupMethodModalProps) {
   const [loading, setLoading] = useState<CommunicationMethod | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [lastInteraction, setLastInteraction] = useState<Interaction | null>(null)
 
   const supabase = createClient()
 
@@ -46,6 +69,24 @@ export default function CatchupMethodModal({
 
   // Lock body scroll when modal is open
   useScrollLock(isOpen)
+
+  useEffect(() => {
+    if (isOpen) {
+      fetchLastInteraction()
+    }
+  }, [isOpen, connection.id])
+
+  const fetchLastInteraction = async () => {
+    const { data } = await supabase
+      .from('interactions')
+      .select('*')
+      .eq('connection_id', connection.id)
+      .order('interaction_date', { ascending: false })
+      .limit(1)
+      .single()
+
+    setLastInteraction(data)
+  }
 
   const handleMethodSelect = async (method: CommunicationMethod) => {
     setLoading(method)
@@ -144,9 +185,21 @@ export default function CatchupMethodModal({
             </button>
           </div>
 
-          <p className="text-sm text-lavender-600 mb-6">
+          <p className="text-sm text-lavender-600 mb-4">
             Choose how you&apos;d like to reach out
           </p>
+
+          {/* Last Interaction Note */}
+          {lastInteraction?.memory && (
+            <div className="mb-4 p-4 bg-muted-teal-50 rounded-xl border border-muted-teal-100">
+              <div className="text-xs font-medium text-muted-teal-600 mb-2">
+                From your last {interactionTypeLabels[lastInteraction.interaction_type]} {formatRelativeDate(lastInteraction.interaction_date)}
+              </div>
+              <p className="text-sm text-lavender-700 italic">
+                &ldquo;{lastInteraction.memory}&rdquo;
+              </p>
+            </div>
+          )}
 
           {error && (
             <p className="text-red-600 text-sm bg-red-50 p-3 rounded-lg mb-4">{error}</p>
@@ -158,6 +211,8 @@ export default function CatchupMethodModal({
               const disabledReason = getDisabledReason(method)
               const isLoading = loading === method.value
 
+              const isPreferred = connection.preferred_contact_method === method.value
+
               return (
                 <button
                   key={method.value}
@@ -168,7 +223,9 @@ export default function CatchupMethodModal({
                       ? 'bg-lavender-50 text-lavender-300 cursor-not-allowed'
                       : loading !== null
                         ? 'bg-lavender-100 text-lavender-500 cursor-wait'
-                        : 'bg-lavender-100 text-lavender-700 hover:bg-muted-teal-100 hover:text-muted-teal-700'
+                        : isPreferred
+                          ? 'bg-muted-teal-100 text-muted-teal-700 ring-2 ring-muted-teal-400'
+                          : 'bg-lavender-100 text-lavender-700 hover:bg-muted-teal-100 hover:text-muted-teal-700'
                   }`}
                 >
                   <div className="text-2xl mb-1">

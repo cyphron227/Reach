@@ -50,10 +50,10 @@ export function getActionWeight(actionType: ActionTypeV2): number {
 }
 
 /**
- * Check if a day is valid (any social investment action with weight >= 0.5)
+ * Check if a day is valid (any social investment action with weight >= 1)
  */
 export function isValidDay(totalWeight: number): boolean {
-  return totalWeight >= 0.5
+  return totalWeight >= 1
 }
 
 /**
@@ -216,11 +216,11 @@ export function getEscalationNudge(
 export function getEscalationMessage(currentActionType: ActionTypeV2): string | null {
   const weight = ACTION_WEIGHTS[currentActionType]
 
-  if (weight <= 1.0) {
+  if (weight <= 1) {
     return INSIGHT_MESSAGES.text_to_call
   }
 
-  if (weight <= 3.0) {
+  if (weight <= 3) {
     return INSIGHT_MESSAGES.call_to_inperson
   }
 
@@ -239,11 +239,8 @@ export function analyzeWeeklyPattern(
   previousWeekActions: DailyAction[] = []
 ): WeeklyPatternData {
   const actionCounts: Record<ActionTypeV2, number> = {
-    self_reflection: 0,
     text: 0,
-    social_planning: 0,
     call: 0,
-    group_activity: 0,
     in_person_1on1: 0,
   }
 
@@ -261,8 +258,7 @@ export function analyzeWeeklyPattern(
   const highDepthActions = actions.filter(
     (a) =>
       a.action_type === 'call' ||
-      a.action_type === 'in_person_1on1' ||
-      a.action_type === 'group_activity'
+      a.action_type === 'in_person_1on1'
   )
   const depthScore = Math.min(
     100,
@@ -271,7 +267,7 @@ export function analyzeWeeklyPattern(
 
   // Calculate variety score (unique action types used)
   const uniqueTypes = Object.values(actionCounts).filter((c) => c > 0).length
-  const varietyScore = Math.min(100, Math.round((uniqueTypes / 6) * 100))
+  const varietyScore = Math.min(100, Math.round((uniqueTypes / 3) * 100))
 
   // Calculate consistency score (actions spread across days)
   const uniqueDays = new Set(actions.map((a) => a.action_date)).size
@@ -362,7 +358,7 @@ export function generateSuggestedActions(
 
   // If variety is low, suggest trying different action types
   if (patterns.variety_score < 30) {
-    const unusedHighValue: ActionTypeV2[] = ['call', 'in_person_1on1', 'group_activity']
+    const unusedHighValue: ActionTypeV2[] = ['call', 'in_person_1on1']
     const dominant = patterns.dominant_action_type
 
     for (const actionType of unusedHighValue) {

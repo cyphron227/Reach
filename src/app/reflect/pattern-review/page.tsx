@@ -108,11 +108,8 @@ export default function PatternReviewPage() {
 
     // Count actions by type
     const actionBreakdown: Record<ActionTypeV2, number> = {
-      self_reflection: 0,
       text: 0,
-      social_planning: 0,
       call: 0,
-      group_activity: 0,
       in_person_1on1: 0,
     }
     for (const action of actions) {

@@ -18,11 +18,8 @@ interface EscalationNudgeProps {
 }
 
 const ESCALATION_ICONS: Record<ActionTypeV2, string> = {
-  self_reflection: '💭',
   text: '💬',
-  social_planning: '📅',
   call: '📞',
-  group_activity: '👥',
   in_person_1on1: '🤝',
 }
 
@@ -45,10 +42,10 @@ export default function EscalationNudge({
 
   // Get appropriate message based on escalation type
   const getMessage = (): string => {
-    if (currentWeight <= 1.0 && suggestedWeight >= 3.0) {
+    if (currentWeight <= 1 && suggestedWeight >= 3) {
       return INSIGHT_MESSAGES.text_to_call
     }
-    if (currentWeight <= 3.0 && suggestedWeight >= 6.0) {
+    if (currentWeight <= 3 && suggestedWeight >= 6) {
       return INSIGHT_MESSAGES.call_to_inperson
     }
     return `Consider ${ACTION_LABELS[suggestedActionType].toLowerCase()} for a deeper connection`
@@ -119,7 +116,7 @@ export default function EscalationNudge({
 
           {weightIncrease > 0 && (
             <p className="text-xs text-muted-teal-600 mt-2">
-              +{weightIncrease.toFixed(1)} additional weight toward your daily goal
+              +{weightIncrease} additional weight toward your daily goal
             </p>
           )}
         </div>
@@ -163,14 +160,14 @@ export function EscalationHint({
 }) {
   const currentWeight = currentActionType ? ACTION_WEIGHTS[currentActionType] : 0
 
-  if (currentWeight >= 6.0) {
+  if (currentWeight >= 6) {
     return null // Already at highest level
   }
 
   let hint = ''
-  if (currentWeight <= 1.0) {
+  if (currentWeight <= 1) {
     hint = INSIGHT_MESSAGES.text_to_call
-  } else if (currentWeight <= 3.0) {
+  } else if (currentWeight <= 3) {
     hint = INSIGHT_MESSAGES.call_to_inperson
   }
 

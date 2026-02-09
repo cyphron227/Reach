@@ -34,6 +34,14 @@ allprojects {
     }
 }
 
+// Redirect node_modules subproject build dirs into android/build to avoid
+// Windows file-locking issues when building inside node_modules
+subprojects { subproject ->
+    if (subproject.projectDir.absolutePath.contains('node_modules')) {
+        subproject.buildDir = new File(rootProject.buildDir, "node_modules_builds/${subproject.name}")
+    }
+}
+
 task clean(type: Delete) {
     delete rootProject.buildDir
 }

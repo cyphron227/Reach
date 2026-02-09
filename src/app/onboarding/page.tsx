@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { isCapacitor, pickContact, SelectedContact } from '@/lib/capacitor'
 import { parsePhone } from '@/lib/phone'
-import { initiateText } from '@/lib/intents'
 import OnboardingProgress from '@/components/OnboardingProgress'
 import OnboardingStep, {
   OnboardingTitle,
@@ -14,6 +13,8 @@ import OnboardingStep, {
   OnboardingList,
 } from '@/components/OnboardingStep'
 import ContactSelectionModal from '@/components/ContactSelectionModal'
+import CatchupMethodModal from '@/components/CatchupMethodModal'
+import { Connection } from '@/types/database'
 
 const TOTAL_STEPS = 5
 
@@ -43,7 +44,9 @@ export default function OnboardingPage() {
   const [manualPhone, setManualPhone] = useState('')
 
   // First action selection
-  const [selectedAction, setSelectedAction] = useState<'text' | 'call' | 'reflect' | null>(null)
+  const [selectedAction, setSelectedAction] = useState<'plan' | 'catchup' | null>(null)
+  const [showCatchupModal, setShowCatchupModal] = useState(false)
+  const [savedFirstConnection, setSavedFirstConnection] = useState<Connection | null>(null)
 
   useEffect(() => {
     setIsNative(isCapacitor())
@@ -102,7 +105,7 @@ export default function OnboardingPage() {
     setConnections(connections.filter((_, i) => i !== index))
   }
 
-  const saveConnectionsAndComplete = async () => {
+  const saveConnectionsAndComplete = async (openCatchupModal = false) => {
     setLoading(true)
     setError(null)
 
@@ -114,6 +117,10 @@ export default function OnboardingPage() {
 
       // Save all connections
       for (const conn of connections) {
+        const nextWeek = new Date()
+        nextWeek.setDate(nextWeek.getDate() + 7)
+        const nextCatchupDate = selectedAction === 'plan' ? nextWeek.toISOString().split('T')[0] : null
+
         const { error: insertError } = await supabase
           .from('connections')
           .insert({
@@ -121,6 +128,7 @@ export default function OnboardingPage() {
             name: conn.name,
             catchup_frequency: 'weekly',
             last_interaction_date: today,
+            next_catchup_date: nextCatchupDate,
             phone_raw: conn.phoneRaw,
             phone_e164: conn.phoneE164,
             email: conn.email,
@@ -131,50 +139,47 @@ export default function OnboardingPage() {
         }
       }
 
-      // Handle selected action
-      if (selectedAction && connections.length > 0) {
-        const firstConn = connections[0]
+      // If user wants to catch-up, fetch the saved first connection to open the modal
+      if (openCatchupModal && connections.length > 0) {
+        const { data: savedConn } = await supabase
+          .from('connections')
+          .select('*')
+          .eq('user_id', user.id)
+          .eq('name', connections[0].name)
+          .single()
 
-        if (selectedAction === 'text' && firstConn.phoneE164) {
-          // Open SMS
-          initiateText(firstConn.phoneE164)
-        } else if (selectedAction === 'call' && firstConn.phoneE164) {
-          // Create a pending call intent
-          const { data: savedConn } = await supabase
-            .from('connections')
-            .select('id')
-            .eq('user_id', user.id)
-            .eq('name', firstConn.name)
-            .single()
-
-          if (savedConn) {
-            await supabase.from('communication_intents').insert({
-              user_id: user.id,
-              connection_id: savedConn.id,
-              method: 'call',
-            })
-          }
-        } else if (selectedAction === 'reflect') {
-          // Log a self-reflection action (if habit engine tables exist)
-          // For now, this is a no-op since we might not have the tables yet
+        if (savedConn) {
+          setSavedFirstConnection(savedConn as Connection)
+          setShowCatchupModal(true)
+          setLoading(false)
+          return // Don't complete onboarding yet - wait for modal
         }
       }
 
-      // Mark onboarding complete
-      const { error: updateError } = await supabase
-        .from('users')
-        .update({ onboarding_completed_at: new Date().toISOString() })
-        .eq('id', user.id)
-
-      if (updateError) {
-        console.error('Error updating onboarding status:', updateError)
-      }
-
-      // Redirect to home
-      router.push('/')
+      await completeOnboarding(user.id)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Something went wrong')
       setLoading(false)
+    }
+  }
+
+  const completeOnboarding = async (userId: string) => {
+    const { error: updateError } = await supabase
+      .from('users')
+      .update({ onboarding_completed_at: new Date().toISOString() })
+      .eq('id', userId)
+
+    if (updateError) {
+      console.error('Error updating onboarding status:', updateError)
+    }
+
+    router.push('/')
+  }
+
+  const handleCatchupModalSuccess = async () => {
+    const { data: { user } } = await supabase.auth.getUser()
+    if (user) {
+      await completeOnboarding(user.id)
     }
   }
 
@@ -188,8 +193,6 @@ export default function OnboardingPage() {
       setStep(step + 1)
     }
   }
-
-  const firstConnectionWithPhone = connections.find(c => c.phoneE164)
 
   return (
     <main className="min-h-screen bg-gradient-to-b from-white to-gray-50 flex flex-col">
@@ -405,65 +408,43 @@ export default function OnboardingPage() {
           </OnboardingText>
 
           <div className="w-full max-w-sm space-y-3 mb-8">
-            {/* Text option - only if phone exists */}
-            {firstConnectionWithPhone ? (
-              <button
-                onClick={() => setSelectedAction('text')}
-                className={`w-full py-4 px-4 rounded-xl border-2 transition-all text-left ${
-                  selectedAction === 'text'
-                    ? 'border-emerald-600 bg-emerald-50'
-                    : 'border-gray-200 hover:border-emerald-300'
-                }`}
-              >
-                <div className="flex items-center gap-3">
-                  <span className="text-xl">💬</span>
-                  <span className="font-medium">Send them a quick text</span>
-                </div>
-              </button>
-            ) : (
-              <div className="py-4 px-4 rounded-xl border-2 border-gray-100 bg-gray-50 text-left opacity-60">
-                <div className="flex items-center gap-3">
-                  <span className="text-xl">💬</span>
-                  <span className="text-gray-500">Add a phone number to text them</span>
-                </div>
-              </div>
-            )}
-
-            {/* Call/plan option */}
+            {/* Plan a catch-up */}
             <button
-              onClick={() => setSelectedAction('call')}
+              onClick={() => setSelectedAction('plan')}
               className={`w-full py-4 px-4 rounded-xl border-2 transition-all text-left ${
-                selectedAction === 'call'
+                selectedAction === 'plan'
                   ? 'border-emerald-600 bg-emerald-50'
                   : 'border-gray-200 hover:border-emerald-300'
               }`}
             >
               <div className="flex items-center gap-3">
-                <span className="text-xl">📞</span>
-                <span className="font-medium">Plan to call them this week</span>
+                <span className="text-xl">📅</span>
+                <span className="font-medium">Plan a catch-up</span>
               </div>
+              <p className="text-sm text-gray-500 mt-1 ml-9">Schedule one for this week</p>
             </button>
 
-            {/* Reflect option */}
+            {/* Catch-up now */}
             <button
-              onClick={() => setSelectedAction('reflect')}
+              onClick={() => setSelectedAction('catchup')}
               className={`w-full py-4 px-4 rounded-xl border-2 transition-all text-left ${
-                selectedAction === 'reflect'
+                selectedAction === 'catchup'
                   ? 'border-emerald-600 bg-emerald-50'
                   : 'border-gray-200 hover:border-emerald-300'
               }`}
             >
               <div className="flex items-center gap-3">
-                <span className="text-xl">🤔</span>
-                <span className="font-medium">Just reflect on this relationship</span>
+                <span className="text-xl">💬</span>
+                <span className="font-medium">Catch-up</span>
               </div>
+              <p className="text-sm text-gray-500 mt-1 ml-9">Message or call them now</p>
             </button>
           </div>
 
           <div className="flex flex-col items-center gap-3">
             <OnboardingButton
-              onClick={saveConnectionsAndComplete}
-              disabled={loading}
+              onClick={() => saveConnectionsAndComplete(selectedAction === 'catchup')}
+              disabled={loading || !selectedAction}
             >
               {loading ? 'Setting up...' : 'Complete Setup'}
             </OnboardingButton>
@@ -490,6 +471,22 @@ export default function OnboardingPage() {
             setShowContactSelection(false)
             setPendingContact(null)
           }}
+        />
+      )}
+
+      {/* Catch-up Method Modal */}
+      {savedFirstConnection && (
+        <CatchupMethodModal
+          connection={savedFirstConnection}
+          isOpen={showCatchupModal}
+          onClose={() => {
+            setShowCatchupModal(false)
+            // Complete onboarding even if they close the modal
+            supabase.auth.getUser().then(({ data: { user } }) => {
+              if (user) completeOnboarding(user.id)
+            })
+          }}
+          onSuccess={handleCatchupModalSuccess}
         />
       )}
     </main>

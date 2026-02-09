@@ -91,6 +91,7 @@ export interface Database {
           user_id: string
           interaction_type: 'call' | 'text' | 'in_person' | 'other'
           memory: string | null
+          mood: 'happy' | 'neutral' | 'sad' | null
           interaction_date: string
           created_at: string
         }
@@ -100,6 +101,7 @@ export interface Database {
           user_id: string
           interaction_type: 'call' | 'text' | 'in_person' | 'other'
           memory?: string | null
+          mood?: 'happy' | 'neutral' | 'sad' | null
           interaction_date?: string
           created_at?: string
         }
@@ -109,6 +111,7 @@ export interface Database {
           user_id?: string
           interaction_type?: 'call' | 'text' | 'in_person' | 'other'
           memory?: string | null
+          mood?: 'happy' | 'neutral' | 'sad' | null
           interaction_date?: string
           created_at?: string
         }

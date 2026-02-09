@@ -63,10 +63,9 @@ function formatDate(dateString: string): string {
 }
 
 const interactionTypes: { value: InteractionType; label: string; icon: string }[] = [
+  { value: 'text', label: 'Message', icon: '💬' },
   { value: 'call', label: 'Call', icon: '📞' },
-  { value: 'text', label: 'Text', icon: '💬' },
-  { value: 'in_person', label: 'In person', icon: '🤝' },
-  { value: 'other', label: 'Other', icon: '✨' },
+  { value: 'in_person', label: 'In-person', icon: '🤝' },
 ]
 
 export default function ConnectionDetailModal({ connection, isOpen, onClose, onEdit, onLogInteraction, onInteractionUpdated }: ConnectionDetailModalProps) {
@@ -297,7 +296,7 @@ export default function ConnectionDetailModal({ connection, isOpen, onClose, onE
                   <label className="block text-sm font-medium text-lavender-700 mb-2">
                     Type
                   </label>
-                  <div className="grid grid-cols-4 gap-2">
+                  <div className="grid grid-cols-3 gap-2">
                     {interactionTypes.map((type) => (
                       <button
                         key={type.value}
