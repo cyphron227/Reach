@@ -133,7 +133,7 @@ export default function EditConnectionModal({ connection, isOpen, onClose, onSuc
 
   return (
     <div
-      className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-end sm:items-center justify-center z-50 p-4 overscroll-contain"
+      className="fixed inset-0 bg-obsidian/40 backdrop-blur-sm flex items-end sm:items-center justify-center z-50 px-4 pt-4 pb-safe overscroll-contain"
       onClick={(e) => {
         // Only close if clicking directly on the backdrop, not on children
         if (e.target === e.currentTarget) {
@@ -142,16 +142,16 @@ export default function EditConnectionModal({ connection, isOpen, onClose, onSuc
       }}
     >
       <div
-        className="bg-white rounded-2xl w-full max-w-md shadow-xl max-h-[90vh] overflow-y-auto overscroll-contain"
+        className="bg-bone rounded-lg w-full max-w-md shadow-modal max-h-[90vh] overflow-y-auto overscroll-contain"
       >
         <div className="p-6">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-semibold text-lavender-800">
+            <h2 className="text-h2 font-medium text-obsidian">
               Edit connection
             </h2>
             <button
               onClick={onClose}
-              className="text-lavender-400 hover:text-lavender-600 transition-colors"
+              className="text-ash hover:text-obsidian transition-all duration-calm"
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -162,7 +162,7 @@ export default function EditConnectionModal({ connection, isOpen, onClose, onSuc
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Name */}
             <div>
-              <label htmlFor="edit-name" className="block text-sm font-medium text-lavender-700 mb-1">
+              <label htmlFor="edit-name" className="block text-body font-medium text-obsidian mb-1">
                 Their name
               </label>
               <input
@@ -171,63 +171,62 @@ export default function EditConnectionModal({ connection, isOpen, onClose, onSuc
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 required
-                className="w-full px-4 py-3 rounded-xl border border-lavender-200 bg-white text-lavender-800 placeholder-lavender-400 focus:outline-none focus:ring-2 focus:ring-muted-teal-400 focus:border-transparent transition-all"
+                className="w-full bg-bone-warm border-none rounded-md px-4 py-3 text-body text-obsidian placeholder:text-ash focus:outline-none focus:ring-1 focus:ring-moss/30 transition-all duration-calm"
               />
             </div>
 
             {/* Phone Number */}
             <div>
-              <label htmlFor="edit-phone" className="block text-sm font-medium text-lavender-700 mb-1">
-                Phone number <span className="text-lavender-400">(optional)</span>
+              <label htmlFor="edit-phone" className="block text-body font-medium text-obsidian mb-1">
+                Phone number <span className="text-ash">(optional)</span>
               </label>
               <input
                 id="edit-phone"
                 type="tel"
                 value={phoneNumber}
                 onChange={(e) => setPhoneNumber(e.target.value)}
-                className="w-full px-4 py-3 rounded-xl border border-lavender-200 bg-white text-lavender-800 placeholder-lavender-400 focus:outline-none focus:ring-2 focus:ring-muted-teal-400 focus:border-transparent transition-all"
+                className="w-full bg-bone-warm border-none rounded-md px-4 py-3 text-body text-obsidian placeholder:text-ash focus:outline-none focus:ring-1 focus:ring-moss/30 transition-all duration-calm"
                 placeholder="e.g., +1 555 123 4567"
               />
             </div>
 
             {/* Email */}
             <div>
-              <label htmlFor="edit-email" className="block text-sm font-medium text-lavender-700 mb-1">
-                Email <span className="text-lavender-400">(optional)</span>
+              <label htmlFor="edit-email" className="block text-body font-medium text-obsidian mb-1">
+                Email <span className="text-ash">(optional)</span>
               </label>
               <input
                 id="edit-email"
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-4 py-3 rounded-xl border border-lavender-200 bg-white text-lavender-800 placeholder-lavender-400 focus:outline-none focus:ring-2 focus:ring-muted-teal-400 focus:border-transparent transition-all"
+                className="w-full bg-bone-warm border-none rounded-md px-4 py-3 text-body text-obsidian placeholder:text-ash focus:outline-none focus:ring-1 focus:ring-moss/30 transition-all duration-calm"
                 placeholder="e.g., sarah@example.com"
               />
             </div>
 
             {/* Preferred Messaging App */}
             <div>
-              <label className="block text-sm font-medium text-lavender-700 mb-1">
-                Preferred messaging app <span className="text-lavender-400">(optional)</span>
+              <label className="block text-body font-medium text-obsidian mb-1">
+                Preferred messaging app <span className="text-ash">(optional)</span>
               </label>
               <div className="flex gap-2">
                 {([
-                  { value: 'text' as PreferredContactMethod, label: 'Text', icon: '📱' },
-                  { value: 'whatsapp' as PreferredContactMethod, label: 'WhatsApp', icon: '💬' },
-                  { value: 'email' as PreferredContactMethod, label: 'Email', icon: '📧' },
+                  { value: 'text' as PreferredContactMethod, label: 'Text' },
+                  { value: 'whatsapp' as PreferredContactMethod, label: 'WhatsApp' },
+                  { value: 'email' as PreferredContactMethod, label: 'Email' },
                 ]).map((option) => (
                   <button
                     key={option.value}
                     type="button"
                     onClick={() => setPreferredMethod(preferredMethod === option.value ? null : option.value)}
-                    className={`flex-1 py-2.5 px-2 rounded-xl text-center transition-all ${
+                    className={`flex-1 py-2.5 px-2 rounded-md text-center transition-all duration-calm ${
                       preferredMethod === option.value
-                        ? 'bg-muted-teal-400 text-white'
-                        : 'bg-lavender-50 text-lavender-600 hover:bg-lavender-100'
+                        ? 'bg-moss text-bone shadow-card'
+                        : 'bg-bone-warm text-obsidian hover:shadow-card'
                     }`}
                   >
-                    <div className="text-lg mb-0.5">{option.icon}</div>
-                    <div className="text-xs font-medium">{option.label}</div>
+                    <div className="text-body font-medium">{option.label}</div>
                   </button>
                 ))}
               </div>
@@ -235,14 +234,14 @@ export default function EditConnectionModal({ connection, isOpen, onClose, onSuc
 
             {/* Frequency */}
             <div>
-              <label htmlFor="edit-frequency" className="block text-sm font-medium text-lavender-700 mb-1">
+              <label htmlFor="edit-frequency" className="block text-body font-medium text-obsidian mb-1">
                 How often do you want to catch-up?
               </label>
               <select
                 id="edit-frequency"
                 value={frequency}
                 onChange={(e) => setFrequency(e.target.value as CatchupFrequency)}
-                className="w-full px-4 py-3 rounded-xl border border-lavender-200 bg-white text-lavender-800 focus:outline-none focus:ring-2 focus:ring-muted-teal-400 focus:border-transparent transition-all"
+                className="w-full bg-bone-warm border-none rounded-md px-4 py-3 text-body text-obsidian focus:outline-none focus:ring-1 focus:ring-moss/30 transition-all duration-calm"
               >
                 {frequencyOptions.map((option) => (
                   <option key={option.value} value={option.value}>
@@ -253,28 +252,28 @@ export default function EditConnectionModal({ connection, isOpen, onClose, onSuc
             </div>
 
             {error && (
-              <p className="text-red-600 text-sm bg-red-50 p-3 rounded-lg">{error}</p>
+              <p className="text-ember text-body bg-bone-warm p-3 rounded-md">{error}</p>
             )}
 
             <div className="flex gap-3">
               <button
                 type="submit"
                 disabled={loading || !name.trim()}
-                className="flex-1 py-3 px-4 bg-muted-teal-500 hover:bg-muted-teal-600 text-white font-medium rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex-1 py-3 px-4 bg-moss hover:bg-moss/90 text-bone font-medium rounded-md transition-all duration-calm disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 {loading ? 'Saving...' : 'Save changes'}
               </button>
             </div>
 
-            <div className="pt-4 border-t border-lavender-100">
+            <div className="pt-4 border-t border-bone-warm">
               <button
                 type="button"
                 onClick={handleDelete}
                 disabled={loading}
-                className={`w-full py-3 px-4 font-medium rounded-xl transition-colors disabled:opacity-50 ${
+                className={`w-full py-3 px-4 font-medium rounded-md transition-all duration-calm disabled:opacity-40 ${
                   deleteConfirm
-                    ? 'bg-red-500 hover:bg-red-600 text-white'
-                    : 'bg-lavender-100 hover:bg-lavender-200 text-lavender-600'
+                    ? 'bg-ember hover:bg-ember/90 text-bone'
+                    : 'bg-bone-warm hover:shadow-card text-obsidian'
                 }`}
               >
                 {deleteConfirm ? 'Click again to confirm delete' : 'Delete connection'}

@@ -8,6 +8,13 @@ interface PendingCatchupPromptProps {
   onDismiss: () => void
 }
 
+const METHOD_LABELS: Record<string, string> = {
+  call: 'Call',
+  text: 'Text',
+  whatsapp: 'WhatsApp',
+  email: 'Email',
+}
+
 export default function PendingCatchupPrompt({
   pendingIntent,
   onRecordCatchup,
@@ -20,21 +27,19 @@ export default function PendingCatchupPrompt({
 
   const methodLabel = getMethodLabel(pendingIntent.intent.method)
   const timeAgo = getTimeAgo(pendingIntent.intent.initiated_at)
+  const displayLabel = METHOD_LABELS[pendingIntent.intent.method] || methodLabel
 
   return (
-    <div className="bg-gradient-to-r from-muted-teal-50 to-lavender-50 rounded-2xl p-4 shadow-sm border border-muted-teal-100 mb-4">
+    <div className="bg-bone shadow-card rounded-lg p-4 mb-4">
       <div className="flex items-start gap-3">
-        <div className="text-2xl">
-          {pendingIntent.intent.method === 'call' && '📞'}
-          {pendingIntent.intent.method === 'text' && '📱'}
-          {pendingIntent.intent.method === 'whatsapp' && '💬'}
-          {pendingIntent.intent.method === 'email' && '📧'}
+        <div className="text-body font-medium text-moss">
+          {displayLabel}
         </div>
         <div className="flex-1">
-          <div className="text-sm font-medium text-lavender-800">
+          <div className="text-body font-medium text-obsidian">
             Did you catch up with {pendingIntent.connection.name}?
           </div>
-          <div className="text-xs text-lavender-500 mt-0.5">
+          <div className="text-micro text-ash mt-0.5">
             You {methodLabel} them {timeAgo}
           </div>
         </div>
@@ -43,13 +48,13 @@ export default function PendingCatchupPrompt({
       <div className="flex gap-2 mt-3">
         <button
           onClick={onRecordCatchup}
-          className="flex-1 py-2.5 px-4 bg-muted-teal-500 hover:bg-muted-teal-600 text-white text-sm font-medium rounded-xl transition-colors"
+          className="flex-1 py-2.5 px-4 bg-moss hover:opacity-90 text-bone text-body font-medium rounded-md transition-all duration-calm"
         >
           Record catch-up
         </button>
         <button
           onClick={handleDismiss}
-          className="py-2.5 px-4 bg-lavender-100 hover:bg-lavender-200 text-lavender-600 text-sm font-medium rounded-xl transition-colors"
+          className="py-2.5 px-4 bg-bone-warm hover:bg-ash/10 text-obsidian text-body font-medium rounded-md transition-all duration-calm"
         >
           Skip
         </button>

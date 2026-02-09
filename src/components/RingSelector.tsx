@@ -10,17 +10,13 @@ import {
 interface RingSelectorProps {
   value: RingTier
   ringPosition?: number | null
-  coreCount: number // Current number of connections in core ring
+  coreCount: number
   onChange: (tier: RingTier, position?: number | null) => void
   connectionName?: string
   disabled?: boolean
   className?: string
 }
 
-/**
- * Selector for assigning a connection to Core or Outer ring
- * Core ring is limited to 7 people
- */
 export default function RingSelector({
   value,
   ringPosition,
@@ -44,7 +40,6 @@ export default function RingSelector({
     setShowCoreWarning(false)
 
     if (newTier === 'core') {
-      // Assign to next available position
       const newPosition = value === 'core' ? ringPosition : coreCount + 1
       onChange('core', newPosition)
     } else {
@@ -54,29 +49,23 @@ export default function RingSelector({
 
   return (
     <div className={`space-y-3 ${className}`}>
-      {/* Ring tier selection */}
       <div className="flex gap-2">
         <button
           type="button"
           onClick={() => handleTierChange('core')}
           disabled={disabled}
-          className={`flex-1 py-3 px-4 rounded-xl border-2 transition-all ${
+          className={`flex-1 py-3 px-4 rounded-md border-2 transition-all duration-calm ${
             value === 'core'
-              ? 'border-muted-teal-500 bg-muted-teal-50'
-              : 'border-lavender-200 bg-white hover:border-lavender-300'
-          } ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
+              ? 'border-moss bg-bone-warm'
+              : 'border-bone-warm bg-bone hover:border-ash'
+          } ${disabled ? 'opacity-40 cursor-not-allowed' : ''}`}
         >
           <div className="flex items-center justify-center gap-2">
-            <span className="text-lg">💎</span>
-            <span
-              className={`font-medium ${
-                value === 'core' ? 'text-muted-teal-700' : 'text-lavender-700'
-              }`}
-            >
+            <span className={`text-body-medium ${value === 'core' ? 'text-moss' : 'text-obsidian'}`}>
               {RING_LABELS.core}
             </span>
           </div>
-          <p className="text-xs text-lavender-500 mt-1">
+          <p className="text-label text-ash mt-1">
             {coreSlotsFilled}/{CORE_RING_MAX} slots
           </p>
         </button>
@@ -85,30 +74,24 @@ export default function RingSelector({
           type="button"
           onClick={() => handleTierChange('outer')}
           disabled={disabled}
-          className={`flex-1 py-3 px-4 rounded-xl border-2 transition-all ${
+          className={`flex-1 py-3 px-4 rounded-md border-2 transition-all duration-calm ${
             value === 'outer'
-              ? 'border-muted-teal-500 bg-muted-teal-50'
-              : 'border-lavender-200 bg-white hover:border-lavender-300'
-          } ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
+              ? 'border-moss bg-bone-warm'
+              : 'border-bone-warm bg-bone hover:border-ash'
+          } ${disabled ? 'opacity-40 cursor-not-allowed' : ''}`}
         >
           <div className="flex items-center justify-center gap-2">
-            <span className="text-lg">🌐</span>
-            <span
-              className={`font-medium ${
-                value === 'outer' ? 'text-muted-teal-700' : 'text-lavender-700'
-              }`}
-            >
+            <span className={`text-body-medium ${value === 'outer' ? 'text-moss' : 'text-obsidian'}`}>
               {RING_LABELS.outer}
             </span>
           </div>
-          <p className="text-xs text-lavender-500 mt-1">Unlimited</p>
+          <p className="text-label text-ash mt-1">Unlimited</p>
         </button>
       </div>
 
-      {/* Core ring warning */}
       {showCoreWarning && (
-        <div className="bg-orange-50 border border-orange-200 rounded-lg p-3">
-          <p className="text-sm text-orange-700">
+        <div className="bg-bone-warm rounded-md p-3">
+          <p className="text-micro text-ember">
             Your core circle is full ({CORE_RING_MAX} connections).
             {connectionName
               ? ` To add ${connectionName}, first move someone else to the outer circle.`
@@ -117,11 +100,10 @@ export default function RingSelector({
         </div>
       )}
 
-      {/* Position selector (when in core) */}
       {value === 'core' && (
-        <div className="bg-lavender-50 rounded-lg p-3">
-          <p className="text-xs text-lavender-600 mb-2">
-            Position in core circle (optional - for personal priority)
+        <div className="bg-bone-warm rounded-md p-3">
+          <p className="text-label text-ash mb-2">
+            Position in core circle (optional)
           </p>
           <div className="flex gap-1 justify-center">
             {Array.from({ length: CORE_RING_MAX }, (_, i) => i + 1).map((pos) => (
@@ -130,11 +112,11 @@ export default function RingSelector({
                 type="button"
                 onClick={() => onChange('core', pos)}
                 disabled={disabled}
-                className={`w-8 h-8 rounded-full text-sm font-medium transition-all ${
+                className={`w-8 h-8 rounded-full text-label transition-all duration-calm ${
                   ringPosition === pos
-                    ? 'bg-muted-teal-500 text-white'
-                    : 'bg-white border border-lavender-200 text-lavender-600 hover:border-muted-teal-300'
-                } ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    ? 'bg-moss text-bone'
+                    : 'bg-bone border border-bone-warm text-ash hover:border-moss'
+                } ${disabled ? 'opacity-40 cursor-not-allowed' : ''}`}
               >
                 {pos}
               </button>
@@ -143,24 +125,18 @@ export default function RingSelector({
         </div>
       )}
 
-      {/* Explanation */}
-      <div className="text-xs text-lavender-500 space-y-1">
+      <div className="text-micro text-ash space-y-1">
         <p>
-          <strong>Core Circle:</strong> Your closest relationships. Limited to {CORE_RING_MAX} people
-          to maintain meaningful connections.
+          <strong className="text-obsidian">Core circle:</strong> Your closest relationships. Limited to {CORE_RING_MAX} people.
         </p>
         <p>
-          <strong>Outer Circle:</strong> Extended network. Important but with more flexible
-          expectations.
+          <strong className="text-obsidian">Outer circle:</strong> Extended network with more flexible expectations.
         </p>
       </div>
     </div>
   )
 }
 
-/**
- * Compact ring indicator for use in lists
- */
 export function RingBadge({
   tier,
   position,
@@ -173,20 +149,20 @@ export function RingBadge({
   if (tier === 'core') {
     return (
       <span
-        className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-muted-teal-100 text-muted-teal-700 ${className}`}
-        title={`Core Circle${position ? ` #${position}` : ''}`}
+        className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-label bg-bone-warm text-moss ${className}`}
+        title={`Core circle${position ? ` #${position}` : ''}`}
       >
-        💎 Core{position && <span className="opacity-70">#{position}</span>}
+        Core{position && <span className="opacity-70">#{position}</span>}
       </span>
     )
   }
 
   return (
     <span
-      className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-lavender-100 text-lavender-600 ${className}`}
-      title="Outer Circle"
+      className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-label bg-bone-warm text-ash ${className}`}
+      title="Outer circle"
     >
-      🌐 Outer
+      Outer
     </span>
   )
 }

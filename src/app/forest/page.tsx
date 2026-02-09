@@ -715,7 +715,7 @@ export default function ForestPage() {
 
       {/* Connection Detail Modal */}
       {selectedConnection && selectedStats && (
-        <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-end sm:items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-end sm:items-center justify-center z-50 px-4 pt-4 pb-safe">
           <div className="bg-white rounded-2xl w-full max-w-sm shadow-xl overflow-hidden">
             {/* Header with tree visualization */}
             <div className={`p-6 ${

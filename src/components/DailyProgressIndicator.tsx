@@ -1,6 +1,6 @@
 'use client'
 
-import { ACTION_WEIGHTS, ActionTypeV2 } from '@/types/habitEngine'
+import { ActionTypeV2 } from '@/types/habitEngine'
 
 interface DailyProgressIndicatorProps {
   totalWeight: number
@@ -10,9 +10,45 @@ interface DailyProgressIndicatorProps {
 }
 
 /**
- * Shows the user's daily progress toward a "valid day" (weight >= 0.5)
- * Displays a progress bar and current weight status
+ * SVG ring that fills based on daily connection weight.
+ * Replaces the old progress bar with an organic ring visualization.
  */
+function ConnectionRing({ percent, size = 40, strokeWidth = 3.5, color }: {
+  percent: number
+  size?: number
+  strokeWidth?: number
+  color: string
+}) {
+  const radius = (size - strokeWidth) / 2
+  const circumference = 2 * Math.PI * radius
+  const offset = circumference - (percent / 100) * circumference
+
+  return (
+    <svg width={size} height={size} className="transform -rotate-90">
+      <circle
+        cx={size / 2}
+        cy={size / 2}
+        r={radius}
+        fill="none"
+        stroke="#F0EEEA"
+        strokeWidth={strokeWidth}
+      />
+      <circle
+        cx={size / 2}
+        cy={size / 2}
+        r={radius}
+        fill="none"
+        stroke={color}
+        strokeWidth={strokeWidth}
+        strokeDasharray={circumference}
+        strokeDashoffset={offset}
+        strokeLinecap="round"
+        className="transition-all duration-deliberate ease-calm"
+      />
+    </svg>
+  )
+}
+
 export default function DailyProgressIndicator({
   totalWeight,
   actionCount,
@@ -20,22 +56,21 @@ export default function DailyProgressIndicator({
   className = '',
 }: DailyProgressIndicatorProps) {
   const isValidDay = totalWeight >= 0.5
-  const progressPercent = Math.min(100, (totalWeight / 6) * 100) // 6 is max weight (in_person_1on1)
+  const progressPercent = Math.min(100, (totalWeight / 6) * 100)
 
-  // Determine color based on progress
-  const getProgressColor = () => {
-    if (isValidDay && totalWeight >= 3) return 'bg-green-500' // Great day
-    if (isValidDay) return 'bg-muted-teal-500' // Valid day
-    if (totalWeight > 0) return 'bg-yellow-500' // Some progress
-    return 'bg-lavender-300' // No progress
+  const getRingColor = () => {
+    if (isValidDay && totalWeight >= 3) return '#5F7A6A' // moss — deep connection
+    if (isValidDay) return '#5F7A6A' // moss — valid day
+    if (totalWeight > 0) return '#E3B873' // sun — some progress
+    return '#F0EEEA' // bone-warm — no progress
   }
 
   const getStatusText = () => {
     if (totalWeight === 0) return 'No actions yet today'
-    if (!isValidDay) return 'Almost there...'
-    if (totalWeight >= 4) return 'Amazing investment!'
-    if (totalWeight >= 2) return 'Great connection day'
-    return 'Valid day achieved'
+    if (!isValidDay) return 'Almost there'
+    if (totalWeight >= 4) return 'Deep connection today'
+    if (totalWeight >= 2) return 'Showing up changes things'
+    return 'Another quiet step forward'
   }
 
   const getActionLabel = (action: ActionTypeV2): string => {
@@ -48,54 +83,46 @@ export default function DailyProgressIndicator({
   }
 
   return (
-    <div className={`bg-white rounded-xl p-4 shadow-sm border border-lavender-100 ${className}`}>
-      {/* Header */}
-      <div className="flex items-center justify-between mb-3">
-        <div className="flex items-center gap-2">
-          <span className="text-lg">
-            {isValidDay ? '✓' : '○'}
+    <div className={`bg-bone rounded-lg p-6 shadow-card ${className}`}>
+      <div className="flex items-center gap-4">
+        <ConnectionRing percent={progressPercent} color={getRingColor()} />
+        <div className="flex-1 min-w-0">
+          <span className="text-body-medium text-obsidian">
+            Today&apos;s connection
           </span>
-          <span className="text-sm font-medium text-lavender-800">
-            Today&apos;s Investment
-          </span>
+          <div className="flex items-center justify-between mt-1">
+            <span className={`text-micro ${isValidDay ? 'text-moss' : 'text-ash'}`}>
+              {getStatusText()}
+            </span>
+            {actionCount > 0 && (
+              <span className="text-micro text-ash">
+                {actionCount} action{actionCount !== 1 ? 's' : ''}
+                {highestAction && ` · ${getActionLabel(highestAction)}`}
+              </span>
+            )}
+          </div>
         </div>
-        <div className="text-right">
-          <span className="text-lg font-semibold text-lavender-800">
-            {totalWeight}
-          </span>
-          <span className="text-xs text-lavender-500 ml-1">weight</span>
-        </div>
       </div>
 
-      {/* Progress bar */}
-      <div className="h-2 bg-lavender-100 rounded-full overflow-hidden mb-2">
-        <div
-          className={`h-full rounded-full transition-all duration-500 ${getProgressColor()}`}
-          style={{ width: `${progressPercent}%` }}
-        />
-      </div>
-
-      {/* Status text */}
-      <div className="flex items-center justify-between text-xs">
-        <span className={isValidDay ? 'text-muted-teal-600 font-medium' : 'text-lavender-500'}>
-          {getStatusText()}
-        </span>
-        {actionCount > 0 && (
-          <span className="text-lavender-500">
-            {actionCount} action{actionCount !== 1 ? 's' : ''}
-            {highestAction && ` · Best: ${getActionLabel(highestAction)}`}
-          </span>
-        )}
-      </div>
-
-      {/* Weight scale hint */}
       {!isValidDay && totalWeight === 0 && (
-        <div className="mt-3 pt-3 border-t border-lavender-100">
-          <p className="text-xs text-lavender-500">
-            Any action counts! Even a quick message ({ACTION_WEIGHTS.text} weight) makes today valid.
+        <div className="mt-4 pt-4 border-t border-bone-warm">
+          <p className="text-micro text-ash">
+            Any action counts. Even a quick message makes today a connection day.
           </p>
         </div>
       )}
     </div>
+  )
+}
+
+/**
+ * Compact ring for the sticky header — 16px version
+ */
+export function CompactConnectionRing({ percent, color }: {
+  percent: number
+  color: string
+}) {
+  return (
+    <ConnectionRing percent={percent} size={16} strokeWidth={2} color={color} />
   )
 }

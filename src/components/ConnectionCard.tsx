@@ -4,8 +4,6 @@ import { Connection, CatchupFrequency, RelationshipStrength, RingTier } from '@/
 import { StrengthDot } from './RelationshipStrengthBadge'
 import { RingBadge } from './RingSelector'
 
-const moodEmojis: Record<string, string> = { happy: '😊', neutral: '😐', sad: '😔' }
-
 interface ConnectionCardProps {
   connection: Connection
   lastMemory?: string
@@ -15,7 +13,6 @@ interface ConnectionCardProps {
   onCatchup: () => void
   onEdit: () => void
   onViewDetails: () => void
-  // V2 Habit Engine props (optional - shown when provided)
   strengthV2?: RelationshipStrength
   ringTier?: RingTier
   ringPosition?: number | null
@@ -52,7 +49,6 @@ const frequencyToDays: Record<CatchupFrequency, number> = {
 }
 
 function getNextCatchupInfo(connection: Connection): { text: string; isOverdue: boolean } {
-  // If there's an explicit next_catchup_date, use that
   if (connection.next_catchup_date) {
     const daysUntil = getDaysUntil(connection.next_catchup_date)
     if (daysUntil === null) return { text: '', isOverdue: false }
@@ -64,7 +60,6 @@ function getNextCatchupInfo(connection: Connection): { text: string; isOverdue: 
     return { text: `Catch-up in ${Math.floor(daysUntil / 7)} weeks`, isOverdue: false }
   }
 
-  // Otherwise calculate based on last interaction + frequency
   if (!connection.last_interaction_date) {
     return { text: 'Reach out anytime', isOverdue: false }
   }
@@ -105,27 +100,23 @@ function getConnectionStatusText(lastInteractionDate: string | null): { text: st
   return { text: `Caught-up ${days} days ago`, isUrgent: false }
 }
 
-export default function ConnectionCard({ connection, lastMemory, lastMood, onLogInteraction, onPlanCatchup, onCatchup, onEdit, onViewDetails, strengthV2, ringTier, ringPosition }: ConnectionCardProps) {
+export default function ConnectionCard({ connection, lastMemory, lastMood: _lastMood, onLogInteraction, onPlanCatchup, onCatchup, onEdit, onViewDetails, strengthV2, ringTier, ringPosition }: ConnectionCardProps) {
+  void _lastMood // Mood tracked in DB but not displayed on card per design system
   const status = getConnectionStatusText(connection.last_interaction_date)
   const nextCatchup = getNextCatchupInfo(connection)
 
   return (
-    <div className="bg-white rounded-2xl p-6 shadow-sm border border-lavender-100">
-      {/* Clickable area for viewing details */}
+    <div className="bg-bone rounded-lg p-6 shadow-card">
       <button
         onClick={onViewDetails}
         className="w-full text-left mb-4 cursor-pointer"
       >
         <div className="flex items-center justify-between mb-1">
           <div className="flex items-center gap-2">
-            {/* V2: Strength indicator dot */}
             {strengthV2 && <StrengthDot strength={strengthV2} />}
-            <span className="text-xl font-semibold text-lavender-800">
+            <span className="text-h3 text-obsidian">
               {connection.name}
             </span>
-            {lastMood && moodEmojis[lastMood] && (
-              <span className="text-lg">{moodEmojis[lastMood]}</span>
-            )}
           </div>
           <div
             className="flex items-center gap-2"
@@ -133,17 +124,16 @@ export default function ConnectionCard({ connection, lastMemory, lastMood, onLog
           >
             <button
               onClick={onEdit}
-              className="p-1.5 text-lavender-400 hover:text-lavender-600 hover:bg-lavender-100 rounded-lg transition-colors"
+              className="p-1.5 text-ash hover:text-obsidian hover:bg-bone-warm rounded-md transition-all duration-calm"
               title="Edit connection"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
               </svg>
             </button>
           </div>
         </div>
 
-        {/* V2: Ring badge for core connections */}
         {ringTier === 'core' && (
           <div className="mb-1">
             <RingBadge tier={ringTier} position={ringPosition} />
@@ -151,17 +141,17 @@ export default function ConnectionCard({ connection, lastMemory, lastMood, onLog
         )}
 
         {nextCatchup.text && (
-          <div className={`text-sm font-bold ${nextCatchup.isOverdue ? 'text-red-500' : 'text-muted-teal-600'}`}>
+          <div className={`text-micro-medium ${nextCatchup.isOverdue ? 'text-ember' : 'text-moss'}`}>
             {nextCatchup.text}
           </div>
         )}
 
-        <div className="text-sm text-lavender-500 mt-1">
+        <div className="text-micro text-ash mt-1">
           {status.text}
         </div>
 
         {lastMemory && (
-          <div className="text-sm text-lavender-500 italic mt-2 line-clamp-3">
+          <div className="text-micro text-ash italic mt-2 line-clamp-3">
             &ldquo;{lastMemory}&rdquo;
           </div>
         )}
@@ -170,19 +160,19 @@ export default function ConnectionCard({ connection, lastMemory, lastMood, onLog
       <div className="grid grid-cols-3 gap-2">
         <button
           onClick={onPlanCatchup}
-          className="py-2.5 px-3 bg-lavender-100 hover:bg-lavender-200 text-lavender-700 text-sm font-medium rounded-xl transition-colors"
+          className="py-2.5 px-3 bg-bone-warm hover:bg-ash/10 text-obsidian text-micro-medium rounded-md transition-all duration-calm"
         >
           Plan
         </button>
         <button
           onClick={onCatchup}
-          className="py-2.5 px-3 bg-muted-teal-500 hover:bg-muted-teal-600 text-white text-sm font-medium rounded-xl transition-colors"
+          className="py-2.5 px-3 bg-moss hover:opacity-90 text-bone text-micro-medium rounded-md transition-all duration-calm"
         >
           Catch-up
         </button>
         <button
           onClick={onLogInteraction}
-          className="py-2.5 px-3 bg-lavender-100 hover:bg-lavender-200 text-lavender-700 text-sm font-medium rounded-xl transition-colors"
+          className="py-2.5 px-3 bg-bone-warm hover:bg-ash/10 text-obsidian text-micro-medium rounded-md transition-all duration-calm"
         >
           Record
         </button>

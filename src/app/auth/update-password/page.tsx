@@ -139,7 +139,7 @@ export default function UpdatePasswordPage() {
 
       if (error) throw error
 
-      setMessage('Password updated successfully! Redirecting...')
+      setMessage('Password updated successfully. Redirecting...')
       setTimeout(() => {
         router.push('/')
         router.refresh()
@@ -153,26 +153,25 @@ export default function UpdatePasswordPage() {
 
   if (checking) {
     return (
-      <main className="min-h-screen bg-lavender-50 flex items-center justify-center">
-        <div className="text-lavender-400">Loading...</div>
+      <main className="min-h-screen bg-bone flex items-center justify-center">
+        <div className="text-ash">Loading...</div>
       </main>
     )
   }
 
   if (linkExpired) {
     return (
-      <main className="min-h-screen bg-lavender-50 flex flex-col items-center justify-center p-6">
+      <main className="min-h-screen bg-bone flex flex-col items-center justify-center p-6">
         <div className="w-full max-w-sm text-center">
-          <div className="text-4xl mb-4">😕</div>
-          <h1 className="text-2xl font-semibold text-lavender-800 mb-2">
+          <h1 className="text-h1 font-medium text-obsidian mb-2">
             Link Expired
           </h1>
-          <p className="text-lavender-500 mb-6">
+          <p className="text-ash mb-6">
             This password reset link is invalid or has expired. Please request a new one.
           </p>
           <button
             onClick={() => router.push('/login')}
-            className="w-full py-3 px-4 bg-muted-teal-500 hover:bg-muted-teal-600 text-white font-medium rounded-xl transition-colors"
+            className="w-full py-3 px-4 bg-moss hover:bg-moss/90 text-bone font-medium rounded-md transition-all duration-calm"
           >
             Back to Login
           </button>
@@ -182,20 +181,20 @@ export default function UpdatePasswordPage() {
   }
 
   return (
-    <main className="min-h-screen bg-lavender-50 flex flex-col items-center justify-center p-6">
+    <main className="min-h-screen bg-bone flex flex-col items-center justify-center p-6">
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-semibold text-lavender-800 mb-2">
+          <h1 className="text-h1 font-medium text-obsidian mb-2">
             Set New Password
           </h1>
-          <p className="text-lavender-500">
+          <p className="text-ash">
             Enter your new password below
           </p>
         </div>
 
         <form onSubmit={handleUpdatePassword} className="space-y-4">
           <div>
-            <label htmlFor="password" className="block text-sm font-medium text-lavender-700 mb-1">
+            <label htmlFor="password" className="block text-body font-medium text-obsidian mb-1">
               New Password
             </label>
             <input
@@ -205,13 +204,13 @@ export default function UpdatePasswordPage() {
               onChange={(e) => setPassword(e.target.value)}
               required
               minLength={6}
-              className="w-full px-4 py-3 rounded-xl border border-lavender-200 bg-white text-lavender-800 placeholder-lavender-400 focus:outline-none focus:ring-2 focus:ring-muted-teal-400 focus:border-transparent transition-all"
+              className="w-full px-4 py-3 rounded-md border-none bg-bone-warm text-obsidian placeholder:text-ash focus:outline-none focus:ring-1 focus:ring-moss/30 transition-all duration-calm"
               placeholder="••••••••"
             />
           </div>
 
           <div>
-            <label htmlFor="confirmPassword" className="block text-sm font-medium text-lavender-700 mb-1">
+            <label htmlFor="confirmPassword" className="block text-body font-medium text-obsidian mb-1">
               Confirm Password
             </label>
             <input
@@ -221,23 +220,23 @@ export default function UpdatePasswordPage() {
               onChange={(e) => setConfirmPassword(e.target.value)}
               required
               minLength={6}
-              className="w-full px-4 py-3 rounded-xl border border-lavender-200 bg-white text-lavender-800 placeholder-lavender-400 focus:outline-none focus:ring-2 focus:ring-muted-teal-400 focus:border-transparent transition-all"
+              className="w-full px-4 py-3 rounded-md border-none bg-bone-warm text-obsidian placeholder:text-ash focus:outline-none focus:ring-1 focus:ring-moss/30 transition-all duration-calm"
               placeholder="••••••••"
             />
           </div>
 
           {error && (
-            <p className="text-red-600 text-sm bg-red-50 p-3 rounded-lg">{error}</p>
+            <p className="text-ember text-body bg-bone-warm p-3 rounded-md">{error}</p>
           )}
 
           {message && (
-            <p className="text-muted-teal-600 text-sm bg-muted-teal-50 p-3 rounded-lg">{message}</p>
+            <p className="text-moss text-body bg-bone-warm p-3 rounded-md">{message}</p>
           )}
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-3 px-4 bg-muted-teal-500 hover:bg-muted-teal-600 text-white font-medium rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full py-3 px-4 bg-moss hover:bg-moss/90 text-bone font-medium rounded-md transition-all duration-calm disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading ? 'Updating...' : 'Update Password'}
           </button>

@@ -77,53 +77,52 @@ export default function ReflectionHistoryPage() {
 
   if (loading) {
     return (
-      <main className="min-h-screen bg-lavender-50 flex items-center justify-center">
-        <div className="text-lavender-400">Loading...</div>
+      <main className="min-h-screen bg-bone flex items-center justify-center">
+        <div className="text-ash">Loading...</div>
       </main>
     )
   }
 
   return (
-    <main className="min-h-screen bg-lavender-50">
+    <main className="min-h-screen bg-bone">
       <div className="max-w-lg mx-auto px-6 pt-8 pb-safe">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <Link
             href="/"
-            className="text-lavender-400 hover:text-lavender-600 text-sm transition-colors flex items-center gap-1"
+            className="text-ash hover:text-obsidian text-body transition-all duration-calm flex items-center gap-1"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
             Back
           </Link>
-          <div className="text-muted-teal-500 font-semibold text-lg">Reflection History</div>
+          <div className="text-moss font-medium text-h3">Reflection History</div>
           <div className="w-12" />
         </div>
 
         {/* Streak Stats */}
-        <div className="bg-white rounded-2xl p-6 shadow-sm border border-lavender-100 mb-6">
+        <div className="bg-bone rounded-lg p-6 shadow-card mb-6">
           <div className="grid grid-cols-3 gap-4 text-center">
             <div>
-              <div className="text-2xl font-bold text-muted-teal-600">{streak.currentStreak}</div>
-              <div className="text-xs text-lavender-500">Current streak</div>
+              <div className="text-h1 font-medium text-moss">{streak.currentStreak}</div>
+              <div className="text-micro text-ash">Current streak</div>
             </div>
             <div>
-              <div className="text-2xl font-bold text-lavender-600">{streak.longestStreak}</div>
-              <div className="text-xs text-lavender-500">Longest streak</div>
+              <div className="text-h1 font-medium text-obsidian">{streak.longestStreak}</div>
+              <div className="text-micro text-ash">Longest streak</div>
             </div>
             <div>
-              <div className="text-2xl font-bold text-lavender-600">{streak.totalReflections}</div>
-              <div className="text-xs text-lavender-500">Total reflections</div>
+              <div className="text-h1 font-medium text-obsidian">{streak.totalReflections}</div>
+              <div className="text-micro text-ash">Total reflections</div>
             </div>
           </div>
 
           {streak.currentStreak > 0 && (
-            <div className="mt-4 pt-4 border-t border-lavender-100">
-              <div className="flex items-center justify-center gap-2 text-muted-teal-600">
-                <span className="text-xl">🔥</span>
-                <span className="text-sm font-medium">
-                  {streak.currentStreak} week{streak.currentStreak > 1 ? 's' : ''} in a row!
+            <div className="mt-4 pt-4 border-t border-bone-warm">
+              <div className="flex items-center justify-center gap-2 text-moss">
+                <span className="text-body font-medium">
+                  {streak.currentStreak} week{streak.currentStreak > 1 ? 's' : ''} in a row
                 </span>
               </div>
             </div>
@@ -140,14 +139,14 @@ export default function ReflectionHistoryPage() {
               return (
                 <div
                   key={reflection.id}
-                  className="bg-white rounded-2xl p-5 shadow-sm border border-lavender-100"
+                  className="bg-bone rounded-lg p-5 shadow-card"
                 >
                   <div className="flex items-center justify-between mb-3">
-                    <div className="text-sm font-medium text-lavender-700">
+                    <div className="text-body font-medium text-obsidian">
                       {dateRange.start} - {dateRange.end}
                     </div>
                     {reflection.grow_closer_name && hasFollowedUp && (
-                      <div className="flex items-center gap-1 text-xs text-muted-teal-600 bg-muted-teal-50 px-2 py-1 rounded-full">
+                      <div className="flex items-center gap-1 text-micro text-moss bg-bone-warm px-2 py-1 rounded-full">
                         <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
                           <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                         </svg>
@@ -159,9 +158,8 @@ export default function ReflectionHistoryPage() {
                   <div className="space-y-2">
                     {reflection.most_connected_name && (
                       <div className="flex items-center gap-2">
-                        <span className="text-sm">💭</span>
-                        <span className="text-xs text-lavender-500">Most connected:</span>
-                        <span className="text-sm font-medium text-lavender-700">
+                        <span className="text-micro text-ash">Most connected:</span>
+                        <span className="text-body font-medium text-obsidian">
                           {reflection.most_connected_name}
                         </span>
                       </div>
@@ -169,13 +167,12 @@ export default function ReflectionHistoryPage() {
 
                     {reflection.grow_closer_name && (
                       <div className="flex items-center gap-2">
-                        <span className="text-sm">🌱</span>
-                        <span className="text-xs text-lavender-500">Grow closer:</span>
-                        <span className="text-sm font-medium text-lavender-700">
+                        <span className="text-micro text-ash">Grow closer:</span>
+                        <span className="text-body font-medium text-obsidian">
                           {reflection.grow_closer_name}
                         </span>
                         {!hasFollowedUp && (
-                          <span className="text-xs text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full">
+                          <span className="text-micro text-sun bg-bone-warm px-2 py-0.5 rounded-full">
                             Pending
                           </span>
                         )}
@@ -183,14 +180,14 @@ export default function ReflectionHistoryPage() {
                     )}
 
                     {!reflection.most_connected_name && !reflection.grow_closer_name && (
-                      <div className="text-sm text-lavender-400 italic">
+                      <div className="text-body text-ash italic">
                         Skipped selections
                       </div>
                     )}
 
                     {reflection.reflection_notes && (
-                      <div className="mt-2 pt-2 border-t border-lavender-100">
-                        <p className="text-sm text-lavender-600 italic">
+                      <div className="mt-2 pt-2 border-t border-bone-warm">
+                        <p className="text-body text-ash italic">
                           &ldquo;{reflection.reflection_notes}&rdquo;
                         </p>
                       </div>
@@ -201,17 +198,16 @@ export default function ReflectionHistoryPage() {
             })}
           </div>
         ) : (
-          <div className="bg-white rounded-2xl p-8 shadow-sm border border-lavender-100 text-center">
-            <div className="text-4xl mb-4">💭</div>
-            <h2 className="text-lg font-semibold text-lavender-800 mb-2">
+          <div className="bg-bone rounded-lg p-8 shadow-card text-center">
+            <h2 className="text-h3 font-medium text-obsidian mb-2">
               No reflections yet
             </h2>
-            <p className="text-lavender-500 mb-6">
+            <p className="text-ash mb-6">
               Start your first weekly reflection to see your history here.
             </p>
             <Link
               href="/reflect"
-              className="inline-block py-3 px-6 bg-muted-teal-500 hover:bg-muted-teal-600 text-white font-medium rounded-xl transition-colors"
+              className="inline-block py-3 px-6 bg-moss hover:bg-moss/90 text-bone font-medium rounded-md transition-all duration-calm"
             >
               Start reflecting
             </Link>
@@ -222,7 +218,7 @@ export default function ReflectionHistoryPage() {
         {reflections.length > 0 && (
           <Link
             href="/reflect"
-            className="mt-6 block w-full py-3 px-4 bg-muted-teal-500 hover:bg-muted-teal-600 text-white font-medium rounded-xl transition-colors text-center"
+            className="mt-6 block w-full py-3 px-4 bg-moss hover:bg-moss/90 text-bone font-medium rounded-md transition-all duration-calm text-center"
           >
             Start this week&apos;s reflection
           </Link>

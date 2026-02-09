@@ -29,7 +29,7 @@ interface OnboardingTitleProps {
 
 export function OnboardingTitle({ children, className = '' }: OnboardingTitleProps) {
   return (
-    <h1 className={`text-2xl font-semibold text-gray-900 mb-4 ${className}`}>
+    <h1 className={`text-h1 font-medium text-obsidian mb-4 ${className}`}>
       {children}
     </h1>
   )
@@ -42,7 +42,7 @@ interface OnboardingTextProps {
 
 export function OnboardingText({ children, className = '' }: OnboardingTextProps) {
   return (
-    <p className={`text-gray-600 text-lg leading-relaxed max-w-sm ${className}`}>
+    <p className={`text-ash text-body leading-relaxed max-w-sm ${className}`}>
       {children}
     </p>
   )
@@ -63,12 +63,12 @@ export function OnboardingButton({
   disabled = false,
   className = '',
 }: OnboardingButtonProps) {
-  const baseStyles = 'px-8 py-3 rounded-full font-medium transition-all duration-200'
+  const baseStyles = 'px-8 py-3 rounded-md font-medium transition-all duration-calm'
 
   const variantStyles = {
-    primary: 'bg-emerald-600 text-white hover:bg-emerald-700 disabled:bg-gray-300 disabled:cursor-not-allowed',
-    secondary: 'bg-gray-100 text-gray-700 hover:bg-gray-200',
-    ghost: 'text-gray-500 hover:text-gray-700',
+    primary: 'bg-moss text-bone hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed',
+    secondary: 'bg-bone-warm text-obsidian hover:bg-ash/10',
+    ghost: 'text-ash hover:text-obsidian',
   }
 
   return (
@@ -96,10 +96,10 @@ export function OnboardingList({ items, className = '' }: OnboardingListProps) {
     <ul className={`space-y-3 text-left ${className}`}>
       {items.map((item, index) => (
         <li key={index} className="flex items-start gap-3">
-          <span className={`text-lg ${item.positive === false ? 'text-gray-400' : 'text-emerald-600'}`}>
+          <span className={`text-body ${item.positive === false ? 'text-ash' : 'text-moss'}`}>
             {item.icon || (item.positive === false ? '\u2717' : '\u2713')}
           </span>
-          <span className={item.positive === false ? 'text-gray-500' : 'text-gray-700'}>
+          <span className={item.positive === false ? 'text-ash' : 'text-obsidian'}>
             {item.text}
           </span>
         </li>

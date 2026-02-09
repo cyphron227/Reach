@@ -67,22 +67,22 @@ export default function PlanCatchupModal({ connection, isOpen, onClose, onSucces
 
   return (
     <div
-      className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-end sm:items-center justify-center z-50 p-4 overscroll-contain"
+      className="fixed inset-0 bg-obsidian/40 backdrop-blur-sm flex items-end sm:items-center justify-center z-50 px-4 pt-4 pb-safe overscroll-contain"
       onClick={(e) => {
         if (e.target === e.currentTarget) {
           onClose()
         }
       }}
     >
-      <div className="bg-white rounded-2xl w-full max-w-md shadow-xl max-h-[90vh] overflow-y-auto overscroll-contain">
+      <div className="bg-bone rounded-lg w-full max-w-md shadow-modal max-h-[90vh] overflow-y-auto overscroll-contain">
         <div className="p-6">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-semibold text-lavender-800">
+            <h2 className="text-h2 font-medium text-obsidian">
               Plan catch-up with {connection.name}
             </h2>
             <button
               onClick={onClose}
-              className="text-lavender-400 hover:text-lavender-600 transition-colors"
+              className="text-ash hover:text-obsidian transition-all duration-calm"
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -93,7 +93,7 @@ export default function PlanCatchupModal({ connection, isOpen, onClose, onSucces
           <form onSubmit={handleSubmit} className="space-y-5">
             {/* Quick date options */}
             <div>
-              <label className="block text-sm font-medium text-lavender-700 mb-2">
+              <label className="block text-body font-medium text-obsidian mb-2">
                 Quick select
               </label>
               <div className="grid grid-cols-3 gap-2">
@@ -102,14 +102,14 @@ export default function PlanCatchupModal({ connection, isOpen, onClose, onSucces
                     key={option.label}
                     type="button"
                     onClick={() => setSelectedDate(option.date)}
-                    className={`py-3 px-2 rounded-xl text-center transition-all ${
+                    className={`py-3 px-2 rounded-md text-center transition-all duration-calm ${
                       selectedDate === option.date
-                        ? 'bg-muted-teal-400 text-white'
-                        : 'bg-lavender-50 text-lavender-600 hover:bg-lavender-100'
+                        ? 'bg-moss text-bone'
+                        : 'bg-bone-warm text-obsidian hover:bg-moss/10'
                     }`}
                   >
-                    <div className="text-xs font-medium">{option.label}</div>
-                    <div className="text-xs mt-0.5 opacity-75">{option.display}</div>
+                    <div className="text-label font-medium">{option.label}</div>
+                    <div className="text-micro mt-0.5 opacity-75">{option.display}</div>
                   </button>
                 ))}
               </div>
@@ -117,7 +117,7 @@ export default function PlanCatchupModal({ connection, isOpen, onClose, onSucces
 
             {/* Custom date picker */}
             <div>
-              <label htmlFor="catchupDate" className="block text-sm font-medium text-lavender-700 mb-2">
+              <label htmlFor="catchupDate" className="block text-body font-medium text-obsidian mb-2">
                 Or pick a date
               </label>
               <input
@@ -126,21 +126,21 @@ export default function PlanCatchupModal({ connection, isOpen, onClose, onSucces
                 value={selectedDate}
                 onChange={(e) => setSelectedDate(e.target.value)}
                 min={formatDateForInput(today)}
-                className="w-full px-4 py-3 rounded-xl border border-lavender-200 bg-white text-lavender-800 focus:outline-none focus:ring-2 focus:ring-muted-teal-400 focus:border-transparent transition-all"
+                className="w-full bg-bone-warm border-none rounded-md px-4 py-3 text-body text-obsidian placeholder:text-ash focus:outline-none focus:ring-1 focus:ring-moss/30 transition-all duration-calm"
               />
             </div>
 
             {error && (
-              <p className="text-red-600 text-sm bg-red-50 p-3 rounded-lg">{error}</p>
+              <p className="text-bone text-body bg-ember p-3 rounded-md">{error}</p>
             )}
 
             {/* Submit Button */}
             <button
               type="submit"
               disabled={loading || !selectedDate}
-              className="w-full py-3 px-4 bg-muted-teal-500 hover:bg-muted-teal-600 text-white font-medium rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full py-3 px-4 bg-moss hover:opacity-90 text-bone font-medium rounded-md transition-all duration-calm disabled:opacity-40 disabled:cursor-not-allowed"
             >
-              {loading ? 'Saving...' : 'Set reminder'}
+              {loading ? 'Saving' : 'Set reminder'}
             </button>
           </form>
         </div>

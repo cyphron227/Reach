@@ -82,7 +82,7 @@ function CallbackContent() {
         }
 
         addDebug('Session established, redirecting...')
-        setStatus('Success! Redirecting...')
+        setStatus('Redirecting...')
         if (type === 'recovery') {
           router.replace('/auth/update-password/')
         } else {
@@ -101,11 +101,11 @@ function CallbackContent() {
   }, [searchParams, router])
 
   return (
-    <main className="min-h-screen bg-lavender-50 flex items-center justify-center">
+    <main className="min-h-screen bg-bone flex items-center justify-center">
       <div className="text-center max-w-md px-4">
-        <div className="text-lavender-500 mb-4">{status}</div>
+        <div className="text-ash mb-4">{status}</div>
         {debugInfo.length > 0 && (
-          <div className="text-left bg-white rounded-xl p-4 border border-lavender-100 text-xs text-lavender-400 space-y-1">
+          <div className="text-left bg-bone rounded-md p-4 shadow-card text-micro text-ash space-y-1">
             {debugInfo.map((line, i) => (
               <div key={i}>{line}</div>
             ))}
@@ -119,8 +119,8 @@ function CallbackContent() {
 export default function AuthCallbackPage() {
   return (
     <Suspense fallback={
-      <main className="min-h-screen bg-lavender-50 flex items-center justify-center">
-        <div className="text-lavender-400">Signing in...</div>
+      <main className="min-h-screen bg-bone flex items-center justify-center">
+        <div className="text-ash">Signing in...</div>
       </main>
     }>
       <CallbackContent />

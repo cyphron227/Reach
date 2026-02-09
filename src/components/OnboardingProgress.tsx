@@ -26,10 +26,10 @@ export default function OnboardingProgress({
           <div
             key={stepNumber}
             className={`
-              w-2 h-2 rounded-full transition-all duration-300
-              ${isActive ? 'w-6 bg-emerald-600' : ''}
-              ${isCompleted ? 'bg-emerald-600' : ''}
-              ${!isActive && !isCompleted ? 'bg-gray-300' : ''}
+              w-2 h-2 rounded-full transition-all duration-calm
+              ${isActive ? 'w-6 bg-moss' : ''}
+              ${isCompleted ? 'bg-moss' : ''}
+              ${!isActive && !isCompleted ? 'bg-ash' : ''}
             `}
             aria-label={`Step ${stepNumber} of ${totalSteps}${isActive ? ' (current)' : ''}${isCompleted ? ' (completed)' : ''}`}
           />

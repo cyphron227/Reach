@@ -219,54 +219,44 @@ export default function LoginPage() {
   // Hero Landing Page
   if (!showAuth) {
     return (
-      <main className="min-h-screen bg-gradient-to-br from-lavender-50 via-muted-teal-50 to-frozen-water-50 animate-gradient relative overflow-hidden">
-        {/* Floating decorative elements */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute top-20 left-10 text-4xl opacity-20 animate-float">🌱</div>
-          <div className="absolute top-40 right-20 text-5xl opacity-15 animate-float-delayed">🌳</div>
-          <div className="absolute bottom-40 left-20 text-3xl opacity-20 animate-float-delayed">💭</div>
-          <div className="absolute bottom-20 right-10 text-4xl opacity-15 animate-float">🌿</div>
-          <div className="absolute top-1/2 left-1/4 text-2xl opacity-10 animate-pulse-soft">✨</div>
-          <div className="absolute top-1/3 right-1/3 text-2xl opacity-10 animate-pulse-soft">✨</div>
-        </div>
-
-        <div className="relative z-10 min-h-screen flex flex-col items-center justify-center px-6 pt-6 pb-safe">
+      <main className="min-h-screen bg-bone relative overflow-hidden">
+        <div className="min-h-screen flex flex-col items-center justify-center px-6 pt-6 pb-safe">
           <div className="max-w-md w-full text-center">
             {/* Logo and Tagline */}
             <div className="mb-12">
-              <h1 className="text-5xl font-semibold text-lavender-800 mb-4">Ringur</h1>
-              <p className="text-xl text-lavender-600 leading-relaxed">
+              <h1 className="text-5xl font-semibold text-obsidian mb-4">Ringur</h1>
+              <p className="text-xl text-ash leading-relaxed">
                 Stay close to who matters
               </p>
             </div>
 
             {/* Hero Description */}
-            <div className="bg-white/70 backdrop-blur-sm rounded-3xl p-8 shadow-lg border border-white/50 mb-8">
-              <p className="text-lavender-700 text-lg leading-relaxed mb-6">
-                Life gets busy. Friendships drift. <span className="text-muted-teal-600 font-medium">Ringur</span> helps you nurture the relationships that matter most with gentle reminders and meaningful memories.
+            <div className="bg-bone rounded-lg p-8 shadow-card mb-8">
+              <p className="text-obsidian text-lg leading-relaxed mb-6">
+                Life gets busy. Friendships drift. <span className="text-moss font-medium">Ringur</span> helps you nurture the relationships that matter most with gentle reminders and meaningful memories.
               </p>
 
               {/* Feature Highlights */}
               <div className="space-y-4 text-left">
                 <div className="flex items-start gap-3">
-                  <span className="text-xl">🌿</span>
+                  <span className="inline-block w-2 h-2 rounded-full bg-moss mt-2 shrink-0" />
                   <div>
-                    <div className="font-medium text-lavender-800">Gentle Nudges</div>
-                    <div className="text-sm text-lavender-500">A gentle nudge when it might be time to reach out</div>
+                    <div className="text-body-medium text-obsidian">Gentle nudges</div>
+                    <div className="text-micro text-ash">A gentle nudge when it might be time to reach out</div>
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
-                  <span className="text-xl">💭</span>
+                  <span className="inline-block w-2 h-2 rounded-full bg-inkblue mt-2 shrink-0" />
                   <div>
-                    <div className="font-medium text-lavender-800">Memories</div>
-                    <div className="text-sm text-lavender-500">Remember what matters before your next conversation</div>
+                    <div className="text-body-medium text-obsidian">Memories</div>
+                    <div className="text-micro text-ash">Remember what matters before your next conversation</div>
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
-                  <span className="text-xl">🌳</span>
+                  <span className="inline-block w-2 h-2 rounded-full bg-sun mt-2 shrink-0" />
                   <div>
-                    <div className="font-medium text-lavender-800">Forest View</div>
-                    <div className="text-sm text-lavender-500">Watch your relationships flourish as a living garden</div>
+                    <div className="text-body-medium text-obsidian">Forest view</div>
+                    <div className="text-micro text-ash">Watch your relationships flourish as a living garden</div>
                   </div>
                 </div>
               </div>
@@ -278,10 +268,10 @@ export default function LoginPage() {
               <button
                 onClick={handleGoogleSignIn}
                 disabled={googleLoading}
-                className="w-full py-4 px-6 bg-white hover:bg-lavender-50 text-lavender-700 font-medium rounded-xl transition-all shadow-md border border-lavender-100 flex items-center justify-center gap-3 disabled:opacity-50"
+                className="w-full py-4 px-6 bg-bone-warm hover:bg-ash/10 text-obsidian font-medium rounded-md transition-all duration-calm shadow-subtle flex items-center justify-center gap-3 disabled:opacity-50"
               >
                 {googleLoading ? (
-                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-lavender-500"></div>
+                  <div className="animate-gentle-pulse rounded-full h-5 w-5 border-b-2 border-ash"></div>
                 ) : (
                   <>
                     <svg className="w-5 h-5" viewBox="0 0 24 24">
@@ -296,28 +286,28 @@ export default function LoginPage() {
               </button>
 
               <div className="flex items-center gap-4">
-                <div className="flex-1 h-px bg-lavender-200/50"></div>
-                <span className="text-lavender-400 text-sm">or</span>
-                <div className="flex-1 h-px bg-lavender-200/50"></div>
+                <div className="flex-1 h-px bg-ash/15"></div>
+                <span className="text-ash text-micro">or</span>
+                <div className="flex-1 h-px bg-ash/15"></div>
               </div>
 
               <button
                 onClick={() => handleGetStarted(true)}
-                className="w-full py-4 px-6 bg-muted-teal-500 hover:bg-muted-teal-600 text-white font-medium rounded-xl transition-all transform hover:scale-[1.02] shadow-md"
+                className="w-full py-4 px-6 bg-moss hover:opacity-90 text-bone font-medium rounded-md transition-all duration-calm shadow-card"
               >
-                Get Started with Email
+                Get started with email
               </button>
               <button
                 onClick={() => handleGetStarted(false)}
-                className="w-full py-4 px-6 bg-white/80 hover:bg-white text-lavender-700 font-medium rounded-xl transition-all border border-lavender-200"
+                className="w-full py-4 px-6 bg-bone-warm hover:bg-ash/10 text-obsidian font-medium rounded-md transition-all duration-calm"
               >
-                Sign In with Email
+                Sign in with email
               </button>
             </div>
 
             {/* Subtle footer */}
-            <p className="mt-8 text-sm text-lavender-400">
-              Small moments build strong roots 🌱
+            <p className="mt-8 text-micro text-ash">
+              Small moments build strong roots
             </p>
           </div>
         </div>
@@ -328,7 +318,7 @@ export default function LoginPage() {
   // Password Reset Form
   if (showResetPassword) {
     return (
-      <main className="min-h-screen bg-lavender-50 flex flex-col items-center justify-center px-6 pt-6 pb-safe">
+      <main className="min-h-screen bg-bone flex flex-col items-center justify-center px-6 pt-6 pb-safe">
         <div className="w-full max-w-sm">
           {/* Back button */}
           <button
@@ -337,7 +327,7 @@ export default function LoginPage() {
               setError(null)
               setMessage(null)
             }}
-            className="mb-6 text-lavender-400 hover:text-lavender-600 text-sm transition-colors flex items-center gap-1"
+            className="mb-6 text-ash hover:text-obsidian text-micro transition-colors duration-calm flex items-center gap-1"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -346,17 +336,17 @@ export default function LoginPage() {
           </button>
 
           <div className="text-center mb-8">
-            <h1 className="text-3xl font-semibold text-lavender-800 mb-2">
-              Reset Password
+            <h1 className="text-h2 text-obsidian mb-2">
+              Reset password
             </h1>
-            <p className="text-lavender-500">
+            <p className="text-body text-ash">
               Enter your email to receive a reset link
             </p>
           </div>
 
           <form onSubmit={handleResetPassword} className="space-y-4">
             <div>
-              <label htmlFor="reset-email" className="block text-sm font-medium text-lavender-700 mb-1">
+              <label htmlFor="reset-email" className="block text-label text-obsidian mb-1">
                 Email
               </label>
               <input
@@ -365,21 +355,21 @@ export default function LoginPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="w-full px-4 py-3 rounded-xl border border-lavender-200 bg-white text-lavender-800 placeholder-lavender-400 focus:outline-none focus:ring-2 focus:ring-muted-teal-400 focus:border-transparent transition-all"
+                className="w-full px-4 py-3 rounded-md bg-bone-warm border-none text-obsidian placeholder-ash focus:outline-none focus:ring-1 focus:ring-moss/30 transition-all duration-calm"
                 placeholder="you@example.com"
               />
             </div>
 
             {error && (
-              <p className="text-red-600 text-sm bg-red-50 p-3 rounded-lg">{error}</p>
+              <p className="text-ember text-micro bg-bone-warm p-3 rounded-md">{error}</p>
             )}
 
             {message && (
-              <p className="text-muted-teal-600 text-sm bg-muted-teal-50 p-3 rounded-lg">{message}</p>
+              <p className="text-moss text-micro bg-bone-warm p-3 rounded-md">{message}</p>
             )}
 
             {rateLimitSecondsRemaining > 0 && (
-              <p className="text-amber-600 text-sm bg-amber-50 p-3 rounded-lg">
+              <p className="text-sun text-micro bg-bone-warm p-3 rounded-md">
                 Please wait {rateLimitSecondsRemaining} second{rateLimitSecondsRemaining !== 1 ? 's' : ''} before requesting another email.
               </p>
             )}
@@ -387,7 +377,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading || rateLimitSecondsRemaining > 0}
-              className="w-full py-3 px-4 bg-muted-teal-500 hover:bg-muted-teal-600 text-white font-medium rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full py-3 px-4 bg-moss hover:opacity-90 text-bone font-medium rounded-md transition-all duration-calm disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? 'Sending...' : rateLimitSecondsRemaining > 0 ? `Wait ${rateLimitSecondsRemaining}s` : 'Send reset link'}
             </button>
@@ -399,12 +389,12 @@ export default function LoginPage() {
 
   // Auth Form
   return (
-    <main className="min-h-screen bg-lavender-50 flex flex-col items-center justify-center px-6 pt-6 pb-safe">
+    <main className="min-h-screen bg-bone flex flex-col items-center justify-center px-6 pt-6 pb-safe">
       <div className="w-full max-w-sm">
         {/* Back button */}
         <button
           onClick={() => setShowAuth(false)}
-          className="mb-6 text-lavender-400 hover:text-lavender-600 text-sm transition-colors flex items-center gap-1"
+          className="mb-6 text-ash hover:text-obsidian text-micro transition-colors duration-calm flex items-center gap-1"
         >
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -413,10 +403,10 @@ export default function LoginPage() {
         </button>
 
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-semibold text-lavender-800 mb-2">
-            {isSignUp ? 'Create Account' : 'Welcome Back'}
+          <h1 className="text-h2 text-obsidian mb-2">
+            {isSignUp ? 'Create account' : 'Welcome back'}
           </h1>
-          <p className="text-lavender-500">
+          <p className="text-body text-ash">
             {isSignUp ? 'Start nurturing your relationships' : 'Continue where you left off'}
           </p>
         </div>
@@ -424,22 +414,22 @@ export default function LoginPage() {
         <form onSubmit={handleAuth} className="space-y-4">
           {isSignUp && (
             <div>
-              <label htmlFor="fullName" className="block text-sm font-medium text-lavender-700 mb-1">
-                Full Name
+              <label htmlFor="fullName" className="block text-label text-obsidian mb-1">
+                Full name
               </label>
               <input
                 id="fullName"
                 type="text"
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
-                className="w-full px-4 py-3 rounded-xl border border-lavender-200 bg-white text-lavender-800 placeholder-lavender-400 focus:outline-none focus:ring-2 focus:ring-muted-teal-400 focus:border-transparent transition-all"
+                className="w-full px-4 py-3 rounded-md bg-bone-warm border-none text-obsidian placeholder-ash focus:outline-none focus:ring-1 focus:ring-moss/30 transition-all duration-calm"
                 placeholder="Your name"
               />
             </div>
           )}
 
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-lavender-700 mb-1">
+            <label htmlFor="email" className="block text-label text-obsidian mb-1">
               Email
             </label>
             <input
@@ -448,13 +438,13 @@ export default function LoginPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="w-full px-4 py-3 rounded-xl border border-lavender-200 bg-white text-lavender-800 placeholder-lavender-400 focus:outline-none focus:ring-2 focus:ring-muted-teal-400 focus:border-transparent transition-all"
+              className="w-full px-4 py-3 rounded-md bg-bone-warm border-none text-obsidian placeholder-ash focus:outline-none focus:ring-1 focus:ring-moss/30 transition-all duration-calm"
               placeholder="you@example.com"
             />
           </div>
 
           <div>
-            <label htmlFor="password" className="block text-sm font-medium text-lavender-700 mb-1">
+            <label htmlFor="password" className="block text-label text-obsidian mb-1">
               Password
             </label>
             <input
@@ -464,7 +454,7 @@ export default function LoginPage() {
               onChange={(e) => setPassword(e.target.value)}
               required
               minLength={6}
-              className="w-full px-4 py-3 rounded-xl border border-lavender-200 bg-white text-lavender-800 placeholder-lavender-400 focus:outline-none focus:ring-2 focus:ring-muted-teal-400 focus:border-transparent transition-all"
+              className="w-full px-4 py-3 rounded-md bg-bone-warm border-none text-obsidian placeholder-ash focus:outline-none focus:ring-1 focus:ring-moss/30 transition-all duration-calm"
               placeholder="••••••••"
             />
           </div>
@@ -478,7 +468,7 @@ export default function LoginPage() {
                   setError(null)
                   setMessage(null)
                 }}
-                className="text-muted-teal-600 hover:text-muted-teal-700 text-sm transition-colors"
+                className="text-moss hover:opacity-80 text-micro transition-colors duration-calm"
               >
                 Forgot password?
               </button>
@@ -486,26 +476,26 @@ export default function LoginPage() {
           )}
 
           {error && (
-            <p className="text-red-600 text-sm bg-red-50 p-3 rounded-lg">{error}</p>
+            <p className="text-ember text-micro bg-bone-warm p-3 rounded-md">{error}</p>
           )}
 
           {message && (
-            <p className="text-muted-teal-600 text-sm bg-muted-teal-50 p-3 rounded-lg">{message}</p>
+            <p className="text-moss text-micro bg-bone-warm p-3 rounded-md">{message}</p>
           )}
 
           <button
             type="submit"
             disabled={loading || googleLoading}
-            className="w-full py-3 px-4 bg-muted-teal-500 hover:bg-muted-teal-600 text-white font-medium rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full py-3 px-4 bg-moss hover:opacity-90 text-bone font-medium rounded-md transition-all duration-calm disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading ? 'Loading...' : isSignUp ? 'Create account' : 'Sign in'}
           </button>
 
           {/* Divider */}
           <div className="flex items-center gap-4 my-6">
-            <div className="flex-1 h-px bg-lavender-200"></div>
-            <span className="text-lavender-400 text-sm">or</span>
-            <div className="flex-1 h-px bg-lavender-200"></div>
+            <div className="flex-1 h-px bg-ash/15"></div>
+            <span className="text-ash text-micro">or</span>
+            <div className="flex-1 h-px bg-ash/15"></div>
           </div>
 
           {/* Google Sign-In Button */}
@@ -513,10 +503,10 @@ export default function LoginPage() {
             type="button"
             onClick={handleGoogleSignIn}
             disabled={loading || googleLoading}
-            className="w-full py-3 px-4 bg-white border border-lavender-200 hover:bg-lavender-50 text-lavender-700 font-medium rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3"
+            className="w-full py-3 px-4 bg-bone-warm hover:bg-ash/10 text-obsidian font-medium rounded-md transition-all duration-calm disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3 shadow-subtle"
           >
             {googleLoading ? (
-              <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-lavender-500"></div>
+              <div className="animate-gentle-pulse rounded-full h-5 w-5 border-b-2 border-ash"></div>
             ) : (
               <>
                 <svg className="w-5 h-5" viewBox="0 0 24 24">
@@ -538,7 +528,7 @@ export default function LoginPage() {
               setError(null)
               setMessage(null)
             }}
-            className="text-muted-teal-600 hover:text-muted-teal-700 text-sm transition-colors"
+            className="text-moss hover:opacity-80 text-micro transition-colors duration-calm"
           >
             {isSignUp ? 'Already have an account? Sign in' : "Don't have an account? Sign up"}
           </button>

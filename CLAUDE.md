@@ -86,6 +86,14 @@ Secondary button: bg-lavender-100 text-lavender-700 rounded-xl
 Background: bg-lavender-50
 Cards: bg-white rounded-2xl shadow-sm border border-lavender-100
 Text: text-lavender-800 (primary), text-lavender-500 (secondary)
+Bottom safe area: pb-safe (custom utility — ensures min 2rem + env(safe-area-inset-bottom))
+```
+
+### Safe Area / Android Nav Bar
+All page content containers use `pb-safe` to prevent content from being hidden behind Android
+software navigation buttons. Defined in `globals.css`:
+```css
+.pb-safe { padding-bottom: max(2rem, env(safe-area-inset-bottom, 0px)); }
 ```
 
 ## Capacitor (Mobile) Patterns
@@ -148,7 +156,8 @@ The app uses 3 unified interaction types across all surfaces:
 ### Key Components
 - **LogInteractionModal**: 3-button type grid + mood emojis + optional note
 - **CatchupMethodModal**: Shows last interaction note, highlights preferred contact method
-- **ConnectionDetailModal**: 3-button type picker in edit form
+- **ConnectionDetailModal**: 3-button type picker in edit form, mood emoji shown in history
+- **ConnectionCard**: Shows last interaction mood emoji after connection name
 - **Add/Edit Connection**: Preferred messaging app selector (Text/WhatsApp/Email)
 
 ## Feature Flags
@@ -303,6 +312,16 @@ Before submitting changes:
 - [ ] No TypeScript errors
 - [ ] Test on web and mobile (Capacitor)
 - [ ] Database types updated if schema changed
+
+## Onboarding Flow
+5-step flow in `src/app/onboarding/page.tsx`:
+1. Welcome
+2. Philosophy
+3. Expectations
+4. **Add Connections** — Opens `AddConnectionModal` (saves directly to DB). Max 3. Skip allowed.
+5. **Take First Action** — Per-connection "Plan" (`PlanCatchupModal`) and "Catch-up" (`CatchupMethodModal`) buttons. Skip or Complete Setup finishes onboarding.
+
+Connections are saved to DB in step 4 (not batched). Step 5 fetches them from DB.
 
 ## Common Tasks
 

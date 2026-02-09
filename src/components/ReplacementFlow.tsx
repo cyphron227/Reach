@@ -62,28 +62,28 @@ export default function ReplacementFlow({
 
   return (
     <div
-      className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-end sm:items-center justify-center z-50 p-4 overscroll-contain"
+      className="fixed inset-0 bg-obsidian/40 backdrop-blur-sm flex items-end sm:items-center justify-center z-50 px-4 pt-4 pb-safe overscroll-contain"
       onClick={(e) => {
         if (e.target === e.currentTarget) {
           onClose()
         }
       }}
     >
-      <div className="bg-white rounded-2xl w-full max-w-md shadow-xl max-h-[90vh] overflow-y-auto overscroll-contain">
+      <div className="bg-bone rounded-lg w-full max-w-md shadow-modal max-h-[90vh] overflow-y-auto overscroll-contain">
         <div className="p-6">
           {/* Header */}
           <div className="flex items-start justify-between mb-4">
             <div>
-              <h2 className="text-xl font-semibold text-lavender-800">
+              <h2 className="text-h2 font-medium text-obsidian">
                 {confirming ? 'Confirm your choice' : 'Time to decide'}
               </h2>
-              <p className="text-sm text-lavender-500 mt-1">
+              <p className="text-body text-ash mt-1">
                 {connectionName}
               </p>
             </div>
             <button
               onClick={onClose}
-              className="text-lavender-400 hover:text-lavender-600 transition-colors"
+              className="text-ash hover:text-obsidian transition-all duration-calm"
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -94,14 +94,14 @@ export default function ReplacementFlow({
           {!confirming ? (
             <>
               {/* Status info */}
-              <div className="bg-red-50 border border-red-200 rounded-xl p-4 mb-6">
+              <div className="bg-bone-warm rounded-md shadow-card p-4 mb-6">
                 <div className="flex items-center gap-3">
-                  <span className="text-2xl">🆘</span>
+                  <span className="text-body font-medium text-ember">Status</span>
                   <div>
-                    <p className="font-medium text-red-700">
+                    <p className="font-medium text-ember">
                       {STRENGTH_LABELS[currentStrength]}
                     </p>
-                    <p className="text-sm text-red-600">
+                    <p className="text-body text-ember">
                       {daysSinceAction} days without connection
                     </p>
                   </div>
@@ -109,11 +109,11 @@ export default function ReplacementFlow({
               </div>
 
               {/* Philosophy message */}
-              <div className="bg-lavender-50 rounded-xl p-4 mb-6">
-                <p className="text-sm text-lavender-700">
+              <div className="bg-bone-warm rounded-md shadow-card p-4 mb-6">
+                <p className="text-body text-obsidian">
                   {INSIGHT_MESSAGES.regret_prevention}
                 </p>
-                <p className="text-sm text-lavender-600 mt-2">
+                <p className="text-body text-ash mt-2">
                   It&apos;s okay to let go. It&apos;s also okay to recommit. What matters is being intentional.
                 </p>
               </div>
@@ -124,30 +124,30 @@ export default function ReplacementFlow({
                   <button
                     key={option.value}
                     onClick={() => handleSelect(option.value)}
-                    className={`w-full p-4 rounded-xl border-2 text-left transition-all hover:border-muted-teal-300 ${
+                    className={`w-full p-4 rounded-md shadow-card text-left transition-all duration-calm hover:opacity-90 ${
                       option.value === 'reinvest'
-                        ? 'border-muted-teal-200 bg-muted-teal-50'
+                        ? 'bg-moss/10 ring-1 ring-moss/30'
                         : option.value === 'archive'
-                        ? 'border-red-200 bg-red-50'
-                        : 'border-lavender-200 bg-white'
+                        ? 'bg-ember/10 ring-1 ring-ember/30'
+                        : 'bg-bone-warm'
                     }`}
                   >
                     <div className="flex items-center gap-3">
-                      <span className="text-xl">
-                        {option.value === 'reinvest' && '💪'}
-                        {option.value === 'downgrade' && '↘️'}
-                        {option.value === 'replace' && '🔄'}
-                        {option.value === 'archive' && '📦'}
+                      <span className="text-body font-medium">
+                        {option.value === 'reinvest' && 'Reinvest'}
+                        {option.value === 'downgrade' && 'Move to outer circle'}
+                        {option.value === 'replace' && 'Replace'}
+                        {option.value === 'archive' && 'Archive'}
                       </span>
                       <div>
                         <p className={`font-medium ${
-                          option.value === 'reinvest' ? 'text-muted-teal-700' :
-                          option.value === 'archive' ? 'text-red-700' :
-                          'text-lavender-800'
+                          option.value === 'reinvest' ? 'text-moss' :
+                          option.value === 'archive' ? 'text-ember' :
+                          'text-obsidian'
                         }`}>
                           {option.label}
                         </p>
-                        <p className="text-sm text-lavender-500">
+                        <p className="text-body text-ash">
                           {option.description}
                         </p>
                       </div>
@@ -161,28 +161,28 @@ export default function ReplacementFlow({
               {/* Confirmation view */}
               <div className="mb-6">
                 {selectedAction === 'reinvest' && (
-                  <div className="bg-muted-teal-50 border border-muted-teal-200 rounded-xl p-4">
+                  <div className="bg-moss/10 ring-1 ring-moss/30 rounded-md shadow-card p-4">
                     <div className="flex items-center gap-3 mb-3">
-                      <span className="text-2xl">💪</span>
-                      <p className="font-medium text-muted-teal-700">Reinvest in {connectionName}</p>
+                      <span className="text-body font-medium text-moss">Reinvest</span>
+                      <p className="font-medium text-moss">Reinvest in {connectionName}</p>
                     </div>
-                    <p className="text-sm text-muted-teal-600">
+                    <p className="text-body text-obsidian">
                       You&apos;re committing to rebuild this connection. The relationship will stay in your
                       core focus, and we&apos;ll help you follow through.
                     </p>
-                    <p className="text-sm text-muted-teal-700 font-medium mt-3">
+                    <p className="text-body text-moss font-medium mt-3">
                       {INSIGHT_MESSAGES.identity}
                     </p>
                   </div>
                 )}
 
                 {selectedAction === 'downgrade' && (
-                  <div className="bg-lavender-50 border border-lavender-200 rounded-xl p-4">
+                  <div className="bg-bone-warm rounded-md shadow-card p-4">
                     <div className="flex items-center gap-3 mb-3">
-                      <span className="text-2xl">↘️</span>
-                      <p className="font-medium text-lavender-700">Move to outer circle</p>
+                      <span className="text-body font-medium text-obsidian">Move</span>
+                      <p className="font-medium text-obsidian">Move to outer circle</p>
                     </div>
-                    <p className="text-sm text-lavender-600">
+                    <p className="text-body text-ash">
                       {connectionName} will move to your outer circle with lower expectations.
                       This isn&apos;t giving up—it&apos;s being realistic about your capacity.
                     </p>
@@ -190,12 +190,12 @@ export default function ReplacementFlow({
                 )}
 
                 {selectedAction === 'replace' && (
-                  <div className="bg-lavender-50 border border-lavender-200 rounded-xl p-4">
+                  <div className="bg-bone-warm rounded-md shadow-card p-4">
                     <div className="flex items-center gap-3 mb-3">
-                      <span className="text-2xl">🔄</span>
-                      <p className="font-medium text-lavender-700">Make space for someone new</p>
+                      <span className="text-body font-medium text-obsidian">Replace</span>
+                      <p className="font-medium text-obsidian">Make space for someone new</p>
                     </div>
-                    <p className="text-sm text-lavender-600">
+                    <p className="text-body text-ash">
                       {connectionName} will be archived, freeing up a spot in your core circle
                       for someone you want to invest in.
                     </p>
@@ -203,12 +203,12 @@ export default function ReplacementFlow({
                 )}
 
                 {selectedAction === 'archive' && (
-                  <div className="bg-red-50 border border-red-200 rounded-xl p-4">
+                  <div className="bg-ember/10 ring-1 ring-ember/30 rounded-md shadow-card p-4">
                     <div className="flex items-center gap-3 mb-3">
-                      <span className="text-2xl">📦</span>
-                      <p className="font-medium text-red-700">Archive {connectionName}</p>
+                      <span className="text-body font-medium text-ember">Archive</span>
+                      <p className="font-medium text-ember">Archive {connectionName}</p>
                     </div>
-                    <p className="text-sm text-red-600">
+                    <p className="text-body text-ember">
                       This connection will be removed from active tracking. You can always
                       re-add them later if things change.
                     </p>
@@ -220,18 +220,18 @@ export default function ReplacementFlow({
               <div className="flex gap-3">
                 <button
                   onClick={handleBack}
-                  className="flex-1 py-3 px-4 bg-lavender-100 hover:bg-lavender-200 text-lavender-700 font-medium rounded-xl transition-colors"
+                  className="flex-1 py-3 px-4 bg-bone-warm hover:bg-ash/10 text-obsidian font-medium rounded-md transition-all duration-calm"
                 >
                   Back
                 </button>
                 <button
                   onClick={handleConfirm}
-                  className={`flex-1 py-3 px-4 font-medium rounded-xl transition-colors ${
+                  className={`flex-1 py-3 px-4 font-medium rounded-md transition-all duration-calm ${
                     selectedAction === 'reinvest'
-                      ? 'bg-muted-teal-500 hover:bg-muted-teal-600 text-white'
+                      ? 'bg-moss hover:opacity-90 text-bone'
                       : selectedAction === 'archive'
-                      ? 'bg-red-500 hover:bg-red-600 text-white'
-                      : 'bg-lavender-600 hover:bg-lavender-700 text-white'
+                      ? 'bg-ember hover:opacity-90 text-bone'
+                      : 'bg-slate hover:opacity-90 text-bone'
                   }`}
                 >
                   Confirm

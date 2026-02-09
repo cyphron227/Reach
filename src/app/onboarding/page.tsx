@@ -84,7 +84,7 @@ export default function OnboardingPage() {
   }
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-white to-gray-50 flex flex-col pb-safe">
+    <main className="min-h-screen bg-bone flex flex-col pb-safe">
       {/* Progress indicator */}
       <div className="pt-8 pb-4">
         <OnboardingProgress currentStep={step} totalSteps={TOTAL_STEPS} />
@@ -93,7 +93,6 @@ export default function OnboardingPage() {
       {/* Step 1: Welcome */}
       {step === 1 && (
         <OnboardingStep>
-          <div className="text-6xl mb-6">🌱</div>
           <OnboardingTitle>Welcome to Ringur</OnboardingTitle>
           <OnboardingText>
             Relationships fade when we stop investing.
@@ -126,7 +125,7 @@ export default function OnboardingPage() {
             className="mb-6"
           />
           <OnboardingText>
-            Small, consistent investment. That&apos;s it.
+            Small, consistent connection. That&apos;s it.
           </OnboardingText>
           <div className="mt-10">
             <OnboardingButton onClick={nextStep}>Continue</OnboardingButton>
@@ -139,7 +138,7 @@ export default function OnboardingPage() {
         <OnboardingStep>
           <div className="space-y-8">
             <div>
-              <h2 className="text-lg font-semibold text-gray-900 mb-3">What Ringur is:</h2>
+              <h2 className="text-h3 text-obsidian mb-3">What Ringur is:</h2>
               <OnboardingList
                 items={[
                   { text: 'A daily connection habit', positive: true },
@@ -149,7 +148,7 @@ export default function OnboardingPage() {
               />
             </div>
             <div>
-              <h2 className="text-lg font-semibold text-gray-500 mb-3">What it isn&apos;t:</h2>
+              <h2 className="text-h3 text-ash mb-3">What it isn&apos;t:</h2>
               <OnboardingList
                 items={[
                   { text: 'Social media', positive: false },
@@ -179,16 +178,15 @@ export default function OnboardingPage() {
             {dbConnections.map((conn) => (
               <div
                 key={conn.id}
-                className="flex items-center justify-between bg-emerald-50 px-4 py-3 rounded-xl"
+                className="flex items-center justify-between bg-bone-warm px-4 py-3 rounded-md"
               >
                 <div className="flex items-center gap-3">
-                  <span className="text-emerald-600">&#10003;</span>
-                  <span className="font-medium text-gray-900">{conn.name}</span>
-                  {conn.phone_e164 && <span className="text-emerald-600">📱</span>}
+                  <span className="text-moss">&#10003;</span>
+                  <span className="text-body-medium text-obsidian">{conn.name}</span>
                 </div>
                 <button
                   onClick={() => removeDbConnection(conn.id)}
-                  className="text-gray-400 hover:text-gray-600"
+                  className="text-ash hover:text-obsidian transition-colors duration-calm"
                 >
                   &times;
                 </button>
@@ -199,7 +197,7 @@ export default function OnboardingPage() {
             {dbConnections.length < 3 && (
               <button
                 onClick={() => setShowAddConnectionModal(true)}
-                className="w-full py-3 px-4 border-2 border-dashed border-gray-300 hover:border-emerald-500 text-gray-500 hover:text-emerald-600 font-medium rounded-xl transition-colors"
+                className="w-full py-3 px-4 border-2 border-dashed border-ash/30 hover:border-moss text-ash hover:text-moss font-medium rounded-md transition-all duration-calm"
               >
                 + Add a connection
               </button>
@@ -207,10 +205,10 @@ export default function OnboardingPage() {
           </div>
 
           {error && (
-            <p className="text-red-600 text-sm mb-4">{error}</p>
+            <p className="text-ember text-micro mb-4">{error}</p>
           )}
 
-          <p className="text-sm text-gray-500 mb-6">
+          <p className="text-micro text-ash mb-6">
             You can add more later as you build the habit.
           </p>
 
@@ -223,7 +221,7 @@ export default function OnboardingPage() {
             </OnboardingButton>
             <button
               onClick={nextStep}
-              className="text-gray-500 hover:text-gray-700 text-sm"
+              className="text-ash hover:text-obsidian text-micro transition-colors duration-calm"
             >
               Skip
             </button>
@@ -246,27 +244,27 @@ export default function OnboardingPage() {
               {dbConnections.map((conn) => (
                 <div
                   key={conn.id}
-                  className="bg-white border border-gray-200 rounded-xl p-4"
+                  className="bg-bone rounded-lg p-4 shadow-card"
                 >
-                  <p className="font-medium text-gray-900 mb-3">{conn.name}</p>
+                  <p className="text-body-medium text-obsidian mb-3">{conn.name}</p>
                   <div className="grid grid-cols-2 gap-2">
                     <button
                       onClick={() => {
                         setSelectedOnboardingConnection(conn)
                         setShowPlanModal(true)
                       }}
-                      className="py-2.5 px-3 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-sm font-medium rounded-xl transition-colors flex items-center justify-center gap-2"
+                      className="py-2.5 px-3 bg-bone-warm hover:bg-ash/10 text-obsidian text-micro-medium rounded-md transition-all duration-calm flex items-center justify-center gap-2"
                     >
-                      <span>📅</span> Plan
+                      Plan
                     </button>
                     <button
                       onClick={() => {
                         setSelectedOnboardingConnection(conn)
                         setShowCatchupModal(true)
                       }}
-                      className="py-2.5 px-3 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium rounded-xl transition-colors flex items-center justify-center gap-2"
+                      className="py-2.5 px-3 bg-moss hover:opacity-90 text-bone text-micro-medium rounded-md transition-all duration-calm flex items-center justify-center gap-2"
                     >
-                      <span>💬</span> Catch-up
+                      Catch-up
                     </button>
                   </div>
                 </div>
@@ -275,7 +273,7 @@ export default function OnboardingPage() {
           )}
 
           {error && (
-            <p className="text-red-600 text-sm mb-4">{error}</p>
+            <p className="text-ember text-micro mb-4">{error}</p>
           )}
 
           <div className="flex flex-col items-center gap-3">
@@ -283,12 +281,12 @@ export default function OnboardingPage() {
               onClick={completeOnboarding}
               disabled={loading}
             >
-              {loading ? 'Setting up...' : 'Complete Setup'}
+              {loading ? 'Setting up...' : 'Complete setup'}
             </OnboardingButton>
             <button
               onClick={completeOnboarding}
               disabled={loading}
-              className="text-gray-500 hover:text-gray-700 text-sm"
+              className="text-ash hover:text-obsidian text-micro transition-colors duration-calm"
             >
               Skip for now
             </button>

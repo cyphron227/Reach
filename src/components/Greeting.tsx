@@ -25,17 +25,16 @@ export default function Greeting({ userName }: GreetingProps) {
   const greeting = getGreeting()
   const firstName = userName?.split(' ')[0]
 
-  // Only pick a random encouragement once on mount, not on every render
   const encouragement = useMemo(() => {
     return encouragements[Math.floor(Math.random() * encouragements.length)]
   }, [])
 
   return (
     <div className="mb-8">
-      <h1 className="text-2xl font-semibold text-lavender-800 mb-1">
+      <h1 className="text-h2 text-obsidian mb-1">
         {greeting}{firstName ? `, ${firstName}` : ''}
       </h1>
-      <p className="text-lavender-500">{encouragement}</p>
+      <p className="text-body text-ash">{encouragement}</p>
     </div>
   )
 }

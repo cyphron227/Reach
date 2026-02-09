@@ -18,16 +18,16 @@ interface LogInteractionModalProps {
 
 type Mood = 'happy' | 'neutral' | 'sad'
 
-const interactionTypes: { value: ActionTypeV2; legacyType: InteractionType; label: string; icon: string }[] = [
-  { value: 'text', legacyType: 'text', label: 'Message', icon: '💬' },
-  { value: 'call', legacyType: 'call', label: 'Call', icon: '📞' },
-  { value: 'in_person_1on1', legacyType: 'in_person', label: 'In-person', icon: '🤝' },
+const interactionTypes: { value: ActionTypeV2; legacyType: InteractionType; label: string }[] = [
+  { value: 'text', legacyType: 'text', label: 'Message' },
+  { value: 'call', legacyType: 'call', label: 'Call' },
+  { value: 'in_person_1on1', legacyType: 'in_person', label: 'In-person' },
 ]
 
-const moodOptions: { value: Mood; emoji: string }[] = [
-  { value: 'happy', emoji: '😊' },
-  { value: 'neutral', emoji: '😐' },
-  { value: 'sad', emoji: '😔' },
+const moodOptions: { value: Mood; label: string }[] = [
+  { value: 'happy', label: 'Good' },
+  { value: 'neutral', label: 'Neutral' },
+  { value: 'sad', label: 'Low' },
 ]
 
 // Helper to update daily habit log aggregation
@@ -240,22 +240,22 @@ export default function LogInteractionModal({ connection, isOpen, onClose, onSuc
 
   return (
     <div
-      className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-end sm:items-center justify-center z-50 p-4 overscroll-contain"
+      className="fixed inset-0 bg-obsidian/40 backdrop-blur-sm flex items-end sm:items-center justify-center z-50 px-4 pt-4 pb-safe overscroll-contain"
       onClick={(e) => {
         if (e.target === e.currentTarget) {
           onClose()
         }
       }}
     >
-      <div className="bg-white rounded-2xl w-full max-w-md max-h-[90vh] overflow-y-auto shadow-xl overscroll-contain">
+      <div className="bg-bone rounded-lg w-full max-w-md max-h-[90vh] overflow-y-auto shadow-modal overscroll-contain">
         <div className="p-6">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-semibold text-lavender-800">
+            <h2 className="text-h2 font-medium text-obsidian">
               Record catch-up with {connection.name}
             </h2>
             <button
               onClick={onClose}
-              className="text-lavender-400 hover:text-lavender-600 transition-colors"
+              className="text-ash hover:text-obsidian transition-all duration-calm"
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -265,14 +265,13 @@ export default function LogInteractionModal({ connection, isOpen, onClose, onSuc
 
           {/* Reflection Priority Badge */}
           {isReflectionPriority && (
-            <div className="mb-4 p-3 bg-muted-teal-50 rounded-xl border border-muted-teal-200">
+            <div className="mb-4 p-3 bg-bone-warm rounded-md shadow-card">
               <div className="flex items-center gap-2">
-                <span className="text-lg">🌱</span>
                 <div>
-                  <div className="text-sm font-medium text-muted-teal-700">
+                  <div className="text-micro font-medium text-moss">
                     Reflection Priority
                   </div>
-                  <div className="text-xs text-muted-teal-600">
+                  <div className="text-micro text-ash">
                     You wanted to grow closer to {connection.name} this week
                   </div>
                 </div>
@@ -283,7 +282,7 @@ export default function LogInteractionModal({ connection, isOpen, onClose, onSuc
           <form onSubmit={handleSubmit} className="space-y-5">
             {/* Interaction Date */}
             <div>
-              <label htmlFor="interactionDate" className="block text-sm font-medium text-lavender-700 mb-2">
+              <label htmlFor="interactionDate" className="block text-body font-medium text-obsidian mb-2">
                 When did you catch-up?
               </label>
               <input
@@ -292,13 +291,13 @@ export default function LogInteractionModal({ connection, isOpen, onClose, onSuc
                 value={interactionDate}
                 onChange={(e) => setInteractionDate(e.target.value)}
                 max={new Date().toISOString().split('T')[0]}
-                className="w-full px-4 py-3 rounded-xl border border-lavender-200 bg-white text-lavender-800 focus:outline-none focus:ring-2 focus:ring-muted-teal-400 focus:border-transparent transition-all"
+                className="w-full bg-bone-warm border-none rounded-md px-4 py-3 text-body text-obsidian focus:outline-none focus:ring-1 focus:ring-moss/30 transition-all duration-calm"
               />
             </div>
 
             {/* Interaction Type - 3 buttons */}
             <div>
-              <label className="block text-sm font-medium text-lavender-700 mb-2">
+              <label className="block text-body font-medium text-obsidian mb-2">
                 How did you catch-up?
               </label>
               <div className="grid grid-cols-3 gap-2">
@@ -307,14 +306,13 @@ export default function LogInteractionModal({ connection, isOpen, onClose, onSuc
                     key={type.value}
                     type="button"
                     onClick={() => setActionType(type.value)}
-                    className={`py-3 px-2 rounded-xl text-center transition-all ${
+                    className={`py-3 px-2 rounded-md text-center transition-all duration-calm ${
                       actionType === type.value
-                        ? 'bg-muted-teal-400 text-white'
-                        : 'bg-lavender-50 text-lavender-600 hover:bg-lavender-100'
+                        ? 'bg-moss text-bone shadow-card'
+                        : 'bg-bone-warm text-obsidian hover:shadow-card'
                     }`}
                   >
-                    <div className="text-xl mb-1">{type.icon}</div>
-                    <div className="text-xs font-medium">{type.label}</div>
+                    <div className="text-body font-medium">{type.label}</div>
                   </button>
                 ))}
               </div>
@@ -322,7 +320,7 @@ export default function LogInteractionModal({ connection, isOpen, onClose, onSuc
 
             {/* Mood */}
             <div>
-              <label className="block text-sm font-medium text-lavender-700 mb-2">
+              <label className="block text-body font-medium text-obsidian mb-2">
                 How did it feel?
               </label>
               <div className="flex gap-3 justify-center">
@@ -331,13 +329,13 @@ export default function LogInteractionModal({ connection, isOpen, onClose, onSuc
                     key={option.value}
                     type="button"
                     onClick={() => setMood(mood === option.value ? null : option.value)}
-                    className={`text-3xl p-2 rounded-xl transition-all ${
+                    className={`px-4 py-2 rounded-md transition-all duration-calm ${
                       mood === option.value
-                        ? 'bg-muted-teal-100 ring-2 ring-muted-teal-400 scale-110'
-                        : 'hover:bg-lavender-50 opacity-60 hover:opacity-100'
+                        ? 'bg-moss text-bone shadow-card'
+                        : 'bg-bone-warm text-obsidian hover:shadow-card opacity-40'
                     }`}
                   >
-                    {option.emoji}
+                    <span className="text-body font-medium">{option.label}</span>
                   </button>
                 ))}
               </div>
@@ -350,7 +348,7 @@ export default function LogInteractionModal({ connection, isOpen, onClose, onSuc
                 value={memory}
                 onChange={(e) => setMemory(e.target.value)}
                 rows={3}
-                className="w-full px-4 py-3 rounded-xl border border-lavender-200 bg-white text-lavender-800 placeholder-lavender-400 focus:outline-none focus:ring-2 focus:ring-muted-teal-400 focus:border-transparent transition-all resize-none"
+                className="w-full bg-bone-warm border-none rounded-md px-4 py-3 text-body text-obsidian placeholder:text-ash focus:outline-none focus:ring-1 focus:ring-moss/30 transition-all duration-calm resize-none"
                 placeholder="Add a note (optional)"
               />
             </div>
@@ -365,19 +363,19 @@ export default function LogInteractionModal({ connection, isOpen, onClose, onSuc
                     onChange={(e) => setPlanNextCatchup(e.target.checked)}
                     className="sr-only"
                   />
-                  <div className={`w-5 h-5 rounded border-2 transition-all ${
+                  <div className={`w-5 h-5 rounded border-2 transition-all duration-calm ${
                     planNextCatchup
-                      ? 'bg-muted-teal-400 border-muted-teal-400'
-                      : 'border-lavender-300'
+                      ? 'bg-moss border-moss'
+                      : 'border-ash'
                   }`}>
                     {planNextCatchup && (
-                      <svg className="w-full h-full text-white p-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-full h-full text-bone p-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                       </svg>
                     )}
                   </div>
                 </div>
-                <span className="text-sm font-medium text-lavender-700">Plan next catch-up</span>
+                <span className="text-body font-medium text-obsidian">Plan next catch-up</span>
               </label>
 
               {planNextCatchup && (
@@ -387,21 +385,21 @@ export default function LogInteractionModal({ connection, isOpen, onClose, onSuc
                     value={nextCatchupDate}
                     onChange={(e) => setNextCatchupDate(e.target.value)}
                     min={new Date().toISOString().split('T')[0]}
-                    className="w-full px-4 py-3 rounded-xl border border-lavender-200 bg-white text-lavender-800 focus:outline-none focus:ring-2 focus:ring-muted-teal-400 focus:border-transparent transition-all"
+                    className="w-full bg-bone-warm border-none rounded-md px-4 py-3 text-body text-obsidian focus:outline-none focus:ring-1 focus:ring-moss/30 transition-all duration-calm"
                   />
                 </div>
               )}
             </div>
 
             {error && (
-              <p className="text-red-600 text-sm bg-red-50 p-3 rounded-lg">{error}</p>
+              <p className="text-ember text-body bg-bone-warm p-3 rounded-md">{error}</p>
             )}
 
             {/* Submit Button */}
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3 px-4 bg-muted-teal-500 hover:bg-muted-teal-600 text-white font-medium rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full py-3 px-4 bg-moss hover:bg-moss/90 text-bone font-medium rounded-md transition-all duration-calm disabled:opacity-40 disabled:cursor-not-allowed"
             >
               {loading ? 'Saving...' : 'Save catch-up'}
             </button>

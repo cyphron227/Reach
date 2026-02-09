@@ -45,21 +45,21 @@ export default function ContactSelectionModal({
 
   return (
     <div
-      className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-end sm:items-center justify-center z-[60] p-4 overscroll-contain"
+      className="fixed inset-0 bg-obsidian/40 backdrop-blur-sm flex items-end sm:items-center justify-center z-[60] px-4 pt-4 pb-safe overscroll-contain"
       onClick={onCancel}
     >
       <div
-        className="bg-white rounded-2xl w-full max-w-md shadow-xl max-h-[80vh] overflow-y-auto overscroll-contain"
+        className="bg-bone rounded-lg w-full max-w-md shadow-modal max-h-[80vh] overflow-y-auto overscroll-contain"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="p-6">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-semibold text-lavender-800">
+            <h2 className="text-h2 font-medium text-obsidian">
               Select contact info
             </h2>
             <button
               onClick={onCancel}
-              className="text-lavender-400 hover:text-lavender-600 transition-colors"
+              className="text-ash hover:text-obsidian transition-all duration-calm"
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -67,7 +67,7 @@ export default function ContactSelectionModal({
             </button>
           </div>
 
-          <p className="text-sm text-lavender-600 mb-6">
+          <p className="text-body text-obsidian mb-6">
             {contactName} has multiple contact options. Choose which ones to use.
           </p>
 
@@ -75,17 +75,17 @@ export default function ContactSelectionModal({
             {/* Phone Number Selection */}
             {showPhoneSelection && (
               <div>
-                <label className="block text-sm font-medium text-lavender-700 mb-3">
+                <label className="block text-body font-medium text-obsidian mb-3">
                   Phone number
                 </label>
                 <div className="space-y-2">
                   {phoneNumbers.map((phone, index) => (
                     <label
                       key={index}
-                      className={`flex items-center p-3 rounded-xl border cursor-pointer transition-all ${
+                      className={`flex items-center p-3 rounded-md cursor-pointer transition-all duration-calm shadow-card ${
                         selectedPhone === phone
-                          ? 'border-muted-teal-400 bg-muted-teal-50'
-                          : 'border-lavender-200 hover:border-lavender-300'
+                          ? 'bg-moss/10 ring-1 ring-moss/30'
+                          : 'bg-bone-warm hover:bg-moss/5'
                       }`}
                     >
                       <input
@@ -97,24 +97,24 @@ export default function ContactSelectionModal({
                         className="sr-only"
                       />
                       <span
-                        className={`w-5 h-5 rounded-full border-2 mr-3 flex items-center justify-center ${
+                        className={`w-5 h-5 rounded-full border-2 mr-3 flex items-center justify-center transition-all duration-calm ${
                           selectedPhone === phone
-                            ? 'border-muted-teal-500 bg-muted-teal-500'
-                            : 'border-lavender-300'
+                            ? 'border-moss bg-moss'
+                            : 'border-ash'
                         }`}
                       >
                         {selectedPhone === phone && (
-                          <span className="w-2 h-2 rounded-full bg-white" />
+                          <span className="w-2 h-2 rounded-full bg-bone" />
                         )}
                       </span>
-                      <span className="text-lavender-800">{formatPhoneNumber(phone)}</span>
+                      <span className="text-obsidian">{formatPhoneNumber(phone)}</span>
                     </label>
                   ))}
                   <label
-                    className={`flex items-center p-3 rounded-xl border cursor-pointer transition-all ${
+                    className={`flex items-center p-3 rounded-md cursor-pointer transition-all duration-calm shadow-card ${
                       selectedPhone === ''
-                        ? 'border-muted-teal-400 bg-muted-teal-50'
-                        : 'border-lavender-200 hover:border-lavender-300'
+                        ? 'bg-moss/10 ring-1 ring-moss/30'
+                        : 'bg-bone-warm hover:bg-moss/5'
                     }`}
                   >
                     <input
@@ -126,17 +126,17 @@ export default function ContactSelectionModal({
                       className="sr-only"
                     />
                     <span
-                      className={`w-5 h-5 rounded-full border-2 mr-3 flex items-center justify-center ${
+                      className={`w-5 h-5 rounded-full border-2 mr-3 flex items-center justify-center transition-all duration-calm ${
                         selectedPhone === ''
-                          ? 'border-muted-teal-500 bg-muted-teal-500'
-                          : 'border-lavender-300'
+                          ? 'border-moss bg-moss'
+                          : 'border-ash'
                       }`}
                     >
                       {selectedPhone === '' && (
-                        <span className="w-2 h-2 rounded-full bg-white" />
+                        <span className="w-2 h-2 rounded-full bg-bone" />
                       )}
                     </span>
-                    <span className="text-lavender-500 italic">Skip - don&apos;t save phone number</span>
+                    <span className="text-ash italic">Skip - don&apos;t save phone number</span>
                   </label>
                 </div>
               </div>
@@ -145,17 +145,17 @@ export default function ContactSelectionModal({
             {/* Email Selection */}
             {showEmailSelection && (
               <div>
-                <label className="block text-sm font-medium text-lavender-700 mb-3">
+                <label className="block text-body font-medium text-obsidian mb-3">
                   Email address
                 </label>
                 <div className="space-y-2">
                   {emails.map((email, index) => (
                     <label
                       key={index}
-                      className={`flex items-center p-3 rounded-xl border cursor-pointer transition-all ${
+                      className={`flex items-center p-3 rounded-md cursor-pointer transition-all duration-calm shadow-card ${
                         selectedEmail === email
-                          ? 'border-muted-teal-400 bg-muted-teal-50'
-                          : 'border-lavender-200 hover:border-lavender-300'
+                          ? 'bg-moss/10 ring-1 ring-moss/30'
+                          : 'bg-bone-warm hover:bg-moss/5'
                       }`}
                     >
                       <input
@@ -167,24 +167,24 @@ export default function ContactSelectionModal({
                         className="sr-only"
                       />
                       <span
-                        className={`w-5 h-5 rounded-full border-2 mr-3 flex items-center justify-center ${
+                        className={`w-5 h-5 rounded-full border-2 mr-3 flex items-center justify-center transition-all duration-calm ${
                           selectedEmail === email
-                            ? 'border-muted-teal-500 bg-muted-teal-500'
-                            : 'border-lavender-300'
+                            ? 'border-moss bg-moss'
+                            : 'border-ash'
                         }`}
                       >
                         {selectedEmail === email && (
-                          <span className="w-2 h-2 rounded-full bg-white" />
+                          <span className="w-2 h-2 rounded-full bg-bone" />
                         )}
                       </span>
-                      <span className="text-lavender-800 break-all">{email}</span>
+                      <span className="text-obsidian break-all">{email}</span>
                     </label>
                   ))}
                   <label
-                    className={`flex items-center p-3 rounded-xl border cursor-pointer transition-all ${
+                    className={`flex items-center p-3 rounded-md cursor-pointer transition-all duration-calm shadow-card ${
                       selectedEmail === ''
-                        ? 'border-muted-teal-400 bg-muted-teal-50'
-                        : 'border-lavender-200 hover:border-lavender-300'
+                        ? 'bg-moss/10 ring-1 ring-moss/30'
+                        : 'bg-bone-warm hover:bg-moss/5'
                     }`}
                   >
                     <input
@@ -196,17 +196,17 @@ export default function ContactSelectionModal({
                       className="sr-only"
                     />
                     <span
-                      className={`w-5 h-5 rounded-full border-2 mr-3 flex items-center justify-center ${
+                      className={`w-5 h-5 rounded-full border-2 mr-3 flex items-center justify-center transition-all duration-calm ${
                         selectedEmail === ''
-                          ? 'border-muted-teal-500 bg-muted-teal-500'
-                          : 'border-lavender-300'
+                          ? 'border-moss bg-moss'
+                          : 'border-ash'
                       }`}
                     >
                       {selectedEmail === '' && (
-                        <span className="w-2 h-2 rounded-full bg-white" />
+                        <span className="w-2 h-2 rounded-full bg-bone" />
                       )}
                     </span>
-                    <span className="text-lavender-500 italic">Skip - don&apos;t save email</span>
+                    <span className="text-ash italic">Skip - don&apos;t save email</span>
                   </label>
                 </div>
               </div>
@@ -216,13 +216,13 @@ export default function ContactSelectionModal({
           <div className="mt-6 flex gap-3">
             <button
               onClick={onCancel}
-              className="flex-1 py-3 px-4 border border-lavender-200 text-lavender-600 font-medium rounded-xl hover:bg-lavender-50 transition-colors"
+              className="flex-1 py-3 px-4 bg-bone-warm text-obsidian font-medium rounded-md hover:bg-ash/10 transition-all duration-calm"
             >
               Cancel
             </button>
             <button
               onClick={handleContinue}
-              className="flex-1 py-3 px-4 bg-muted-teal-500 hover:bg-muted-teal-600 text-white font-medium rounded-xl transition-colors"
+              className="flex-1 py-3 px-4 bg-moss hover:opacity-90 text-bone font-medium rounded-md transition-all duration-calm"
             >
               Continue
             </button>
