@@ -189,7 +189,7 @@ export default function ReflectPage() {
   if (loading) {
     return (
       <main className="min-h-screen bg-bone flex items-center justify-center">
-        <div className="text-ash">Loading...</div>
+        <div className="text-text-tertiary">Loading...</div>
       </main>
     )
   }
@@ -202,7 +202,7 @@ export default function ReflectPage() {
           {step !== 'complete' && step !== 'connected' ? (
             <button
               onClick={handleBack}
-              className="text-ash hover:text-obsidian text-body transition-all duration-calm flex items-center gap-1"
+              className="text-text-tertiary hover:text-obsidian text-body transition-all duration-calm flex items-center gap-1"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -212,7 +212,7 @@ export default function ReflectPage() {
           ) : (
             <Link
               href="/"
-              className="text-ash hover:text-obsidian text-body transition-all duration-calm flex items-center gap-1"
+              className="text-text-tertiary hover:text-obsidian text-body transition-all duration-calm flex items-center gap-1"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -227,27 +227,27 @@ export default function ReflectPage() {
         {/* Progress Dots */}
         <div className="flex justify-center gap-2 mb-8">
           <div className={`w-2 h-2 rounded-full transition-all duration-calm ${
-            step === 'connected' ? 'bg-moss' : 'bg-ash'
+            step === 'connected' ? 'bg-moss' : 'bg-text-placeholder'
           }`} />
           <div className={`w-2 h-2 rounded-full transition-all duration-calm ${
-            step === 'grow_closer' ? 'bg-moss' : 'bg-ash'
+            step === 'grow_closer' ? 'bg-moss' : 'bg-text-placeholder'
           }`} />
           <div className={`w-2 h-2 rounded-full transition-all duration-calm ${
-            step === 'insights' ? 'bg-moss' : 'bg-ash'
+            step === 'insights' ? 'bg-moss' : 'bg-text-placeholder'
           }`} />
           <div className={`w-2 h-2 rounded-full transition-all duration-calm ${
-            step === 'complete' ? 'bg-moss' : 'bg-ash'
+            step === 'complete' ? 'bg-moss' : 'bg-text-placeholder'
           }`} />
         </div>
 
         {/* Step 1: Most Connected */}
         {step === 'connected' && (
-          <div className="bg-bone rounded-lg p-6 shadow-card">
+          <div className="bg-white rounded-lg p-6 shadow-card">
             <div className="text-center mb-6">
               <h2 className="text-h2 font-medium text-obsidian mb-2">
                 Who did you feel most connected to this week?
               </h2>
-              <p className="text-body text-ash">
+              <p className="text-body text-text-secondary">
                 Think about conversations that felt meaningful
               </p>
             </div>
@@ -288,12 +288,12 @@ export default function ReflectPage() {
 
         {/* Step 2: Grow Closer */}
         {step === 'grow_closer' && (
-          <div className="bg-bone rounded-lg p-6 shadow-card">
+          <div className="bg-white rounded-lg p-6 shadow-card">
             <div className="text-center mb-6">
               <h2 className="text-h2 font-medium text-obsidian mb-2">
                 Is there anyone you&apos;d like to grow closer to?
               </h2>
-              <p className="text-body text-ash">
+              <p className="text-body text-text-secondary">
                 Someone you&apos;ve been meaning to reach out to
               </p>
             </div>
@@ -336,7 +336,7 @@ export default function ReflectPage() {
         {step === 'insights' && growCloserConnection && (
           <div className="space-y-4">
             {/* Header Card */}
-            <div className="bg-bone rounded-lg p-6 shadow-card">
+            <div className="bg-white rounded-lg p-6 shadow-card">
               <div className="text-center mb-4">
                 <h2 className="text-h3 font-medium text-obsidian">
                   Growing closer with {growCloserConnection.name}
@@ -347,7 +347,7 @@ export default function ReflectPage() {
               {maintenanceGap && (
                 <div className="mb-4">
                   <div className="flex justify-between text-body mb-2">
-                    <span className="text-ash">Connection health</span>
+                    <span className="text-text-secondary">Connection health</span>
                     <span className={`font-medium ${
                       maintenanceGap.status === 'ahead' || maintenanceGap.status === 'on_track'
                         ? 'text-moss'
@@ -362,7 +362,7 @@ export default function ReflectPage() {
                       {maintenanceGap.status === 'never_contacted' && 'New'}
                     </span>
                   </div>
-                  <p className="text-body text-ash mt-2">{maintenanceGap.message}</p>
+                  <p className="text-body text-text-secondary mt-2">{maintenanceGap.message}</p>
                 </div>
               )}
 
@@ -372,7 +372,7 @@ export default function ReflectPage() {
                   <div className="text-body font-medium text-moss">
                     {streak.currentStreak} week streak
                   </div>
-                  <div className="text-micro text-ash">
+                  <div className="text-micro text-text-tertiary">
                     You&apos;ve reflected {streak.totalReflections} times total
                   </div>
                 </div>
@@ -381,7 +381,7 @@ export default function ReflectPage() {
 
             {/* Recent Interactions */}
             {recentInteractions.length > 0 && (
-              <div className="bg-bone rounded-lg p-6 shadow-card">
+              <div className="bg-white rounded-lg p-6 shadow-card">
                 <h3 className="text-body font-medium text-obsidian mb-3">Recent History</h3>
                 <div className="space-y-3">
                   {recentInteractions.map((interaction) => (
@@ -391,12 +391,12 @@ export default function ReflectPage() {
                           <span className="text-body font-medium text-obsidian">
                             {interactionTypeLabel[interaction.interaction_type] || interaction.interaction_type}
                           </span>
-                          <span className="text-micro text-ash">
+                          <span className="text-micro text-text-tertiary">
                             {formatRelativeDate(interaction.interaction_date)}
                           </span>
                         </div>
                         {interaction.memory && (
-                          <p className="text-body text-ash italic truncate">
+                          <p className="text-body text-text-secondary italic truncate">
                             &ldquo;{interaction.memory}&rdquo;
                           </p>
                         )}
@@ -409,7 +409,7 @@ export default function ReflectPage() {
 
             {/* Science-Backed Suggestions */}
             {suggestions.length > 0 && (
-              <div className="bg-bone rounded-lg p-6 shadow-card">
+              <div className="bg-white rounded-lg p-6 shadow-card">
                 <h3 className="text-body font-medium text-obsidian mb-3">Suggestions for you</h3>
                 <div className="space-y-3">
                   {suggestions.map((suggestion, index) => (
@@ -426,7 +426,7 @@ export default function ReflectPage() {
                           <div className="text-body font-medium text-obsidian">
                             {suggestion.message}
                           </div>
-                          <div className="text-micro text-ash mt-1 italic">
+                          <div className="text-micro text-text-secondary mt-1 italic">
                             {suggestion.scienceNote}
                           </div>
                         </div>
@@ -450,7 +450,7 @@ export default function ReflectPage() {
 
         {/* Step 4: Complete */}
         {step === 'complete' && (
-          <div className="bg-bone rounded-lg p-8 shadow-card text-center">
+          <div className="bg-white rounded-lg p-8 shadow-card text-center">
             <h2 className="text-h2 font-medium text-obsidian mb-3">
               Thank you for reflecting
             </h2>
@@ -463,7 +463,7 @@ export default function ReflectPage() {
               <p className="text-body text-obsidian italic">
                 &ldquo;The quality of your life is the quality of your relationships.&rdquo;
               </p>
-              <p className="text-micro text-ash mt-2">— Tony Robbins</p>
+              <p className="text-micro text-text-tertiary mt-2">— Tony Robbins</p>
             </div>
 
             {/* Summary */}
@@ -471,7 +471,7 @@ export default function ReflectPage() {
               <div className="text-left mb-6 space-y-3">
                 {mostConnected && (
                   <div className="bg-bone-warm rounded-md p-4">
-                    <div className="text-micro text-ash mb-1">Felt most connected to</div>
+                    <div className="text-micro text-text-tertiary mb-1">Felt most connected to</div>
                     <div className="text-obsidian font-medium">
                       {connections.find(c => c.id === mostConnected)?.name}
                     </div>
@@ -479,7 +479,7 @@ export default function ReflectPage() {
                 )}
                 {growCloser && (
                   <div className="bg-bone-warm rounded-md p-4">
-                    <div className="text-micro text-ash mb-1">Want to grow closer to</div>
+                    <div className="text-micro text-text-tertiary mb-1">Want to grow closer to</div>
                     <div className="text-obsidian font-medium">
                       {connections.find(c => c.id === growCloser)?.name}
                     </div>

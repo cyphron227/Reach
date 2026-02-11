@@ -190,7 +190,7 @@ export default function AddConnectionModal({ isOpen, onClose, onSuccess }: AddCo
         }}
       >
         <div
-          className="bg-bone rounded-lg w-full max-w-md shadow-modal max-h-[90vh] overflow-y-auto overscroll-contain"
+          className="bg-white rounded-lg w-full max-w-md shadow-modal max-h-[90vh] overflow-y-auto overscroll-contain"
         >
           <div className="p-6">
             <div className="flex items-center justify-between mb-6">
@@ -199,7 +199,7 @@ export default function AddConnectionModal({ isOpen, onClose, onSuccess }: AddCo
               </h2>
               <button
                 onClick={onClose}
-                className="text-ash hover:text-obsidian transition-all duration-calm"
+                className="text-text-tertiary hover:text-obsidian transition-all duration-calm"
               >
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -235,7 +235,7 @@ export default function AddConnectionModal({ isOpen, onClose, onSuccess }: AddCo
 
                 {/* Privacy notice */}
                 <div className="pt-4 border-t border-bone-warm">
-                  <ul className="space-y-2 text-micro text-ash">
+                  <ul className="space-y-2 text-micro text-text-tertiary">
                     <li className="flex gap-2">
                       <span className="text-moss">•</span>
                       <span>Ringur only accesses contacts you explicitly choose.</span>
@@ -276,7 +276,7 @@ export default function AddConnectionModal({ isOpen, onClose, onSuccess }: AddCo
 
                 {/* Name */}
                 <div>
-                  <label htmlFor="name" className="block text-body font-medium text-obsidian mb-1">
+                  <label htmlFor="name" className="block text-micro-medium text-text-tertiary mb-1">
                     Their name
                   </label>
                   <input
@@ -285,45 +285,45 @@ export default function AddConnectionModal({ isOpen, onClose, onSuccess }: AddCo
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     required
-                    className="w-full bg-bone-warm border-none rounded-md px-4 py-3 text-body text-obsidian placeholder:text-ash focus:outline-none focus:ring-1 focus:ring-moss/30 transition-all duration-calm"
+                    className="w-full bg-bone-warm border-none rounded-md px-4 py-3 text-body text-obsidian placeholder:text-text-placeholder focus:outline-none focus:ring-1 focus:ring-moss/40 transition-all duration-calm"
                     placeholder="e.g., Sarah"
                   />
                 </div>
 
                 {/* Phone Number */}
                 <div>
-                  <label htmlFor="phone" className="block text-body font-medium text-obsidian mb-1">
-                    Phone number <span className="text-ash">(optional)</span>
+                  <label htmlFor="phone" className="block text-micro-medium text-text-tertiary mb-1">
+                    Phone number <span className="text-text-tertiary">(optional)</span>
                   </label>
                   <input
                     id="phone"
                     type="tel"
                     value={phoneNumber}
                     onChange={(e) => setPhoneNumber(e.target.value)}
-                    className="w-full bg-bone-warm border-none rounded-md px-4 py-3 text-body text-obsidian placeholder:text-ash focus:outline-none focus:ring-1 focus:ring-moss/30 transition-all duration-calm"
+                    className="w-full bg-bone-warm border-none rounded-md px-4 py-3 text-body text-obsidian placeholder:text-text-placeholder focus:outline-none focus:ring-1 focus:ring-moss/40 transition-all duration-calm"
                     placeholder="e.g., +1 555 123 4567"
                   />
                 </div>
 
                 {/* Email */}
                 <div>
-                  <label htmlFor="email" className="block text-body font-medium text-obsidian mb-1">
-                    Email <span className="text-ash">(optional)</span>
+                  <label htmlFor="email" className="block text-micro-medium text-text-tertiary mb-1">
+                    Email <span className="text-text-tertiary">(optional)</span>
                   </label>
                   <input
                     id="email"
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full bg-bone-warm border-none rounded-md px-4 py-3 text-body text-obsidian placeholder:text-ash focus:outline-none focus:ring-1 focus:ring-moss/30 transition-all duration-calm"
+                    className="w-full bg-bone-warm border-none rounded-md px-4 py-3 text-body text-obsidian placeholder:text-text-placeholder focus:outline-none focus:ring-1 focus:ring-moss/40 transition-all duration-calm"
                     placeholder="e.g., sarah@example.com"
                   />
                 </div>
 
                 {/* Preferred Messaging App */}
                 <div>
-                  <label className="block text-body font-medium text-obsidian mb-1">
-                    Preferred messaging app <span className="text-ash">(optional)</span>
+                  <label className="block text-micro-medium text-text-tertiary mb-1">
+                    Preferred messaging app <span className="text-text-tertiary">(optional)</span>
                   </label>
                   <div className="flex gap-2">
                     {([
@@ -349,14 +349,14 @@ export default function AddConnectionModal({ isOpen, onClose, onSuccess }: AddCo
 
                 {/* Frequency */}
                 <div>
-                  <label htmlFor="frequency" className="block text-body font-medium text-obsidian mb-1">
+                  <label htmlFor="frequency" className="block text-micro-medium text-text-tertiary mb-1">
                     How often do you want to catch-up?
                   </label>
                   <select
                     id="frequency"
                     value={frequency}
                     onChange={(e) => setFrequency(e.target.value as CatchupFrequency)}
-                    className="w-full bg-bone-warm border-none rounded-md px-4 py-3 text-body text-obsidian focus:outline-none focus:ring-1 focus:ring-moss/30 transition-all duration-calm"
+                    className="w-full bg-bone-warm border-none rounded-md px-4 py-3 text-body text-obsidian focus:outline-none focus:ring-1 focus:ring-moss/40 transition-all duration-calm"
                   >
                     {frequencyOptions.map((option) => (
                       <option key={option.value} value={option.value}>

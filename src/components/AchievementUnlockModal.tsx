@@ -83,7 +83,7 @@ export default function AchievementUnlockModal({
           <div className="text-body-medium font-medium mb-0.5">
             {currentAchievement.name}
           </div>
-          <div className="text-micro text-ash">
+          <div className="text-micro text-bone/70">
             {currentAchievement.description}
           </div>
         </div>

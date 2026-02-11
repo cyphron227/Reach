@@ -148,7 +148,7 @@ export default function OnboardingPage() {
               />
             </div>
             <div>
-              <h2 className="text-h3 text-ash mb-3">What it isn&apos;t:</h2>
+              <h2 className="text-h3 text-text-secondary mb-3">What it isn&apos;t:</h2>
               <OnboardingList
                 items={[
                   { text: 'Social media', positive: false },
@@ -186,7 +186,7 @@ export default function OnboardingPage() {
                 </div>
                 <button
                   onClick={() => removeDbConnection(conn.id)}
-                  className="text-ash hover:text-obsidian transition-colors duration-calm"
+                  className="text-text-tertiary hover:text-obsidian transition-colors duration-calm"
                 >
                   &times;
                 </button>
@@ -197,7 +197,7 @@ export default function OnboardingPage() {
             {dbConnections.length < 3 && (
               <button
                 onClick={() => setShowAddConnectionModal(true)}
-                className="w-full py-3 px-4 border-2 border-dashed border-ash/30 hover:border-moss text-ash hover:text-moss font-medium rounded-md transition-all duration-calm"
+                className="w-full py-3 px-4 border-2 border-dashed border-text-placeholder/30 hover:border-moss text-text-secondary hover:text-moss font-medium rounded-md transition-all duration-calm"
               >
                 + Add a connection
               </button>
@@ -208,7 +208,7 @@ export default function OnboardingPage() {
             <p className="text-ember text-micro mb-4">{error}</p>
           )}
 
-          <p className="text-micro text-ash mb-6">
+          <p className="text-micro text-text-secondary mb-6">
             You can add more later as you build the habit.
           </p>
 
@@ -221,7 +221,7 @@ export default function OnboardingPage() {
             </OnboardingButton>
             <button
               onClick={nextStep}
-              className="text-ash hover:text-obsidian text-micro transition-colors duration-calm"
+              className="text-text-tertiary hover:text-obsidian text-micro transition-colors duration-calm"
             >
               Skip
             </button>
@@ -244,7 +244,7 @@ export default function OnboardingPage() {
               {dbConnections.map((conn) => (
                 <div
                   key={conn.id}
-                  className="bg-bone rounded-lg p-4 shadow-card"
+                  className="bg-white rounded-lg p-4 shadow-card"
                 >
                   <p className="text-body-medium text-obsidian mb-3">{conn.name}</p>
                   <div className="grid grid-cols-2 gap-2">
@@ -253,7 +253,7 @@ export default function OnboardingPage() {
                         setSelectedOnboardingConnection(conn)
                         setShowPlanModal(true)
                       }}
-                      className="py-2.5 px-3 bg-bone-warm hover:bg-ash/10 text-obsidian text-micro-medium rounded-md transition-all duration-calm flex items-center justify-center gap-2"
+                      className="py-2.5 px-3 bg-bone-warm hover:bg-bone-warm text-obsidian text-micro-medium rounded-md transition-all duration-calm flex items-center justify-center gap-2"
                     >
                       Plan
                     </button>
@@ -286,7 +286,7 @@ export default function OnboardingPage() {
             <button
               onClick={completeOnboarding}
               disabled={loading}
-              className="text-ash hover:text-obsidian text-micro transition-colors duration-calm"
+              className="text-text-tertiary hover:text-obsidian text-micro transition-colors duration-calm"
             >
               Skip for now
             </button>

@@ -225,13 +225,13 @@ export default function LoginPage() {
             {/* Logo and Tagline */}
             <div className="mb-12">
               <h1 className="text-5xl font-semibold text-obsidian mb-4">Ringur</h1>
-              <p className="text-xl text-ash leading-relaxed">
+              <p className="text-xl text-text-secondary leading-relaxed">
                 Stay close to who matters
               </p>
             </div>
 
             {/* Hero Description */}
-            <div className="bg-bone rounded-lg p-8 shadow-card mb-8">
+            <div className="bg-white rounded-lg p-8 shadow-card mb-8">
               <p className="text-obsidian text-lg leading-relaxed mb-6">
                 Life gets busy. Friendships drift. <span className="text-moss font-medium">Ringur</span> helps you nurture the relationships that matter most with gentle reminders and meaningful memories.
               </p>
@@ -242,21 +242,21 @@ export default function LoginPage() {
                   <span className="inline-block w-2 h-2 rounded-full bg-moss mt-2 shrink-0" />
                   <div>
                     <div className="text-body-medium text-obsidian">Gentle nudges</div>
-                    <div className="text-micro text-ash">A gentle nudge when it might be time to reach out</div>
+                    <div className="text-micro text-text-secondary">A gentle nudge when it might be time to reach out</div>
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
                   <span className="inline-block w-2 h-2 rounded-full bg-inkblue mt-2 shrink-0" />
                   <div>
                     <div className="text-body-medium text-obsidian">Memories</div>
-                    <div className="text-micro text-ash">Remember what matters before your next conversation</div>
+                    <div className="text-micro text-text-secondary">Remember what matters before your next conversation</div>
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
                   <span className="inline-block w-2 h-2 rounded-full bg-sun mt-2 shrink-0" />
                   <div>
                     <div className="text-body-medium text-obsidian">Forest view</div>
-                    <div className="text-micro text-ash">Watch your relationships flourish as a living garden</div>
+                    <div className="text-micro text-text-secondary">Watch your relationships flourish as a living garden</div>
                   </div>
                 </div>
               </div>
@@ -268,10 +268,10 @@ export default function LoginPage() {
               <button
                 onClick={handleGoogleSignIn}
                 disabled={googleLoading}
-                className="w-full py-4 px-6 bg-bone-warm hover:bg-ash/10 text-obsidian font-medium rounded-md transition-all duration-calm shadow-subtle flex items-center justify-center gap-3 disabled:opacity-50"
+                className="w-full py-4 px-6 bg-bone-warm hover:bg-bone-warm text-obsidian font-medium rounded-md transition-all duration-calm shadow-subtle flex items-center justify-center gap-3 disabled:opacity-50"
               >
                 {googleLoading ? (
-                  <div className="animate-gentle-pulse rounded-full h-5 w-5 border-b-2 border-ash"></div>
+                  <div className="animate-gentle-pulse rounded-full h-5 w-5 border-b-2 border-text-placeholder"></div>
                 ) : (
                   <>
                     <svg className="w-5 h-5" viewBox="0 0 24 24">
@@ -286,27 +286,27 @@ export default function LoginPage() {
               </button>
 
               <div className="flex items-center gap-4">
-                <div className="flex-1 h-px bg-ash/15"></div>
-                <span className="text-ash text-micro">or</span>
-                <div className="flex-1 h-px bg-ash/15"></div>
+                <div className="flex-1 h-px bg-text-placeholder/20"></div>
+                <span className="text-text-tertiary text-micro">or</span>
+                <div className="flex-1 h-px bg-text-placeholder/20"></div>
               </div>
 
               <button
                 onClick={() => handleGetStarted(true)}
-                className="w-full py-4 px-6 bg-moss hover:opacity-90 text-bone font-medium rounded-md transition-all duration-calm shadow-card"
+                className="w-full py-4 px-6 bg-terracotta hover:opacity-90 text-bone font-medium rounded-md transition-all duration-calm shadow-card"
               >
                 Get started with email
               </button>
               <button
                 onClick={() => handleGetStarted(false)}
-                className="w-full py-4 px-6 bg-bone-warm hover:bg-ash/10 text-obsidian font-medium rounded-md transition-all duration-calm"
+                className="w-full py-4 px-6 bg-bone-warm hover:bg-bone-warm text-obsidian font-medium rounded-md transition-all duration-calm"
               >
                 Sign in with email
               </button>
             </div>
 
             {/* Subtle footer */}
-            <p className="mt-8 text-micro text-ash">
+            <p className="mt-8 text-micro text-text-tertiary">
               Small moments build strong roots
             </p>
           </div>
@@ -327,7 +327,7 @@ export default function LoginPage() {
               setError(null)
               setMessage(null)
             }}
-            className="mb-6 text-ash hover:text-obsidian text-micro transition-colors duration-calm flex items-center gap-1"
+            className="mb-6 text-text-tertiary hover:text-obsidian text-micro transition-colors duration-calm flex items-center gap-1"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -339,14 +339,14 @@ export default function LoginPage() {
             <h1 className="text-h2 text-obsidian mb-2">
               Reset password
             </h1>
-            <p className="text-body text-ash">
+            <p className="text-body text-text-secondary">
               Enter your email to receive a reset link
             </p>
           </div>
 
           <form onSubmit={handleResetPassword} className="space-y-4">
             <div>
-              <label htmlFor="reset-email" className="block text-label text-obsidian mb-1">
+              <label htmlFor="reset-email" className="block text-micro-medium text-text-tertiary mb-1">
                 Email
               </label>
               <input
@@ -355,7 +355,7 @@ export default function LoginPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="w-full px-4 py-3 rounded-md bg-bone-warm border-none text-obsidian placeholder-ash focus:outline-none focus:ring-1 focus:ring-moss/30 transition-all duration-calm"
+                className="w-full px-4 py-3 rounded-md bg-bone-warm border-none text-obsidian placeholder:text-text-placeholder focus:outline-none focus:ring-1 focus:ring-moss/40 transition-all duration-calm"
                 placeholder="you@example.com"
               />
             </div>
@@ -394,7 +394,7 @@ export default function LoginPage() {
         {/* Back button */}
         <button
           onClick={() => setShowAuth(false)}
-          className="mb-6 text-ash hover:text-obsidian text-micro transition-colors duration-calm flex items-center gap-1"
+          className="mb-6 text-text-tertiary hover:text-obsidian text-micro transition-colors duration-calm flex items-center gap-1"
         >
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -406,7 +406,7 @@ export default function LoginPage() {
           <h1 className="text-h2 text-obsidian mb-2">
             {isSignUp ? 'Create account' : 'Welcome back'}
           </h1>
-          <p className="text-body text-ash">
+          <p className="text-body text-text-secondary">
             {isSignUp ? 'Start nurturing your relationships' : 'Continue where you left off'}
           </p>
         </div>
@@ -414,7 +414,7 @@ export default function LoginPage() {
         <form onSubmit={handleAuth} className="space-y-4">
           {isSignUp && (
             <div>
-              <label htmlFor="fullName" className="block text-label text-obsidian mb-1">
+              <label htmlFor="fullName" className="block text-micro-medium text-text-tertiary mb-1">
                 Full name
               </label>
               <input
@@ -422,14 +422,14 @@ export default function LoginPage() {
                 type="text"
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
-                className="w-full px-4 py-3 rounded-md bg-bone-warm border-none text-obsidian placeholder-ash focus:outline-none focus:ring-1 focus:ring-moss/30 transition-all duration-calm"
+                className="w-full px-4 py-3 rounded-md bg-bone-warm border-none text-obsidian placeholder:text-text-placeholder focus:outline-none focus:ring-1 focus:ring-moss/40 transition-all duration-calm"
                 placeholder="Your name"
               />
             </div>
           )}
 
           <div>
-            <label htmlFor="email" className="block text-label text-obsidian mb-1">
+            <label htmlFor="email" className="block text-micro-medium text-text-tertiary mb-1">
               Email
             </label>
             <input
@@ -438,13 +438,13 @@ export default function LoginPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="w-full px-4 py-3 rounded-md bg-bone-warm border-none text-obsidian placeholder-ash focus:outline-none focus:ring-1 focus:ring-moss/30 transition-all duration-calm"
+              className="w-full px-4 py-3 rounded-md bg-bone-warm border-none text-obsidian placeholder:text-text-placeholder focus:outline-none focus:ring-1 focus:ring-moss/40 transition-all duration-calm"
               placeholder="you@example.com"
             />
           </div>
 
           <div>
-            <label htmlFor="password" className="block text-label text-obsidian mb-1">
+            <label htmlFor="password" className="block text-micro-medium text-text-tertiary mb-1">
               Password
             </label>
             <input
@@ -454,7 +454,7 @@ export default function LoginPage() {
               onChange={(e) => setPassword(e.target.value)}
               required
               minLength={6}
-              className="w-full px-4 py-3 rounded-md bg-bone-warm border-none text-obsidian placeholder-ash focus:outline-none focus:ring-1 focus:ring-moss/30 transition-all duration-calm"
+              className="w-full px-4 py-3 rounded-md bg-bone-warm border-none text-obsidian placeholder:text-text-placeholder focus:outline-none focus:ring-1 focus:ring-moss/40 transition-all duration-calm"
               placeholder="••••••••"
             />
           </div>
@@ -493,9 +493,9 @@ export default function LoginPage() {
 
           {/* Divider */}
           <div className="flex items-center gap-4 my-6">
-            <div className="flex-1 h-px bg-ash/15"></div>
-            <span className="text-ash text-micro">or</span>
-            <div className="flex-1 h-px bg-ash/15"></div>
+            <div className="flex-1 h-px bg-text-placeholder/20"></div>
+            <span className="text-text-tertiary text-micro">or</span>
+            <div className="flex-1 h-px bg-text-placeholder/20"></div>
           </div>
 
           {/* Google Sign-In Button */}
@@ -503,10 +503,10 @@ export default function LoginPage() {
             type="button"
             onClick={handleGoogleSignIn}
             disabled={loading || googleLoading}
-            className="w-full py-3 px-4 bg-bone-warm hover:bg-ash/10 text-obsidian font-medium rounded-md transition-all duration-calm disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3 shadow-subtle"
+            className="w-full py-3 px-4 bg-bone-warm hover:bg-bone-warm text-obsidian font-medium rounded-md transition-all duration-calm disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3 shadow-subtle"
           >
             {googleLoading ? (
-              <div className="animate-gentle-pulse rounded-full h-5 w-5 border-b-2 border-ash"></div>
+              <div className="animate-gentle-pulse rounded-full h-5 w-5 border-b-2 border-text-placeholder"></div>
             ) : (
               <>
                 <svg className="w-5 h-5" viewBox="0 0 24 24">

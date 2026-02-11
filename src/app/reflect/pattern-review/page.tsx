@@ -209,7 +209,7 @@ export default function PatternReviewPage() {
   if (loading) {
     return (
       <main className="min-h-screen bg-bone flex items-center justify-center">
-        <div className="text-ash">Loading...</div>
+        <div className="text-text-tertiary">Loading...</div>
       </main>
     )
   }
@@ -222,7 +222,7 @@ export default function PatternReviewPage() {
           {step !== 'complete' && step !== 'overview' ? (
             <button
               onClick={handleBack}
-              className="text-ash hover:text-obsidian text-body transition-all duration-calm flex items-center gap-1"
+              className="text-text-tertiary hover:text-obsidian text-body transition-all duration-calm flex items-center gap-1"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -232,7 +232,7 @@ export default function PatternReviewPage() {
           ) : (
             <Link
               href="/"
-              className="text-ash hover:text-obsidian text-body transition-all duration-calm flex items-center gap-1"
+              className="text-text-tertiary hover:text-obsidian text-body transition-all duration-calm flex items-center gap-1"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -247,28 +247,28 @@ export default function PatternReviewPage() {
         {/* Progress Dots */}
         <div className="flex justify-center gap-2 mb-8">
           <div className={`w-2 h-2 rounded-full transition-all duration-calm ${
-            step === 'overview' ? 'bg-moss' : 'bg-ash'
+            step === 'overview' ? 'bg-moss' : 'bg-text-placeholder'
           }`} />
           <div className={`w-2 h-2 rounded-full transition-all duration-calm ${
-            step === 'connections' ? 'bg-moss' : 'bg-ash'
+            step === 'connections' ? 'bg-moss' : 'bg-text-placeholder'
           }`} />
           <div className={`w-2 h-2 rounded-full transition-all duration-calm ${
-            step === 'insights' ? 'bg-moss' : 'bg-ash'
+            step === 'insights' ? 'bg-moss' : 'bg-text-placeholder'
           }`} />
           <div className={`w-2 h-2 rounded-full transition-all duration-calm ${
-            step === 'complete' ? 'bg-moss' : 'bg-ash'
+            step === 'complete' ? 'bg-moss' : 'bg-text-placeholder'
           }`} />
         </div>
 
         {/* Step 1: Overview */}
         {step === 'overview' && weeklyPattern && (
           <div className="space-y-4">
-            <div className="bg-bone rounded-lg p-6 shadow-card">
+            <div className="bg-white rounded-lg p-6 shadow-card">
               <div className="text-center mb-6">
                 <h2 className="text-h2 font-medium text-obsidian mb-2">
                   Your Week in Review
                 </h2>
-                <p className="text-body text-ash">
+                <p className="text-body text-text-secondary">
                   {weeklyPattern.validDays} valid days this week
                 </p>
               </div>
@@ -279,19 +279,19 @@ export default function PatternReviewPage() {
                   <div className="text-h1 font-medium text-moss">
                     {weeklyPattern.depth_score}
                   </div>
-                  <div className="text-micro text-ash">Depth</div>
+                  <div className="text-micro text-text-tertiary">Depth</div>
                 </div>
                 <div className="bg-bone-warm rounded-md p-3 text-center">
                   <div className="text-h1 font-medium text-moss">
                     {weeklyPattern.variety_score}
                   </div>
-                  <div className="text-micro text-ash">Variety</div>
+                  <div className="text-micro text-text-tertiary">Variety</div>
                 </div>
                 <div className="bg-bone-warm rounded-md p-3 text-center">
                   <div className="text-h1 font-medium text-moss">
                     {weeklyPattern.consistency_score}
                   </div>
-                  <div className="text-micro text-ash">Consistency</div>
+                  <div className="text-micro text-text-tertiary">Consistency</div>
                 </div>
               </div>
 
@@ -302,7 +302,7 @@ export default function PatternReviewPage() {
                   {Object.entries(weeklyPattern.actionBreakdown).map(([type, count]) => (
                     count > 0 && (
                       <div key={type} className="flex items-center justify-between text-body">
-                        <span className="text-ash">
+                        <span className="text-text-secondary">
                           {ACTION_LABELS[type as ActionTypeV2] || type.replace(/_/g, ' ')}
                         </span>
                         <span className="font-medium text-obsidian">{count}</span>
@@ -334,7 +334,7 @@ export default function PatternReviewPage() {
           <div className="space-y-4">
             {/* Connections Needing Attention */}
             {connectionsNeedingAttention.length > 0 && (
-              <div className="bg-bone rounded-lg p-6 shadow-card">
+              <div className="bg-white rounded-lg p-6 shadow-card">
                 <div className="flex items-center gap-2 mb-4">
                   <h3 className="font-medium text-obsidian">Need Attention</h3>
                 </div>
@@ -367,7 +367,7 @@ export default function PatternReviewPage() {
 
             {/* Flourishing Connections */}
             {flourishingConnections.length > 0 && (
-              <div className="bg-bone rounded-lg p-6 shadow-card">
+              <div className="bg-white rounded-lg p-6 shadow-card">
                 <div className="flex items-center gap-2 mb-4">
                   <h3 className="font-medium text-obsidian">Flourishing</h3>
                 </div>
@@ -386,11 +386,11 @@ export default function PatternReviewPage() {
 
             {/* All other connections summary */}
             {connections.length > connectionsNeedingAttention.length + flourishingConnections.length && (
-              <div className="bg-bone rounded-lg p-6 shadow-card">
+              <div className="bg-white rounded-lg p-6 shadow-card">
                 <div className="flex items-center gap-2 mb-2">
                   <h3 className="font-medium text-obsidian">Stable</h3>
                 </div>
-                <p className="text-body text-ash">
+                <p className="text-body text-text-secondary">
                   {connections.length - connectionsNeedingAttention.length - flourishingConnections.length} connections maintaining healthy balance
                 </p>
               </div>
@@ -408,7 +408,7 @@ export default function PatternReviewPage() {
         {/* Step 3: Insights */}
         {step === 'insights' && (
           <div className="space-y-4">
-            <div className="bg-bone rounded-lg p-6 shadow-card">
+            <div className="bg-white rounded-lg p-6 shadow-card">
               <div className="text-center mb-6">
                 <h2 className="text-h2 font-medium text-obsidian mb-2">
                   Insights for You
@@ -462,7 +462,7 @@ export default function PatternReviewPage() {
 
         {/* Step 4: Complete */}
         {step === 'complete' && (
-          <div className="bg-bone rounded-lg p-8 shadow-card text-center">
+          <div className="bg-white rounded-lg p-8 shadow-card text-center">
             <h2 className="text-h2 font-medium text-obsidian mb-3">
               Pattern Review Complete
             </h2>
@@ -475,7 +475,7 @@ export default function PatternReviewPage() {
               <div className="bg-bone-warm rounded-md p-4 mb-6 text-left">
                 <div className="flex items-center justify-between mb-3">
                   <span className="text-body font-medium text-obsidian">This Week</span>
-                  <span className="text-body text-ash">
+                  <span className="text-body text-text-tertiary">
                     {weeklyPattern.validDays}/7 valid days
                   </span>
                 </div>
@@ -484,7 +484,7 @@ export default function PatternReviewPage() {
                     <div
                       key={i}
                       className={`flex-1 h-2 rounded-full ${
-                        i < weeklyPattern.validDays ? 'bg-moss' : 'bg-ash'
+                        i < weeklyPattern.validDays ? 'bg-moss' : 'bg-text-placeholder'
                       }`}
                     />
                   ))}

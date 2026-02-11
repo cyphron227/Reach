@@ -78,7 +78,7 @@ export default function ReflectionHistoryPage() {
   if (loading) {
     return (
       <main className="min-h-screen bg-bone flex items-center justify-center">
-        <div className="text-ash">Loading...</div>
+        <div className="text-text-tertiary">Loading...</div>
       </main>
     )
   }
@@ -90,7 +90,7 @@ export default function ReflectionHistoryPage() {
         <div className="flex items-center justify-between mb-8">
           <Link
             href="/"
-            className="text-ash hover:text-obsidian text-body transition-all duration-calm flex items-center gap-1"
+            className="text-text-tertiary hover:text-obsidian text-body transition-all duration-calm flex items-center gap-1"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -102,19 +102,19 @@ export default function ReflectionHistoryPage() {
         </div>
 
         {/* Streak Stats */}
-        <div className="bg-bone rounded-lg p-6 shadow-card mb-6">
+        <div className="bg-white rounded-lg p-6 shadow-card mb-6">
           <div className="grid grid-cols-3 gap-4 text-center">
             <div>
               <div className="text-h1 font-medium text-moss">{streak.currentStreak}</div>
-              <div className="text-micro text-ash">Current streak</div>
+              <div className="text-micro text-text-tertiary">Current streak</div>
             </div>
             <div>
               <div className="text-h1 font-medium text-obsidian">{streak.longestStreak}</div>
-              <div className="text-micro text-ash">Longest streak</div>
+              <div className="text-micro text-text-tertiary">Longest streak</div>
             </div>
             <div>
               <div className="text-h1 font-medium text-obsidian">{streak.totalReflections}</div>
-              <div className="text-micro text-ash">Total reflections</div>
+              <div className="text-micro text-text-tertiary">Total reflections</div>
             </div>
           </div>
 
@@ -139,7 +139,7 @@ export default function ReflectionHistoryPage() {
               return (
                 <div
                   key={reflection.id}
-                  className="bg-bone rounded-lg p-5 shadow-card"
+                  className="bg-white rounded-lg p-5 shadow-card"
                 >
                   <div className="flex items-center justify-between mb-3">
                     <div className="text-body font-medium text-obsidian">
@@ -158,7 +158,7 @@ export default function ReflectionHistoryPage() {
                   <div className="space-y-2">
                     {reflection.most_connected_name && (
                       <div className="flex items-center gap-2">
-                        <span className="text-micro text-ash">Most connected:</span>
+                        <span className="text-micro text-text-tertiary">Most connected:</span>
                         <span className="text-body font-medium text-obsidian">
                           {reflection.most_connected_name}
                         </span>
@@ -167,7 +167,7 @@ export default function ReflectionHistoryPage() {
 
                     {reflection.grow_closer_name && (
                       <div className="flex items-center gap-2">
-                        <span className="text-micro text-ash">Grow closer:</span>
+                        <span className="text-micro text-text-tertiary">Grow closer:</span>
                         <span className="text-body font-medium text-obsidian">
                           {reflection.grow_closer_name}
                         </span>
@@ -180,14 +180,14 @@ export default function ReflectionHistoryPage() {
                     )}
 
                     {!reflection.most_connected_name && !reflection.grow_closer_name && (
-                      <div className="text-body text-ash italic">
+                      <div className="text-body text-text-secondary italic">
                         Skipped selections
                       </div>
                     )}
 
                     {reflection.reflection_notes && (
                       <div className="mt-2 pt-2 border-t border-bone-warm">
-                        <p className="text-body text-ash italic">
+                        <p className="text-body text-text-secondary italic">
                           &ldquo;{reflection.reflection_notes}&rdquo;
                         </p>
                       </div>
@@ -198,11 +198,11 @@ export default function ReflectionHistoryPage() {
             })}
           </div>
         ) : (
-          <div className="bg-bone rounded-lg p-8 shadow-card text-center">
+          <div className="bg-white rounded-lg p-8 shadow-card text-center">
             <h2 className="text-h3 font-medium text-obsidian mb-2">
               No reflections yet
             </h2>
-            <p className="text-ash mb-6">
+            <p className="text-text-secondary mb-6">
               Start your first weekly reflection to see your history here.
             </p>
             <Link

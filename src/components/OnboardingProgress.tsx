@@ -29,7 +29,7 @@ export default function OnboardingProgress({
               w-2 h-2 rounded-full transition-all duration-calm
               ${isActive ? 'w-6 bg-moss' : ''}
               ${isCompleted ? 'bg-moss' : ''}
-              ${!isActive && !isCompleted ? 'bg-ash' : ''}
+              ${!isActive && !isCompleted ? 'bg-text-placeholder' : ''}
             `}
             aria-label={`Step ${stepNumber} of ${totalSteps}${isActive ? ' (current)' : ''}${isCompleted ? ' (completed)' : ''}`}
           />

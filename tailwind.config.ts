@@ -9,19 +9,36 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        // New design system palette
+        // Core palette
         obsidian: '#0F1115',
         bone: '#F6F5F3',
-        ash: '#A6A8AD',
         slate: '#2A2F3A',
+
+        // Text hierarchy (WCAG AA compliant on bone)
+        'text-primary': '#0F1115',
+        'text-secondary': '#4A4D55',
+        'text-tertiary': '#6B6E76',
+        'text-placeholder': '#9B9DA3',
+
+        // Emotional accents
         moss: '#5F7A6A',
         ember: '#C46A4A',
         sun: '#E3B873',
         inkblue: '#2F4C5F',
-        'bone-warm': '#F0EEEA',
+        terracotta: '#B5543A',
+
+        // Surface variants
+        'bone-warm': '#ECEAE6',
         'slate-light': '#3A4050',
+        'moss-light': '#EEF2EF',
+        'inkblue-light': '#ECF0F3',
+        'terracotta-light': '#F5EEEB',
+
         background: '#F6F5F3',
         foreground: '#0F1115',
+
+        // DEPRECATED v1 — kept for forest page compatibility only
+        ash: '#A6A8AD',
 
         // Legacy colors — kept for forest page (skipped in redesign)
         lavender: {
@@ -73,8 +90,8 @@ const config: Config = {
         'h3': ['1.125rem', { lineHeight: '1.5rem', letterSpacing: '-0.01em', fontWeight: '500' }],
         'body': ['0.9375rem', { lineHeight: '1.5rem', fontWeight: '400' }],
         'body-medium': ['0.9375rem', { lineHeight: '1.5rem', fontWeight: '500' }],
-        'micro': ['0.8125rem', { lineHeight: '1.125rem', fontWeight: '400' }],
-        'micro-medium': ['0.8125rem', { lineHeight: '1.125rem', fontWeight: '500' }],
+        'micro': ['0.8125rem', { lineHeight: '1.25rem', fontWeight: '400' }],
+        'micro-medium': ['0.8125rem', { lineHeight: '1.25rem', fontWeight: '500' }],
         'label': ['0.75rem', { lineHeight: '1rem', letterSpacing: '0.02em', fontWeight: '500' }],
       },
       spacing: {

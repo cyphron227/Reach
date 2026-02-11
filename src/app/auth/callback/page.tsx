@@ -103,9 +103,9 @@ function CallbackContent() {
   return (
     <main className="min-h-screen bg-bone flex items-center justify-center">
       <div className="text-center max-w-md px-4">
-        <div className="text-ash mb-4">{status}</div>
+        <div className="text-text-tertiary mb-4">{status}</div>
         {debugInfo.length > 0 && (
-          <div className="text-left bg-bone rounded-md p-4 shadow-card text-micro text-ash space-y-1">
+          <div className="text-left bg-white rounded-md p-4 shadow-card text-micro text-text-tertiary space-y-1">
             {debugInfo.map((line, i) => (
               <div key={i}>{line}</div>
             ))}
@@ -120,7 +120,7 @@ export default function AuthCallbackPage() {
   return (
     <Suspense fallback={
       <main className="min-h-screen bg-bone flex items-center justify-center">
-        <div className="text-ash">Signing in...</div>
+        <div className="text-text-tertiary">Signing in...</div>
       </main>
     }>
       <CallbackContent />

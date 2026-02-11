@@ -49,7 +49,7 @@ export default function ContactSelectionModal({
       onClick={onCancel}
     >
       <div
-        className="bg-bone rounded-lg w-full max-w-md shadow-modal max-h-[80vh] overflow-y-auto overscroll-contain"
+        className="bg-white rounded-lg w-full max-w-md shadow-modal max-h-[80vh] overflow-y-auto overscroll-contain"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="p-6">
@@ -59,7 +59,7 @@ export default function ContactSelectionModal({
             </h2>
             <button
               onClick={onCancel}
-              className="text-ash hover:text-obsidian transition-all duration-calm"
+              className="text-text-tertiary hover:text-obsidian transition-all duration-calm"
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -84,7 +84,7 @@ export default function ContactSelectionModal({
                       key={index}
                       className={`flex items-center p-3 rounded-md cursor-pointer transition-all duration-calm shadow-card ${
                         selectedPhone === phone
-                          ? 'bg-moss/10 ring-1 ring-moss/30'
+                          ? 'bg-moss/10 ring-1 ring-moss/40'
                           : 'bg-bone-warm hover:bg-moss/5'
                       }`}
                     >
@@ -100,7 +100,7 @@ export default function ContactSelectionModal({
                         className={`w-5 h-5 rounded-full border-2 mr-3 flex items-center justify-center transition-all duration-calm ${
                           selectedPhone === phone
                             ? 'border-moss bg-moss'
-                            : 'border-ash'
+                            : 'border-text-placeholder/30'
                         }`}
                       >
                         {selectedPhone === phone && (
@@ -113,7 +113,7 @@ export default function ContactSelectionModal({
                   <label
                     className={`flex items-center p-3 rounded-md cursor-pointer transition-all duration-calm shadow-card ${
                       selectedPhone === ''
-                        ? 'bg-moss/10 ring-1 ring-moss/30'
+                        ? 'bg-moss/10 ring-1 ring-moss/40'
                         : 'bg-bone-warm hover:bg-moss/5'
                     }`}
                   >
@@ -129,14 +129,14 @@ export default function ContactSelectionModal({
                       className={`w-5 h-5 rounded-full border-2 mr-3 flex items-center justify-center transition-all duration-calm ${
                         selectedPhone === ''
                           ? 'border-moss bg-moss'
-                          : 'border-ash'
+                          : 'border-text-placeholder/30'
                       }`}
                     >
                       {selectedPhone === '' && (
                         <span className="w-2 h-2 rounded-full bg-bone" />
                       )}
                     </span>
-                    <span className="text-ash italic">Skip - don&apos;t save phone number</span>
+                    <span className="text-text-tertiary italic">Skip - don&apos;t save phone number</span>
                   </label>
                 </div>
               </div>
@@ -154,7 +154,7 @@ export default function ContactSelectionModal({
                       key={index}
                       className={`flex items-center p-3 rounded-md cursor-pointer transition-all duration-calm shadow-card ${
                         selectedEmail === email
-                          ? 'bg-moss/10 ring-1 ring-moss/30'
+                          ? 'bg-moss/10 ring-1 ring-moss/40'
                           : 'bg-bone-warm hover:bg-moss/5'
                       }`}
                     >
@@ -170,7 +170,7 @@ export default function ContactSelectionModal({
                         className={`w-5 h-5 rounded-full border-2 mr-3 flex items-center justify-center transition-all duration-calm ${
                           selectedEmail === email
                             ? 'border-moss bg-moss'
-                            : 'border-ash'
+                            : 'border-text-placeholder/30'
                         }`}
                       >
                         {selectedEmail === email && (
@@ -183,7 +183,7 @@ export default function ContactSelectionModal({
                   <label
                     className={`flex items-center p-3 rounded-md cursor-pointer transition-all duration-calm shadow-card ${
                       selectedEmail === ''
-                        ? 'bg-moss/10 ring-1 ring-moss/30'
+                        ? 'bg-moss/10 ring-1 ring-moss/40'
                         : 'bg-bone-warm hover:bg-moss/5'
                     }`}
                   >
@@ -199,14 +199,14 @@ export default function ContactSelectionModal({
                       className={`w-5 h-5 rounded-full border-2 mr-3 flex items-center justify-center transition-all duration-calm ${
                         selectedEmail === ''
                           ? 'border-moss bg-moss'
-                          : 'border-ash'
+                          : 'border-text-placeholder/30'
                       }`}
                     >
                       {selectedEmail === '' && (
                         <span className="w-2 h-2 rounded-full bg-bone" />
                       )}
                     </span>
-                    <span className="text-ash italic">Skip - don&apos;t save email</span>
+                    <span className="text-text-tertiary italic">Skip - don&apos;t save email</span>
                   </label>
                 </div>
               </div>
@@ -216,7 +216,7 @@ export default function ContactSelectionModal({
           <div className="mt-6 flex gap-3">
             <button
               onClick={onCancel}
-              className="flex-1 py-3 px-4 bg-bone-warm text-obsidian font-medium rounded-md hover:bg-ash/10 transition-all duration-calm"
+              className="flex-1 py-3 px-4 bg-bone-warm text-obsidian font-medium rounded-md hover:bg-bone-warm transition-all duration-calm"
             >
               Cancel
             </button>

@@ -236,7 +236,7 @@ export default function SettingsPage() {
   if (loading) {
     return (
       <main className="min-h-screen bg-bone flex items-center justify-center">
-        <div className="text-ash">Loading...</div>
+        <div className="text-text-tertiary">Loading...</div>
       </main>
     )
   }
@@ -248,7 +248,7 @@ export default function SettingsPage() {
         <div className="flex items-center justify-between mb-8">
           <Link
             href="/"
-            className="text-ash hover:text-obsidian text-micro transition-colors duration-calm flex items-center gap-1"
+            className="text-text-tertiary hover:text-obsidian text-micro transition-colors duration-calm flex items-center gap-1"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -260,20 +260,20 @@ export default function SettingsPage() {
         </div>
 
         {/* Profile Section */}
-        <div className="bg-bone rounded-lg p-6 shadow-card mb-6">
-          <h2 className="text-label text-ash mb-4">
+        <div className="bg-white rounded-lg p-6 shadow-card mb-6">
+          <h2 className="text-label text-inkblue mb-4">
             Profile
           </h2>
           <div className="space-y-4">
             <div>
-              <div className="text-label text-ash mb-1">Name</div>
+              <div className="text-micro-medium text-text-tertiary mb-1">Name</div>
               {editingName ? (
                 <div className="flex gap-2">
                   <input
                     type="text"
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
-                    className="flex-1 px-3 py-2 rounded-md bg-bone-warm border-none text-obsidian focus:outline-none focus:ring-1 focus:ring-moss/30 transition-all duration-calm text-body"
+                    className="flex-1 px-3 py-2 rounded-md bg-bone-warm border-none text-obsidian focus:outline-none focus:ring-1 focus:ring-moss/40 transition-all duration-calm text-body"
                     placeholder="Your name"
                   />
                   <button
@@ -288,7 +288,7 @@ export default function SettingsPage() {
                       setEditingName(false)
                       setFullName(user?.full_name || '')
                     }}
-                    className="px-3 py-2 bg-bone-warm hover:bg-ash/10 text-obsidian text-micro-medium rounded-md transition-all duration-calm"
+                    className="px-3 py-2 bg-bone-warm hover:bg-bone-warm text-obsidian text-micro-medium rounded-md transition-all duration-calm"
                   >
                     Cancel
                   </button>
@@ -306,15 +306,15 @@ export default function SettingsPage() {
               )}
             </div>
             <div>
-              <div className="text-label text-ash">Email</div>
+              <div className="text-micro-medium text-text-tertiary">Email</div>
               <div className="text-body text-obsidian">{user?.email}</div>
             </div>
           </div>
         </div>
 
         {/* Notifications Section */}
-        <div className="bg-bone rounded-lg p-6 shadow-card mb-6">
-          <h2 className="text-label text-ash mb-4">
+        <div className="bg-white rounded-lg p-6 shadow-card mb-6">
+          <h2 className="text-label text-inkblue mb-4">
             Notifications
           </h2>
 
@@ -323,7 +323,7 @@ export default function SettingsPage() {
             <div className="flex items-center justify-between">
               <div>
                 <div className="text-body-medium text-obsidian">Daily reminder</div>
-                <div className="text-micro text-ash">Get a gentle nudge to reach out</div>
+                <div className="text-micro text-text-secondary">Get a gentle nudge to reach out</div>
               </div>
               <button
                 onClick={handleNotificationToggle}
@@ -346,7 +346,7 @@ export default function SettingsPage() {
                 <select
                   value={notificationTime}
                   onChange={(e) => setNotificationTime(e.target.value)}
-                  className="w-full px-4 py-3 rounded-md bg-bone-warm border-none text-obsidian focus:outline-none focus:ring-1 focus:ring-moss/30 transition-all duration-calm"
+                  className="w-full px-4 py-3 rounded-md bg-bone-warm border-none text-obsidian focus:outline-none focus:ring-1 focus:ring-moss/40 transition-all duration-calm"
                 >
                   <option value="08:00">8:00 AM</option>
                   <option value="09:00">9:00 AM</option>
@@ -365,15 +365,15 @@ export default function SettingsPage() {
         </div>
 
         {/* Weekly Reflection Section */}
-        <div className="bg-bone rounded-lg p-6 shadow-card mb-6">
-          <h2 className="text-label text-ash mb-4">
+        <div className="bg-white rounded-lg p-6 shadow-card mb-6">
+          <h2 className="text-label text-inkblue mb-4">
             Weekly reflection
           </h2>
 
           <div className="flex items-center justify-between">
             <div>
               <div className="text-body-medium text-obsidian">Weekly check-in</div>
-              <div className="text-micro text-ash">Reflect on your connections each week</div>
+              <div className="text-micro text-text-secondary">Reflect on your connections each week</div>
             </div>
             <button
               onClick={() => setWeeklyReflectionEnabled(!weeklyReflectionEnabled)}
@@ -414,7 +414,7 @@ export default function SettingsPage() {
         <div className="bg-bone-warm rounded-md p-4 mb-6">
           <div>
             <div className="text-micro-medium text-obsidian">Your data is private</div>
-            <div className="text-micro text-ash">
+            <div className="text-micro text-text-secondary">
               All your connections and catch-ups are stored securely and only visible to you.
             </div>
           </div>
@@ -423,7 +423,7 @@ export default function SettingsPage() {
         {/* Sign Out */}
         <button
           onClick={handleSignOut}
-          className="w-full py-3 px-4 bg-bone-warm hover:bg-ash/10 text-obsidian font-medium rounded-md transition-all duration-calm mb-8"
+          className="w-full py-3 px-4 bg-bone-warm hover:bg-bone-warm text-obsidian font-medium rounded-md transition-all duration-calm mb-8"
         >
           Sign out
         </button>
@@ -453,7 +453,7 @@ export default function SettingsPage() {
             }
           }}
         >
-          <div className="bg-bone rounded-lg w-full max-w-md shadow-modal p-6">
+          <div className="bg-white rounded-lg w-full max-w-md shadow-modal p-6">
             <div className="flex items-center gap-3 mb-4">
               <div className="w-10 h-10 rounded-full bg-bone-warm flex items-center justify-center">
                 <svg className="w-5 h-5 text-ember" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -470,7 +470,7 @@ export default function SettingsPage() {
               <p className="text-micro text-obsidian">
                 All your data will be permanently deleted, including:
               </p>
-              <ul className="text-micro text-ash mt-2 ml-4 list-disc">
+              <ul className="text-micro text-text-secondary mt-2 ml-4 list-disc">
                 <li>Your profile and settings</li>
                 <li>All your connections</li>
                 <li>All interaction history and memories</li>
@@ -479,7 +479,7 @@ export default function SettingsPage() {
             </div>
 
             <div className="mb-6">
-              <label className="block text-label text-obsidian mb-2">
+              <label className="block text-micro-medium text-text-tertiary mb-2">
                 Type <span className="font-bold text-ember">delete</span> to confirm
               </label>
               <input
@@ -499,7 +499,7 @@ export default function SettingsPage() {
                   setDeleteConfirmText('')
                 }}
                 disabled={deleting}
-                className="flex-1 py-3 px-4 bg-bone-warm hover:bg-ash/10 text-obsidian font-medium rounded-md transition-all duration-calm disabled:opacity-50"
+                className="flex-1 py-3 px-4 bg-bone-warm hover:bg-bone-warm text-obsidian font-medium rounded-md transition-all duration-calm disabled:opacity-50"
               >
                 Cancel
               </button>

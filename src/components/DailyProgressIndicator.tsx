@@ -30,7 +30,7 @@ function ConnectionRing({ percent, size = 40, strokeWidth = 3.5, color }: {
         cy={size / 2}
         r={radius}
         fill="none"
-        stroke="#F0EEEA"
+        stroke="#ECEAE6"
         strokeWidth={strokeWidth}
       />
       <circle
@@ -62,7 +62,7 @@ export default function DailyProgressIndicator({
     if (isValidDay && totalWeight >= 3) return '#5F7A6A' // moss — deep connection
     if (isValidDay) return '#5F7A6A' // moss — valid day
     if (totalWeight > 0) return '#E3B873' // sun — some progress
-    return '#F0EEEA' // bone-warm — no progress
+    return '#ECEAE6' // bone-warm — no progress
   }
 
   const getStatusText = () => {
@@ -83,7 +83,7 @@ export default function DailyProgressIndicator({
   }
 
   return (
-    <div className={`bg-bone rounded-lg p-6 shadow-card ${className}`}>
+    <div className={`bg-white rounded-lg p-6 shadow-card ${className}`}>
       <div className="flex items-center gap-4">
         <ConnectionRing percent={progressPercent} color={getRingColor()} />
         <div className="flex-1 min-w-0">
@@ -91,11 +91,11 @@ export default function DailyProgressIndicator({
             Today&apos;s connection
           </span>
           <div className="flex items-center justify-between mt-1">
-            <span className={`text-micro ${isValidDay ? 'text-moss' : 'text-ash'}`}>
+            <span className={`text-micro ${isValidDay ? 'text-moss' : 'text-text-secondary'}`}>
               {getStatusText()}
             </span>
             {actionCount > 0 && (
-              <span className="text-micro text-ash">
+              <span className="text-micro text-text-tertiary">
                 {actionCount} action{actionCount !== 1 ? 's' : ''}
                 {highestAction && ` · ${getActionLabel(highestAction)}`}
               </span>
@@ -106,7 +106,7 @@ export default function DailyProgressIndicator({
 
       {!isValidDay && totalWeight === 0 && (
         <div className="mt-4 pt-4 border-t border-bone-warm">
-          <p className="text-micro text-ash">
+          <p className="text-micro text-text-secondary">
             Any action counts. Even a quick message makes today a connection day.
           </p>
         </div>

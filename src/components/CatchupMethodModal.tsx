@@ -167,7 +167,7 @@ export default function CatchupMethodModal({
       }}
     >
       <div
-        className="bg-bone rounded-lg w-full max-w-md shadow-modal max-h-[90vh] overflow-y-auto overscroll-contain"
+        className="bg-white rounded-lg w-full max-w-md shadow-modal max-h-[90vh] overflow-y-auto overscroll-contain"
       >
         <div className="p-6">
           <div className="flex items-center justify-between mb-6">
@@ -176,7 +176,7 @@ export default function CatchupMethodModal({
             </h2>
             <button
               onClick={onClose}
-              className="text-ash hover:text-obsidian transition-all duration-calm"
+              className="text-text-tertiary hover:text-obsidian transition-all duration-calm"
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -191,7 +191,7 @@ export default function CatchupMethodModal({
           {/* Last Interaction Note */}
           {lastInteraction?.memory && (
             <div className="mb-4 p-4 bg-bone-warm rounded-md shadow-card">
-              <div className="text-label font-medium text-ash mb-2">
+              <div className="text-label font-medium text-text-tertiary mb-2">
                 From your last {interactionTypeLabels[lastInteraction.interaction_type]} {formatRelativeDate(lastInteraction.interaction_date)}
               </div>
               <p className="text-body text-obsidian italic">
@@ -219,27 +219,27 @@ export default function CatchupMethodModal({
                   disabled={disabled || loading !== null}
                   className={`py-4 px-4 rounded-md text-center transition-all duration-calm ${
                     disabled
-                      ? 'bg-bone-warm text-ash opacity-40 cursor-not-allowed'
+                      ? 'bg-bone-warm text-text-secondary opacity-40 cursor-not-allowed'
                       : loading !== null
-                        ? 'bg-bone-warm text-ash cursor-wait'
+                        ? 'bg-bone-warm text-text-secondary cursor-wait'
                         : isPreferred
-                          ? 'bg-moss/10 text-moss ring-1 ring-moss/30'
+                          ? 'bg-moss/10 text-moss ring-1 ring-moss/40'
                           : 'bg-bone-warm text-obsidian hover:bg-moss/10 hover:text-moss'
                   }`}
                 >
                   <div className="text-body font-medium">{method.label}</div>
                   {isLoading && (
-                    <div className="text-micro text-ash mt-1 animate-gentle-pulse">Loading</div>
+                    <div className="text-micro text-text-tertiary mt-1 animate-gentle-pulse">Loading</div>
                   )}
                   {disabled && disabledReason && (
-                    <div className="text-micro text-ash mt-1">{disabledReason}</div>
+                    <div className="text-micro text-text-tertiary mt-1">{disabledReason}</div>
                   )}
                 </button>
               )
             })}
           </div>
 
-          <p className="text-micro text-ash text-center mt-6">
+          <p className="text-micro text-text-tertiary text-center mt-6">
             Opens your default app for the selected method
           </p>
         </div>

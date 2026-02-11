@@ -30,7 +30,7 @@ export default function PendingCatchupPrompt({
   const displayLabel = METHOD_LABELS[pendingIntent.intent.method] || methodLabel
 
   return (
-    <div className="bg-bone shadow-card rounded-lg p-4 mb-4">
+    <div className="bg-terracotta-light border-l-[2.5px] border-terracotta/40 rounded-md p-4 mb-4">
       <div className="flex items-start gap-3">
         <div className="text-body font-medium text-moss">
           {displayLabel}
@@ -39,7 +39,7 @@ export default function PendingCatchupPrompt({
           <div className="text-body font-medium text-obsidian">
             Did you catch up with {pendingIntent.connection.name}?
           </div>
-          <div className="text-micro text-ash mt-0.5">
+          <div className="text-micro text-text-tertiary mt-0.5">
             You {methodLabel} them {timeAgo}
           </div>
         </div>
@@ -54,7 +54,7 @@ export default function PendingCatchupPrompt({
         </button>
         <button
           onClick={handleDismiss}
-          className="py-2.5 px-4 bg-bone-warm hover:bg-ash/10 text-obsidian text-body font-medium rounded-md transition-all duration-calm"
+          className="py-2.5 px-4 bg-bone-warm hover:bg-bone-warm text-obsidian text-body font-medium rounded-md transition-all duration-calm"
         >
           Skip
         </button>

@@ -42,7 +42,7 @@ interface OnboardingTextProps {
 
 export function OnboardingText({ children, className = '' }: OnboardingTextProps) {
   return (
-    <p className={`text-ash text-body leading-relaxed max-w-sm ${className}`}>
+    <p className={`text-text-secondary text-body leading-relaxed max-w-sm ${className}`}>
       {children}
     </p>
   )
@@ -66,9 +66,9 @@ export function OnboardingButton({
   const baseStyles = 'px-8 py-3 rounded-md font-medium transition-all duration-calm'
 
   const variantStyles = {
-    primary: 'bg-moss text-bone hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed',
-    secondary: 'bg-bone-warm text-obsidian hover:bg-ash/10',
-    ghost: 'text-ash hover:text-obsidian',
+    primary: 'bg-terracotta text-bone hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed',
+    secondary: 'bg-bone-warm text-obsidian hover:bg-bone-warm',
+    ghost: 'text-text-tertiary hover:text-obsidian',
   }
 
   return (
@@ -96,10 +96,10 @@ export function OnboardingList({ items, className = '' }: OnboardingListProps) {
     <ul className={`space-y-3 text-left ${className}`}>
       {items.map((item, index) => (
         <li key={index} className="flex items-start gap-3">
-          <span className={`text-body ${item.positive === false ? 'text-ash' : 'text-moss'}`}>
+          <span className={`text-body ${item.positive === false ? 'text-text-secondary' : 'text-moss'}`}>
             {item.icon || (item.positive === false ? '\u2717' : '\u2713')}
           </span>
-          <span className={item.positive === false ? 'text-ash' : 'text-obsidian'}>
+          <span className={item.positive === false ? 'text-text-secondary' : 'text-obsidian'}>
             {item.text}
           </span>
         </li>

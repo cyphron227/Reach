@@ -247,7 +247,7 @@ export default function LogInteractionModal({ connection, isOpen, onClose, onSuc
         }
       }}
     >
-      <div className="bg-bone rounded-lg w-full max-w-md max-h-[90vh] overflow-y-auto shadow-modal overscroll-contain">
+      <div className="bg-white rounded-lg w-full max-w-md max-h-[90vh] overflow-y-auto shadow-modal overscroll-contain">
         <div className="p-6">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-h2 font-medium text-obsidian">
@@ -255,7 +255,7 @@ export default function LogInteractionModal({ connection, isOpen, onClose, onSuc
             </h2>
             <button
               onClick={onClose}
-              className="text-ash hover:text-obsidian transition-all duration-calm"
+              className="text-text-tertiary hover:text-obsidian transition-all duration-calm"
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -271,7 +271,7 @@ export default function LogInteractionModal({ connection, isOpen, onClose, onSuc
                   <div className="text-micro font-medium text-moss">
                     Reflection Priority
                   </div>
-                  <div className="text-micro text-ash">
+                  <div className="text-micro text-text-secondary">
                     You wanted to grow closer to {connection.name} this week
                   </div>
                 </div>
@@ -282,7 +282,7 @@ export default function LogInteractionModal({ connection, isOpen, onClose, onSuc
           <form onSubmit={handleSubmit} className="space-y-5">
             {/* Interaction Date */}
             <div>
-              <label htmlFor="interactionDate" className="block text-body font-medium text-obsidian mb-2">
+              <label htmlFor="interactionDate" className="block text-micro-medium text-text-tertiary mb-2">
                 When did you catch-up?
               </label>
               <input
@@ -291,13 +291,13 @@ export default function LogInteractionModal({ connection, isOpen, onClose, onSuc
                 value={interactionDate}
                 onChange={(e) => setInteractionDate(e.target.value)}
                 max={new Date().toISOString().split('T')[0]}
-                className="w-full bg-bone-warm border-none rounded-md px-4 py-3 text-body text-obsidian focus:outline-none focus:ring-1 focus:ring-moss/30 transition-all duration-calm"
+                className="w-full bg-bone-warm border-none rounded-md px-4 py-3 text-body text-obsidian focus:outline-none focus:ring-1 focus:ring-moss/40 transition-all duration-calm"
               />
             </div>
 
             {/* Interaction Type - 3 buttons */}
             <div>
-              <label className="block text-body font-medium text-obsidian mb-2">
+              <label className="block text-micro-medium text-text-tertiary mb-2">
                 How did you catch-up?
               </label>
               <div className="grid grid-cols-3 gap-2">
@@ -320,7 +320,7 @@ export default function LogInteractionModal({ connection, isOpen, onClose, onSuc
 
             {/* Mood */}
             <div>
-              <label className="block text-body font-medium text-obsidian mb-2">
+              <label className="block text-micro-medium text-text-tertiary mb-2">
                 How did it feel?
               </label>
               <div className="flex gap-3 justify-center">
@@ -348,7 +348,7 @@ export default function LogInteractionModal({ connection, isOpen, onClose, onSuc
                 value={memory}
                 onChange={(e) => setMemory(e.target.value)}
                 rows={3}
-                className="w-full bg-bone-warm border-none rounded-md px-4 py-3 text-body text-obsidian placeholder:text-ash focus:outline-none focus:ring-1 focus:ring-moss/30 transition-all duration-calm resize-none"
+                className="w-full bg-bone-warm border-none rounded-md px-4 py-3 text-body text-obsidian placeholder:text-text-placeholder focus:outline-none focus:ring-1 focus:ring-moss/40 transition-all duration-calm resize-none"
                 placeholder="Add a note (optional)"
               />
             </div>
@@ -366,7 +366,7 @@ export default function LogInteractionModal({ connection, isOpen, onClose, onSuc
                   <div className={`w-5 h-5 rounded border-2 transition-all duration-calm ${
                     planNextCatchup
                       ? 'bg-moss border-moss'
-                      : 'border-ash'
+                      : 'border-text-placeholder/30'
                   }`}>
                     {planNextCatchup && (
                       <svg className="w-full h-full text-bone p-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -385,7 +385,7 @@ export default function LogInteractionModal({ connection, isOpen, onClose, onSuc
                     value={nextCatchupDate}
                     onChange={(e) => setNextCatchupDate(e.target.value)}
                     min={new Date().toISOString().split('T')[0]}
-                    className="w-full bg-bone-warm border-none rounded-md px-4 py-3 text-body text-obsidian focus:outline-none focus:ring-1 focus:ring-moss/30 transition-all duration-calm"
+                    className="w-full bg-bone-warm border-none rounded-md px-4 py-3 text-body text-obsidian focus:outline-none focus:ring-1 focus:ring-moss/40 transition-all duration-calm"
                   />
                 </div>
               )}

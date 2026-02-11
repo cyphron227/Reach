@@ -1,8 +1,8 @@
 'use client'
 
 import { Connection, CatchupFrequency, RelationshipStrength, RingTier } from '@/types/database'
-import { StrengthDot } from './RelationshipStrengthBadge'
 import { RingBadge } from './RingSelector'
+import ConnectionRing from './ConnectionRing'
 
 interface ConnectionCardProps {
   connection: Connection
@@ -106,61 +106,63 @@ export default function ConnectionCard({ connection, lastMemory, lastMood: _last
   const nextCatchup = getNextCatchupInfo(connection)
 
   return (
-    <div className="bg-bone rounded-lg p-6 shadow-card">
+    <div className="bg-white rounded-lg p-6 shadow-card">
       <button
         onClick={onViewDetails}
         className="w-full text-left mb-4 cursor-pointer"
       >
-        <div className="flex items-center justify-between mb-1">
-          <div className="flex items-center gap-2">
-            {strengthV2 && <StrengthDot strength={strengthV2} />}
-            <span className="text-h3 text-obsidian">
-              {connection.name}
-            </span>
-          </div>
-          <div
-            className="flex items-center gap-2"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <button
-              onClick={onEdit}
-              className="p-1.5 text-ash hover:text-obsidian hover:bg-bone-warm rounded-md transition-all duration-calm"
-              title="Edit connection"
-            >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-              </svg>
-            </button>
+        <div className="flex items-start gap-4">
+          <ConnectionRing name={connection.name} strength={strengthV2} size={72} />
+          <div className="flex-1 min-w-0 pt-1">
+            <div className="flex items-center justify-between mb-1">
+              <span className="text-h3 text-obsidian">
+                {connection.name}
+              </span>
+              <div
+                className="flex items-center gap-2"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <button
+                  onClick={onEdit}
+                  className="p-1.5 text-text-tertiary hover:text-obsidian hover:bg-bone-warm rounded-md transition-all duration-calm"
+                  title="Edit connection"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            {ringTier === 'core' && (
+              <div className="mb-1">
+                <RingBadge tier={ringTier} position={ringPosition} />
+              </div>
+            )}
+
+            {nextCatchup.text && (
+              <div className={`text-micro-medium ${nextCatchup.isOverdue ? 'text-ember' : 'text-moss'}`}>
+                {nextCatchup.text}
+              </div>
+            )}
+
+            <div className="text-micro text-text-tertiary mt-1">
+              {status.text}
+            </div>
+
+            {lastMemory && (
+              <div className="text-micro text-text-secondary italic mt-2 line-clamp-3">
+                &ldquo;{lastMemory}&rdquo;
+              </div>
+            )}
           </div>
         </div>
-
-        {ringTier === 'core' && (
-          <div className="mb-1">
-            <RingBadge tier={ringTier} position={ringPosition} />
-          </div>
-        )}
-
-        {nextCatchup.text && (
-          <div className={`text-micro-medium ${nextCatchup.isOverdue ? 'text-ember' : 'text-moss'}`}>
-            {nextCatchup.text}
-          </div>
-        )}
-
-        <div className="text-micro text-ash mt-1">
-          {status.text}
-        </div>
-
-        {lastMemory && (
-          <div className="text-micro text-ash italic mt-2 line-clamp-3">
-            &ldquo;{lastMemory}&rdquo;
-          </div>
-        )}
       </button>
 
       <div className="grid grid-cols-3 gap-2">
         <button
           onClick={onPlanCatchup}
-          className="py-2.5 px-3 bg-bone-warm hover:bg-ash/10 text-obsidian text-micro-medium rounded-md transition-all duration-calm"
+          className="py-2.5 px-3 bg-bone-warm hover:bg-bone-warm text-obsidian text-micro-medium rounded-md transition-all duration-calm"
         >
           Plan
         </button>
@@ -172,7 +174,7 @@ export default function ConnectionCard({ connection, lastMemory, lastMood: _last
         </button>
         <button
           onClick={onLogInteraction}
-          className="py-2.5 px-3 bg-bone-warm hover:bg-ash/10 text-obsidian text-micro-medium rounded-md transition-all duration-calm"
+          className="py-2.5 px-3 bg-bone-warm hover:bg-bone-warm text-obsidian text-micro-medium rounded-md transition-all duration-calm"
         >
           Record
         </button>

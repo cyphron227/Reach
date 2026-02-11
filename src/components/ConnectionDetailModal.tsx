@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { Connection, Interaction, CatchupFrequency, InteractionType } from '@/types/database'
+import { Connection, Interaction, CatchupFrequency, InteractionType, RelationshipStrength } from '@/types/database'
 import { useScrollLock } from '@/lib/useScrollLock'
+import ConnectionRing from './ConnectionRing'
 
 interface ConnectionDetailModalProps {
   connection: Connection
@@ -12,6 +13,7 @@ interface ConnectionDetailModalProps {
   onEdit: () => void
   onLogInteraction: () => void
   onInteractionUpdated?: () => void
+  strengthV2?: RelationshipStrength
 }
 
 const frequencyLabels: Record<CatchupFrequency, string> = {
@@ -63,7 +65,7 @@ const interactionTypes: { value: InteractionType; label: string }[] = [
   { value: 'in_person', label: 'In-person' },
 ]
 
-export default function ConnectionDetailModal({ connection, isOpen, onClose, onEdit, onLogInteraction, onInteractionUpdated }: ConnectionDetailModalProps) {
+export default function ConnectionDetailModal({ connection, isOpen, onClose, onEdit, onLogInteraction, onInteractionUpdated, strengthV2 }: ConnectionDetailModalProps) {
   const [interactions, setInteractions] = useState<Interaction[]>([])
   const [loading, setLoading] = useState(true)
   const [editingInteraction, setEditingInteraction] = useState<Interaction | null>(null)
@@ -161,17 +163,14 @@ export default function ConnectionDetailModal({ connection, isOpen, onClose, onE
       }}
     >
       <div
-        className="bg-bone rounded-lg w-full max-w-md max-h-[90vh] shadow-modal flex flex-col overscroll-contain"
+        className="bg-white rounded-lg w-full max-w-md max-h-[90vh] shadow-modal flex flex-col overscroll-contain"
       >
         {/* Header */}
         <div className="p-6 border-b border-bone-warm">
-          <div className="flex items-center justify-between mb-1">
-            <h2 className="text-h2 font-medium text-obsidian">
-              {connection.name}
-            </h2>
+          <div className="flex justify-end mb-2">
             <button
               onClick={onClose}
-              className="text-ash hover:text-obsidian transition-all duration-calm"
+              className="text-text-tertiary hover:text-obsidian transition-all duration-calm"
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -179,8 +178,16 @@ export default function ConnectionDetailModal({ connection, isOpen, onClose, onE
             </button>
           </div>
 
-          <div className="flex items-center gap-2 text-body text-ash">
-            <span>{frequencyLabels[connection.catchup_frequency]}</span>
+          <div className="flex flex-col items-center mb-4">
+            <div className="mb-4">
+              <ConnectionRing name={connection.name} strength={strengthV2} size={120} />
+            </div>
+            <h2 className="text-h2 font-medium text-obsidian">
+              {connection.name}
+            </h2>
+            <div className="text-body text-text-secondary mt-1">
+              {frequencyLabels[connection.catchup_frequency]}
+            </div>
           </div>
 
           <div className="flex gap-2 mt-4">
@@ -204,11 +211,11 @@ export default function ConnectionDetailModal({ connection, isOpen, onClose, onE
           <h3 className="text-body font-medium text-obsidian mb-4">Catch-up history</h3>
 
           {loading ? (
-            <div className="text-center py-8 text-ash">Loading...</div>
+            <div className="text-center py-8 text-text-tertiary">Loading...</div>
           ) : interactions.length === 0 ? (
             <div className="text-center py-8">
-              <p className="text-ash">No catch-ups yet</p>
-              <p className="text-ash text-micro mt-1">Record your first catch-up to start tracking</p>
+              <p className="text-text-secondary">No catch-ups yet</p>
+              <p className="text-text-tertiary text-micro mt-1">Record your first catch-up to start tracking</p>
             </div>
           ) : (
             <div className="space-y-3">
@@ -223,16 +230,16 @@ export default function ConnectionDetailModal({ connection, isOpen, onClose, onE
                         {interactionTypeLabels[interaction.interaction_type]}
                       </span>
                       {interaction.mood && moodLabels[interaction.mood] && (
-                        <span className="text-micro text-ash">({moodLabels[interaction.mood]})</span>
+                        <span className="text-micro text-text-tertiary">({moodLabels[interaction.mood]})</span>
                       )}
                     </div>
                     <div className="flex items-center gap-2">
-                      <span className="text-micro text-ash">
+                      <span className="text-micro text-text-tertiary">
                         {formatDate(interaction.interaction_date)}
                       </span>
                       <button
                         onClick={() => startEditing(interaction)}
-                        className="p-1 text-ash hover:text-obsidian hover:bg-bone rounded transition-all duration-calm"
+                        className="p-1 text-text-tertiary hover:text-obsidian hover:bg-bone rounded transition-all duration-calm"
                         title="Edit interaction"
                       >
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -256,7 +263,7 @@ export default function ConnectionDetailModal({ connection, isOpen, onClose, onE
       {/* Edit Interaction Modal */}
       {editingInteraction && (
         <div className="fixed inset-0 bg-obsidian/60 flex items-center justify-center z-[60] px-4 pt-4 pb-safe">
-          <div className="bg-bone rounded-lg w-full max-w-sm shadow-modal">
+          <div className="bg-white rounded-lg w-full max-w-sm shadow-modal">
             <div className="p-6">
               <div className="flex items-center justify-between mb-6">
                 <h3 className="text-h3 font-medium text-obsidian">
@@ -264,7 +271,7 @@ export default function ConnectionDetailModal({ connection, isOpen, onClose, onE
                 </h3>
                 <button
                   onClick={cancelEditing}
-                  className="text-ash hover:text-obsidian transition-all duration-calm"
+                  className="text-text-tertiary hover:text-obsidian transition-all duration-calm"
                 >
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -275,7 +282,7 @@ export default function ConnectionDetailModal({ connection, isOpen, onClose, onE
               <div className="space-y-4">
                 {/* Date */}
                 <div>
-                  <label className="block text-body font-medium text-obsidian mb-2">
+                  <label className="block text-micro-medium text-text-tertiary mb-2">
                     Date
                   </label>
                   <input
@@ -283,13 +290,13 @@ export default function ConnectionDetailModal({ connection, isOpen, onClose, onE
                     value={editDate}
                     onChange={(e) => setEditDate(e.target.value)}
                     max={new Date().toISOString().split('T')[0]}
-                    className="w-full bg-bone-warm border-none rounded-md px-4 py-3 text-body text-obsidian focus:outline-none focus:ring-1 focus:ring-moss/30 transition-all duration-calm"
+                    className="w-full bg-bone-warm border-none rounded-md px-4 py-3 text-body text-obsidian focus:outline-none focus:ring-1 focus:ring-moss/40 transition-all duration-calm"
                   />
                 </div>
 
                 {/* Type */}
                 <div>
-                  <label className="block text-body font-medium text-obsidian mb-2">
+                  <label className="block text-micro-medium text-text-tertiary mb-2">
                     Type
                   </label>
                   <div className="grid grid-cols-3 gap-2">
@@ -312,14 +319,14 @@ export default function ConnectionDetailModal({ connection, isOpen, onClose, onE
 
                 {/* Memory */}
                 <div>
-                  <label className="block text-body font-medium text-obsidian mb-2">
+                  <label className="block text-micro-medium text-text-tertiary mb-2">
                     Memory
                   </label>
                   <textarea
                     value={editMemory}
                     onChange={(e) => setEditMemory(e.target.value)}
                     rows={3}
-                    className="w-full bg-bone-warm border-none rounded-md px-4 py-3 text-body text-obsidian placeholder:text-ash focus:outline-none focus:ring-1 focus:ring-moss/30 transition-all duration-calm resize-none"
+                    className="w-full bg-bone-warm border-none rounded-md px-4 py-3 text-body text-obsidian placeholder:text-text-placeholder focus:outline-none focus:ring-1 focus:ring-moss/40 transition-all duration-calm resize-none"
                     placeholder="What did you talk about?"
                   />
                 </div>

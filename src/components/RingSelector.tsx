@@ -57,7 +57,7 @@ export default function RingSelector({
           className={`flex-1 py-3 px-4 rounded-md border-2 transition-all duration-calm ${
             value === 'core'
               ? 'border-moss bg-bone-warm'
-              : 'border-bone-warm bg-bone hover:border-ash'
+              : 'border-bone-warm bg-bone hover:border-text-placeholder'
           } ${disabled ? 'opacity-40 cursor-not-allowed' : ''}`}
         >
           <div className="flex items-center justify-center gap-2">
@@ -65,7 +65,7 @@ export default function RingSelector({
               {RING_LABELS.core}
             </span>
           </div>
-          <p className="text-label text-ash mt-1">
+          <p className="text-label text-text-tertiary mt-1">
             {coreSlotsFilled}/{CORE_RING_MAX} slots
           </p>
         </button>
@@ -77,7 +77,7 @@ export default function RingSelector({
           className={`flex-1 py-3 px-4 rounded-md border-2 transition-all duration-calm ${
             value === 'outer'
               ? 'border-moss bg-bone-warm'
-              : 'border-bone-warm bg-bone hover:border-ash'
+              : 'border-bone-warm bg-bone hover:border-text-placeholder'
           } ${disabled ? 'opacity-40 cursor-not-allowed' : ''}`}
         >
           <div className="flex items-center justify-center gap-2">
@@ -85,7 +85,7 @@ export default function RingSelector({
               {RING_LABELS.outer}
             </span>
           </div>
-          <p className="text-label text-ash mt-1">Unlimited</p>
+          <p className="text-label text-text-tertiary mt-1">Unlimited</p>
         </button>
       </div>
 
@@ -102,7 +102,7 @@ export default function RingSelector({
 
       {value === 'core' && (
         <div className="bg-bone-warm rounded-md p-3">
-          <p className="text-label text-ash mb-2">
+          <p className="text-label text-text-secondary mb-2">
             Position in core circle (optional)
           </p>
           <div className="flex gap-1 justify-center">
@@ -115,7 +115,7 @@ export default function RingSelector({
                 className={`w-8 h-8 rounded-full text-label transition-all duration-calm ${
                   ringPosition === pos
                     ? 'bg-moss text-bone'
-                    : 'bg-bone border border-bone-warm text-ash hover:border-moss'
+                    : 'bg-bone border border-bone-warm text-text-tertiary hover:border-moss'
                 } ${disabled ? 'opacity-40 cursor-not-allowed' : ''}`}
               >
                 {pos}
@@ -125,7 +125,7 @@ export default function RingSelector({
         </div>
       )}
 
-      <div className="text-micro text-ash space-y-1">
+      <div className="text-micro text-text-secondary space-y-1">
         <p>
           <strong className="text-obsidian">Core circle:</strong> Your closest relationships. Limited to {CORE_RING_MAX} people.
         </p>
@@ -159,7 +159,7 @@ export function RingBadge({
 
   return (
     <span
-      className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-label bg-bone-warm text-ash ${className}`}
+      className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-label bg-bone-warm text-text-secondary ${className}`}
       title="Outer circle"
     >
       Outer

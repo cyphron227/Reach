@@ -154,7 +154,7 @@ export default function UpdatePasswordPage() {
   if (checking) {
     return (
       <main className="min-h-screen bg-bone flex items-center justify-center">
-        <div className="text-ash">Loading...</div>
+        <div className="text-text-tertiary">Loading...</div>
       </main>
     )
   }
@@ -166,7 +166,7 @@ export default function UpdatePasswordPage() {
           <h1 className="text-h1 font-medium text-obsidian mb-2">
             Link Expired
           </h1>
-          <p className="text-ash mb-6">
+          <p className="text-text-secondary mb-6">
             This password reset link is invalid or has expired. Please request a new one.
           </p>
           <button
@@ -187,14 +187,14 @@ export default function UpdatePasswordPage() {
           <h1 className="text-h1 font-medium text-obsidian mb-2">
             Set New Password
           </h1>
-          <p className="text-ash">
+          <p className="text-text-secondary">
             Enter your new password below
           </p>
         </div>
 
         <form onSubmit={handleUpdatePassword} className="space-y-4">
           <div>
-            <label htmlFor="password" className="block text-body font-medium text-obsidian mb-1">
+            <label htmlFor="password" className="block text-micro-medium text-text-tertiary mb-1">
               New Password
             </label>
             <input
@@ -204,13 +204,13 @@ export default function UpdatePasswordPage() {
               onChange={(e) => setPassword(e.target.value)}
               required
               minLength={6}
-              className="w-full px-4 py-3 rounded-md border-none bg-bone-warm text-obsidian placeholder:text-ash focus:outline-none focus:ring-1 focus:ring-moss/30 transition-all duration-calm"
+              className="w-full px-4 py-3 rounded-md border-none bg-bone-warm text-obsidian placeholder:text-text-placeholder focus:outline-none focus:ring-1 focus:ring-moss/40 transition-all duration-calm"
               placeholder="••••••••"
             />
           </div>
 
           <div>
-            <label htmlFor="confirmPassword" className="block text-body font-medium text-obsidian mb-1">
+            <label htmlFor="confirmPassword" className="block text-micro-medium text-text-tertiary mb-1">
               Confirm Password
             </label>
             <input
@@ -220,7 +220,7 @@ export default function UpdatePasswordPage() {
               onChange={(e) => setConfirmPassword(e.target.value)}
               required
               minLength={6}
-              className="w-full px-4 py-3 rounded-md border-none bg-bone-warm text-obsidian placeholder:text-ash focus:outline-none focus:ring-1 focus:ring-moss/30 transition-all duration-calm"
+              className="w-full px-4 py-3 rounded-md border-none bg-bone-warm text-obsidian placeholder:text-text-placeholder focus:outline-none focus:ring-1 focus:ring-moss/40 transition-all duration-calm"
               placeholder="••••••••"
             />
           </div>

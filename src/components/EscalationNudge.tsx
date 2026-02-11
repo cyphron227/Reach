@@ -47,7 +47,7 @@ export default function EscalationNudge({
   if (variant === 'inline') {
     return (
       <div className={`flex items-center gap-2 text-body ${className}`}>
-        <span className="text-ash">Tip:</span>
+        <span className="text-text-tertiary">Tip:</span>
         <span className="text-moss">{getMessage()}</span>
         {onAccept && (
           <button
@@ -65,7 +65,7 @@ export default function EscalationNudge({
   if (variant === 'toast') {
     return (
       <div
-        className={`flex items-center gap-3 bg-bone rounded-md shadow-card px-4 py-3 ${className}`}
+        className={`flex items-center gap-3 bg-moss-light border-l-[2.5px] border-moss/40 rounded-md px-4 py-3 ${className}`}
       >
         <div className="text-body font-medium text-moss">{ACTION_LABELS[suggestedActionType]}</div>
         <div className="flex-1">
@@ -75,7 +75,7 @@ export default function EscalationNudge({
           <button
             type="button"
             onClick={onDismiss}
-            className="text-ash hover:text-obsidian transition-all duration-calm"
+            className="text-text-tertiary hover:text-obsidian transition-all duration-calm"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -89,7 +89,7 @@ export default function EscalationNudge({
   // Card variant (default)
   return (
     <div
-      className={`bg-bone shadow-card rounded-lg p-4 ${className}`}
+      className={`bg-moss-light border-l-[2.5px] border-moss/40 rounded-md p-4 ${className}`}
     >
       <div className="flex items-start gap-3">
         <div className="flex-shrink-0 w-10 h-10 bg-bone-warm rounded-full flex items-center justify-center shadow-card">
@@ -102,7 +102,7 @@ export default function EscalationNudge({
           </p>
 
           {connectionName && (
-            <p className="text-micro text-ash mt-1">
+            <p className="text-micro text-text-tertiary mt-1">
               Suggested for {connectionName}
             </p>
           )}
@@ -124,7 +124,7 @@ export default function EscalationNudge({
             <button
               type="button"
               onClick={onDismiss}
-              className="py-2 px-3 bg-bone-warm hover:bg-ash/10 text-obsidian text-body font-medium rounded-md transition-all duration-calm"
+              className="py-2 px-3 bg-bone-warm hover:bg-bone-warm text-obsidian text-body font-medium rounded-md transition-all duration-calm"
             >
               Not now
             </button>
@@ -161,7 +161,7 @@ export function EscalationHint({
   if (!hint) return null
 
   return (
-    <p className={`text-micro text-ash italic ${className}`}>
+    <p className={`text-micro text-text-tertiary italic ${className}`}>
       {hint}
     </p>
   )

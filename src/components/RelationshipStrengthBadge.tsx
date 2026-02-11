@@ -29,8 +29,8 @@ const STRENGTH_CONFIG: Record<
     message: 'Connection is strong',
   },
   stable: {
-    dotColor: 'bg-ash',
-    textColor: 'text-ash',
+    dotColor: 'bg-text-tertiary',
+    textColor: 'text-text-secondary',
     message: 'Relationship is stable',
   },
   thinning: {
@@ -115,16 +115,16 @@ export function RelationshipStrengthCard({
               {STRENGTH_LABELS[strength]}
             </span>
             {connectionName && (
-              <span className="text-micro text-ash">
+              <span className="text-micro text-text-tertiary">
                 with {connectionName}
               </span>
             )}
           </div>
-          <p className="text-micro text-ash mt-1">
+          <p className="text-micro text-text-secondary mt-1">
             {config.message}
           </p>
           {showWarning && decayWarning && (
-            <p className="text-micro text-ash mt-2">
+            <p className="text-micro text-text-tertiary mt-2">
               {decayWarning}
             </p>
           )}
@@ -144,7 +144,7 @@ export function StrengthDot({
   const colors: Record<RelationshipStrength, string> = {
     flourishing: 'bg-moss',
     strong: 'bg-moss',
-    stable: 'bg-ash',
+    stable: 'bg-text-tertiary',
     thinning: 'bg-sun',
     decaying: 'bg-ember',
   }

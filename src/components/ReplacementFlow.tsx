@@ -69,7 +69,7 @@ export default function ReplacementFlow({
         }
       }}
     >
-      <div className="bg-bone rounded-lg w-full max-w-md shadow-modal max-h-[90vh] overflow-y-auto overscroll-contain">
+      <div className="bg-white rounded-lg w-full max-w-md shadow-modal max-h-[90vh] overflow-y-auto overscroll-contain">
         <div className="p-6">
           {/* Header */}
           <div className="flex items-start justify-between mb-4">
@@ -77,13 +77,13 @@ export default function ReplacementFlow({
               <h2 className="text-h2 font-medium text-obsidian">
                 {confirming ? 'Confirm your choice' : 'Time to decide'}
               </h2>
-              <p className="text-body text-ash mt-1">
+              <p className="text-body text-text-secondary mt-1">
                 {connectionName}
               </p>
             </div>
             <button
               onClick={onClose}
-              className="text-ash hover:text-obsidian transition-all duration-calm"
+              className="text-text-tertiary hover:text-obsidian transition-all duration-calm"
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -113,7 +113,7 @@ export default function ReplacementFlow({
                 <p className="text-body text-obsidian">
                   {INSIGHT_MESSAGES.regret_prevention}
                 </p>
-                <p className="text-body text-ash mt-2">
+                <p className="text-body text-text-secondary mt-2">
                   It&apos;s okay to let go. It&apos;s also okay to recommit. What matters is being intentional.
                 </p>
               </div>
@@ -147,7 +147,7 @@ export default function ReplacementFlow({
                         }`}>
                           {option.label}
                         </p>
-                        <p className="text-body text-ash">
+                        <p className="text-body text-text-secondary">
                           {option.description}
                         </p>
                       </div>
@@ -182,7 +182,7 @@ export default function ReplacementFlow({
                       <span className="text-body font-medium text-obsidian">Move</span>
                       <p className="font-medium text-obsidian">Move to outer circle</p>
                     </div>
-                    <p className="text-body text-ash">
+                    <p className="text-body text-text-secondary">
                       {connectionName} will move to your outer circle with lower expectations.
                       This isn&apos;t giving up—it&apos;s being realistic about your capacity.
                     </p>
@@ -195,7 +195,7 @@ export default function ReplacementFlow({
                       <span className="text-body font-medium text-obsidian">Replace</span>
                       <p className="font-medium text-obsidian">Make space for someone new</p>
                     </div>
-                    <p className="text-body text-ash">
+                    <p className="text-body text-text-secondary">
                       {connectionName} will be archived, freeing up a spot in your core circle
                       for someone you want to invest in.
                     </p>
@@ -220,7 +220,7 @@ export default function ReplacementFlow({
               <div className="flex gap-3">
                 <button
                   onClick={handleBack}
-                  className="flex-1 py-3 px-4 bg-bone-warm hover:bg-ash/10 text-obsidian font-medium rounded-md transition-all duration-calm"
+                  className="flex-1 py-3 px-4 bg-bone-warm hover:bg-bone-warm text-obsidian font-medium rounded-md transition-all duration-calm"
                 >
                   Back
                 </button>
