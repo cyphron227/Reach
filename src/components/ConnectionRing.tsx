@@ -1,19 +1,15 @@
 'use client'
 
 import { RelationshipStrength } from '@/types/habitEngine'
+import { calculateRingVisualization } from '@/lib/ringCalculations'
 
 interface ConnectionRingProps {
   name: string
   strength?: RelationshipStrength
+  daysSinceAction?: number
+  decayStartedAt?: string | null
   size?: 72 | 120
-}
-
-const STRENGTH_TO_HEALTH: Record<RelationshipStrength, number> = {
-  flourishing: 0.9,
-  strong: 0.75,
-  stable: 0.55,
-  thinning: 0.35,
-  decaying: 0.2,
+  onClick?: () => void
 }
 
 function getInitials(name: string): string {
@@ -25,38 +21,55 @@ function getInitials(name: string): string {
     .join('')
 }
 
-export default function ConnectionRing({ name, strength, size = 72 }: ConnectionRingProps) {
-  const health = strength ? STRENGTH_TO_HEALTH[strength] : 0.5
+export default function ConnectionRing({
+  name,
+  strength,
+  daysSinceAction = 0,
+  decayStartedAt = null,
+  size = 72,
+  onClick,
+}: ConnectionRingProps) {
+  const effectiveStrength: RelationshipStrength = strength ?? 'stable'
 
-  const ringColor = health > 0.6 ? '#5F7A6A' : health > 0.3 ? '#E3B873' : '#C46A4A'
-  const outerColor = health > 0.6 ? '#2F4C5F' : ringColor
-  const ringOpacity = 0.25 + health * 0.55
-  const outerRingOpacity = 0.15 + health * 0.3
+  const {
+    fillPercent,
+    innerOpacity,
+    outerOpacity,
+    innerColor,
+    outerColor,
+    shouldPulse,
+  } = calculateRingVisualization(effectiveStrength, daysSinceAction, decayStartedAt)
 
-  // Inner ring: radius is size/2 - 10, circumference = 2*PI*r
+  // Inner ring geometry
   const innerRadius = size / 2 - 10
   const innerCircumference = 2 * Math.PI * innerRadius
-  const innerFilled = health * innerCircumference
-  const innerGap = (1 - health) * innerCircumference
+  const innerFilled = (fillPercent / 100) * innerCircumference
+  const innerGap = innerCircumference - innerFilled
 
-  // Outer ring: radius is size/2 - 4, circumference = 2*PI*r
+  // Outer ring geometry (slightly less fill)
   const outerRadius = size / 2 - 4
   const outerCircumference = 2 * Math.PI * outerRadius
-  const outerHealth = Math.max(0, health - 0.1)
-  const outerFilled = outerHealth * outerCircumference
-  const outerGap = (1 - outerHealth) * outerCircumference
+  const outerFillPercent = Math.max(0, fillPercent - 10)
+  const outerFilled = (outerFillPercent / 100) * outerCircumference
+  const outerGap = outerCircumference - outerFilled
 
-  // Center circle
   const centerSize = size - 24
   const initials = getInitials(name)
   const fontSize = size === 120 ? 'text-[32px]' : 'text-[14px]'
 
   return (
-    <div className="relative flex-shrink-0" style={{ width: size, height: size }}>
+    <div
+      className={`relative flex-shrink-0 ${onClick ? 'cursor-pointer' : ''}`}
+      style={{ width: size, height: size }}
+      onClick={onClick}
+      role={onClick ? 'button' : undefined}
+      tabIndex={onClick ? 0 : undefined}
+      onKeyDown={onClick ? (e) => { if (e.key === 'Enter' || e.key === ' ') onClick() } : undefined}
+    >
       <svg
         width={size}
         height={size}
-        className="absolute top-0 left-0 -rotate-90"
+        className={`absolute top-0 left-0 -rotate-90 ${shouldPulse ? 'animate-gentle-pulse' : ''}`}
       >
         {/* Outer ring */}
         <circle
@@ -68,7 +81,7 @@ export default function ConnectionRing({ name, strength, size = 72 }: Connection
           strokeWidth="2"
           strokeDasharray={`${outerFilled} ${outerGap}`}
           strokeLinecap="round"
-          opacity={outerRingOpacity}
+          opacity={outerOpacity}
           className="transition-all duration-deliberate ease-calm"
         />
         {/* Inner ring */}
@@ -77,11 +90,11 @@ export default function ConnectionRing({ name, strength, size = 72 }: Connection
           cy={size / 2}
           r={innerRadius}
           fill="none"
-          stroke={ringColor}
+          stroke={innerColor}
           strokeWidth="2.5"
           strokeDasharray={`${innerFilled} ${innerGap}`}
           strokeLinecap="round"
-          opacity={ringOpacity}
+          opacity={innerOpacity}
           className="transition-all duration-deliberate ease-calm"
         />
       </svg>

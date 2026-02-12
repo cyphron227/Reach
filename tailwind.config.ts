@@ -1,6 +1,7 @@
 import type { Config } from "tailwindcss";
 
 const config: Config = {
+  darkMode: 'class',
   content: [
     "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
@@ -36,6 +37,29 @@ const config: Config = {
 
         background: '#F6F5F3',
         foreground: '#0F1115',
+
+        // Dark mode — "Deep Night" theme
+        dark: {
+          bg: '#0C0D10',
+          surface: '#161821',
+          'surface-raised': '#1E2029',
+          'surface-hover': '#252731',
+          border: 'rgba(255,255,255,0.06)',
+          'text-primary': '#E8E6E2',
+          'text-secondary': '#A3A5AB',
+          'text-tertiary': '#6E7078',
+          'text-placeholder': '#4A4C54',
+          moss: '#6E9A7E',
+          'moss-subtle': 'rgba(110,154,126,0.12)',
+          inkblue: '#4A7A96',
+          'inkblue-subtle': 'rgba(74,122,150,0.12)',
+          terracotta: '#D4694E',
+          'terracotta-subtle': 'rgba(212,105,78,0.10)',
+          sun: '#E8C07A',
+          'sun-subtle': 'rgba(232,192,122,0.10)',
+          ember: '#D47A5C',
+          'avatar-bg': '#252731',
+        },
 
         // DEPRECATED v1 — kept for forest page compatibility only
         ash: '#A6A8AD',

@@ -205,12 +205,13 @@ function TodayPageContent() {
     return cleanup
   }, [])
 
-  // Handle notification tap - open the connection details
+  // Handle notification tap - open catch-up modal directly
   useEffect(() => {
     if (notificationConnectionId && connections.length > 0) {
       const connection = connections.find(c => c.id === notificationConnectionId)
       if (connection) {
-        handleViewDetails(connection)
+        setSelectedConnection(connection)
+        setShowCatchupModal(true)
         setNotificationConnectionId(null)
       }
     }
@@ -485,8 +486,8 @@ function TodayPageContent() {
 
   if (loading) {
     return (
-      <main className="min-h-screen bg-bone flex items-center justify-center">
-        <div className="text-text-tertiary">Loading...</div>
+      <main className="min-h-screen bg-bone dark:bg-dark-bg flex items-center justify-center">
+        <div className="text-text-tertiary dark:text-dark-text-tertiary">Loading...</div>
       </main>
     )
   }
@@ -508,10 +509,10 @@ function TodayPageContent() {
   const showCompactProgress = habitEngineEnabled && scrollY > 150
 
   return (
-    <main className="min-h-screen bg-bone">
+    <main className="min-h-screen bg-bone dark:bg-dark-bg">
       {/* Sticky Header */}
       <div
-        className="sticky z-40 bg-bone transition-all duration-150"
+        className="sticky z-40 bg-bone dark:bg-dark-bg transition-all duration-150"
         style={{
           top: 'env(safe-area-inset-top, 0px)',
           paddingTop: `${Math.max(8, 32 - scrollY / 5)}px`,
@@ -522,7 +523,7 @@ function TodayPageContent() {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div
-                className="text-obsidian transition-all duration-150 origin-left"
+                className="text-obsidian dark:text-dark-text-primary transition-all duration-150 origin-left"
                 style={{
                   fontSize: `${Math.max(14, 18 * headerScale)}px`,
                   fontWeight: 500,
@@ -534,18 +535,18 @@ function TodayPageContent() {
               {userStreak && userStreak.current_streak > 0 && (
                 <button
                   onClick={() => setShowStreakInfo(true)}
-                  className="flex items-center gap-1.5 bg-bone-warm hover:bg-sun/10 px-2 py-1 rounded-md transition-all duration-150"
+                  className="flex items-center gap-1.5 bg-bone-warm dark:bg-dark-surface-raised hover:bg-sun/10 dark:hover:bg-dark-surface-hover px-2 py-1 rounded-md transition-all duration-150"
                   style={{ opacity: headerOpacity }}
                 >
                   <StreakRing streakDays={userStreak.current_streak} />
-                  <span className="text-body font-medium text-obsidian">{userStreak.current_streak}</span>
+                  <span className="text-body font-medium text-obsidian dark:text-dark-text-primary">{userStreak.current_streak}</span>
                 </button>
               )}
             </div>
             <div className="relative" ref={menuRef}>
               <button
                 onClick={() => setShowMenu(!showMenu)}
-                className="p-2 text-text-tertiary hover:text-obsidian hover:bg-bone-warm rounded-md transition-colors"
+                className="p-2 text-text-tertiary dark:text-dark-text-tertiary hover:text-obsidian dark:hover:text-dark-text-primary hover:bg-bone-warm dark:hover:bg-dark-surface-hover rounded-md transition-colors"
               >
                 <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                   <circle cx="12" cy="5" r="2" />
@@ -556,15 +557,15 @@ function TodayPageContent() {
 
               {/* Menu Overlay */}
               {showMenu && (
-                <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-elevated py-2 z-50">
+                <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-dark-surface rounded-md shadow-elevated py-2 z-50">
                   <button
                     onClick={() => {
                       setShowMenu(false)
                       setShowAddModal(true)
                     }}
-                    className="w-full px-4 py-3 text-left text-obsidian hover:bg-bone-warm transition-colors flex items-center gap-3"
+                    className="w-full px-4 py-3 text-left text-obsidian dark:text-dark-text-primary hover:bg-bone-warm dark:hover:bg-dark-surface-hover transition-colors flex items-center gap-3"
                   >
-                    <svg className="w-5 h-5 text-moss" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-5 h-5 text-moss dark:text-dark-moss" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                     </svg>
                     New connection
@@ -572,24 +573,24 @@ function TodayPageContent() {
                   <Link
                     href="/forest"
                     onClick={() => setShowMenu(false)}
-                    className="w-full px-4 py-3 text-left text-obsidian hover:bg-bone-warm transition-colors flex items-center gap-3"
+                    className="w-full px-4 py-3 text-left text-obsidian dark:text-dark-text-primary hover:bg-bone-warm dark:hover:bg-dark-surface-hover transition-colors flex items-center gap-3"
                   >
                     <span className="text-body">Forest</span>
                   </Link>
                   <Link
                     href="/reflect"
                     onClick={() => setShowMenu(false)}
-                    className="w-full px-4 py-3 text-left text-obsidian hover:bg-bone-warm transition-colors flex items-center gap-3"
+                    className="w-full px-4 py-3 text-left text-obsidian dark:text-dark-text-primary hover:bg-bone-warm dark:hover:bg-dark-surface-hover transition-colors flex items-center gap-3"
                   >
                     <span className="text-body">Weekly Reflection</span>
                   </Link>
-                  <div className="border-t border-bone-warm my-1"></div>
+                  <div className="border-t border-bone-warm dark:border-dark-border my-1"></div>
                   <Link
                     href="/settings"
                     onClick={() => setShowMenu(false)}
-                    className="w-full px-4 py-3 text-left text-obsidian hover:bg-bone-warm transition-colors flex items-center gap-3"
+                    className="w-full px-4 py-3 text-left text-obsidian dark:text-dark-text-primary hover:bg-bone-warm dark:hover:bg-dark-surface-hover transition-colors flex items-center gap-3"
                   >
-                    <svg className="w-5 h-5 text-text-tertiary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-5 h-5 text-text-tertiary dark:text-dark-text-tertiary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                     </svg>
@@ -612,7 +613,7 @@ function TodayPageContent() {
             >
               <div className="flex items-center gap-2">
                 <CompactConnectionRing percent={progressPercent} color={getRingColor()} />
-                <span className="text-micro text-text-tertiary">
+                <span className="text-micro text-text-tertiary dark:text-dark-text-tertiary">
                   {isValidDay ? 'Valid day' : totalWeight > 0 ? 'In progress' : 'No actions yet'}
                 </span>
               </div>
@@ -661,7 +662,7 @@ function TodayPageContent() {
             {/* Search Bar */}
             <div className="relative">
               <svg
-                className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-text-tertiary"
+                className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-text-tertiary dark:text-dark-text-tertiary"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -678,7 +679,7 @@ function TodayPageContent() {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search connections..."
-                className="w-full px-4 py-3 pl-10 rounded-md border-none bg-bone-warm text-obsidian placeholder:text-text-placeholder focus:outline-none focus:ring-2 focus:ring-moss transition-all"
+                className="w-full px-4 py-3 pl-10 rounded-md border-none bg-bone-warm dark:bg-dark-surface-raised text-obsidian dark:text-dark-text-primary placeholder:text-text-placeholder focus:outline-none focus:ring-2 focus:ring-moss transition-all"
               />
             </div>
 
@@ -689,7 +690,7 @@ function TodayPageContent() {
                 className={`flex-1 py-2.5 px-4 rounded-md font-medium transition-colors ${
                   sortMode === 'soonest'
                     ? 'bg-moss text-bone'
-                    : 'bg-bone-warm text-text-secondary hover:bg-bone-warm'
+                    : 'bg-bone-warm dark:bg-dark-surface-raised text-text-secondary dark:text-dark-text-secondary hover:bg-bone-warm dark:hover:bg-dark-surface-hover'
                 }`}
               >
                 Soonest
@@ -699,7 +700,7 @@ function TodayPageContent() {
                 className={`flex-1 py-2.5 px-4 rounded-md font-medium transition-colors ${
                   sortMode === 'alphabetical'
                     ? 'bg-moss text-bone'
-                    : 'bg-bone-warm text-text-secondary hover:bg-bone-warm'
+                    : 'bg-bone-warm dark:bg-dark-surface-raised text-text-secondary dark:text-dark-text-secondary hover:bg-bone-warm dark:hover:bg-dark-surface-hover'
                 }`}
               >
                 A-Z
@@ -728,6 +729,9 @@ function TodayPageContent() {
                     strengthV2={health?.current_strength}
                     ringTier={health?.ring_tier}
                     ringPosition={health?.ring_position}
+                    daysSinceAction={health?.days_since_action ?? 0}
+                    lastActionType={health?.last_action_type ?? null}
+                    decayStartedAt={health?.decay_started_at ?? null}
                   />
                 )
               })}
@@ -737,7 +741,7 @@ function TodayPageContent() {
             {filteredConnections.length > CONNECTIONS_TO_SHOW && !showAllConnections && sortMode !== 'alphabetical' && (
               <button
                 onClick={() => setShowAllConnections(true)}
-                className="mt-4 w-full py-3 px-4 bg-bone-warm hover:bg-bone-warm text-text-secondary font-medium rounded-md transition-colors"
+                className="mt-4 w-full py-3 px-4 bg-bone-warm dark:bg-dark-surface-raised hover:bg-bone-warm dark:hover:bg-dark-surface-hover text-text-secondary dark:text-dark-text-secondary font-medium rounded-md transition-colors"
               >
                 Show all ({filteredConnections.length} connections)
               </button>
@@ -745,15 +749,15 @@ function TodayPageContent() {
           </>
         ) : connections.length > 0 && searchQuery.trim() ? (
           /* No search results state (we have connections but none match) */
-          <div className="bg-white rounded-lg p-8 shadow-card text-center">
-            <h2 className="text-h3 font-medium text-obsidian mb-2">
+          <div className="bg-white dark:bg-dark-surface rounded-lg p-8 shadow-card text-center">
+            <h2 className="text-h3 font-medium text-obsidian dark:text-dark-text-primary mb-2">
               No matches found
             </h2>
-            <p className="text-body text-text-secondary mb-6">
+            <p className="text-body text-text-secondary dark:text-dark-text-secondary mb-6">
               Try a different search term or{' '}
               <button
                 onClick={() => setSearchQuery('')}
-                className="text-moss hover:underline font-medium"
+                className="text-moss dark:text-dark-moss hover:underline font-medium"
               >
                 clear your search
               </button>
@@ -761,11 +765,11 @@ function TodayPageContent() {
           </div>
         ) : (
           /* No connections empty state */
-          <div className="bg-white rounded-lg p-8 shadow-card text-center">
-            <h2 className="text-h3 font-medium text-obsidian mb-2">
+          <div className="bg-white dark:bg-dark-surface rounded-lg p-8 shadow-card text-center">
+            <h2 className="text-h3 font-medium text-obsidian dark:text-dark-text-primary mb-2">
               No connections yet
             </h2>
-            <p className="text-body text-text-secondary mb-6">
+            <p className="text-body text-text-secondary dark:text-dark-text-secondary mb-6">
               Add someone you&apos;d like to stay in touch with.
             </p>
             <button
@@ -781,7 +785,7 @@ function TodayPageContent() {
         {connections.length > 0 && (
           <button
             onClick={() => setShowAddModal(true)}
-            className="mt-6 w-full py-3 px-4 border-2 border-dashed border-bone-warm hover:border-moss/30 text-text-secondary hover:text-moss font-medium rounded-md transition-colors"
+            className="mt-6 w-full py-3 px-4 border-2 border-dashed border-bone-warm dark:border-dark-border hover:border-moss/30 text-text-secondary dark:text-dark-text-secondary hover:text-moss dark:hover:text-dark-moss font-medium rounded-md transition-colors"
           >
             + New connection
           </button>
@@ -792,24 +796,24 @@ function TodayPageContent() {
           <>
             <Link
               href="/forest"
-              className="mt-6 block bg-moss/10 rounded-md p-4 border border-moss/20 hover:bg-moss/15 transition-colors"
+              className="mt-6 block bg-moss/10 dark:bg-dark-moss-subtle rounded-md p-4 border border-moss/20 hover:bg-moss/15 transition-colors"
             >
               <div className="flex items-center gap-3">
                 <div>
-                  <div className="text-body font-medium text-obsidian">Forest</div>
-                  <div className="text-micro text-text-secondary">View the health of all your relationships</div>
+                  <div className="text-body font-medium text-obsidian dark:text-dark-text-primary">Forest</div>
+                  <div className="text-micro text-text-secondary dark:text-dark-text-secondary">View the health of all your relationships</div>
                 </div>
               </div>
             </Link>
 
             <Link
               href="/reflect"
-              className="mt-3 block bg-moss/10 rounded-md p-4 border border-moss/20 hover:bg-moss/15 transition-colors"
+              className="mt-3 block bg-moss/10 dark:bg-dark-moss-subtle rounded-md p-4 border border-moss/20 hover:bg-moss/15 transition-colors"
             >
               <div className="flex items-center gap-3">
                 <div>
-                  <div className="text-body font-medium text-obsidian">Weekly reflection</div>
-                  <div className="text-micro text-text-secondary">Take a moment to reflect on your connections</div>
+                  <div className="text-body font-medium text-obsidian dark:text-dark-text-primary">Weekly reflection</div>
+                  <div className="text-micro text-text-secondary dark:text-dark-text-secondary">Take a moment to reflect on your connections</div>
                 </div>
               </div>
             </Link>
@@ -859,6 +863,9 @@ function TodayPageContent() {
             }}
             onInteractionUpdated={loadData}
             strengthV2={connectionHealthMap[selectedConnection.id]?.current_strength}
+            daysSinceAction={connectionHealthMap[selectedConnection.id]?.days_since_action ?? 0}
+            lastActionType={connectionHealthMap[selectedConnection.id]?.last_action_type ?? null}
+            decayStartedAt={connectionHealthMap[selectedConnection.id]?.decay_started_at ?? null}
           />
         </>
       )}
@@ -908,31 +915,31 @@ function TodayPageContent() {
       {/* Streak Info Modal */}
       {showStreakInfo && userStreak && (
         <div
-          className="fixed inset-0 bg-obsidian/40 backdrop-blur-sm flex items-center justify-center z-50 px-4 pt-4 pb-safe"
+          className="fixed inset-0 bg-obsidian/40 dark:bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 px-4 pt-4 pb-safe"
           onClick={() => setShowStreakInfo(false)}
         >
           <div
-            className="bg-white rounded-lg w-full max-w-sm shadow-modal"
+            className="bg-white dark:bg-dark-surface rounded-lg w-full max-w-sm shadow-modal"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="p-6 text-center">
               <div className="mb-4 flex justify-center">
                 <StreakRing streakDays={userStreak.current_streak} size={64} />
               </div>
-              <h2 className="text-h1 font-medium text-obsidian mb-2">
+              <h2 className="text-h1 font-medium text-obsidian dark:text-dark-text-primary mb-2">
                 {userStreak.current_streak} day streak
               </h2>
-              <p className="text-body text-text-secondary mb-4">
+              <p className="text-body text-text-secondary dark:text-dark-text-secondary mb-4">
                 You&apos;ve been catching up with your connections for {userStreak.current_streak} {userStreak.current_streak === 1 ? 'day' : 'days'} in a row.
               </p>
 
               {/* Next milestone */}
               {getNextMilestone(userStreak.current_streak) && (
                 <div className="bg-sun/10 rounded-md p-4 mb-4">
-                  <div className="text-body text-obsidian font-medium">
+                  <div className="text-body text-obsidian dark:text-dark-text-primary font-medium">
                     Next milestone: {getNextMilestone(userStreak.current_streak)} days
                   </div>
-                  <div className="text-micro text-text-tertiary mt-1">
+                  <div className="text-micro text-text-tertiary dark:text-dark-text-tertiary mt-1">
                     {getDaysToNextMilestone(userStreak.current_streak)} more {getDaysToNextMilestone(userStreak.current_streak) === 1 ? 'day' : 'days'} to go
                   </div>
                 </div>
@@ -940,15 +947,15 @@ function TodayPageContent() {
 
               {/* Longest streak */}
               {userStreak.longest_streak > userStreak.current_streak && (
-                <div className="text-body text-text-secondary mb-4">
+                <div className="text-body text-text-secondary dark:text-dark-text-secondary mb-4">
                   Your longest streak: {userStreak.longest_streak} days
                 </div>
               )}
 
               {/* How streaks work */}
-              <div className="text-left bg-bone-warm rounded-md p-4 mb-4">
-                <div className="text-body font-medium text-obsidian mb-2">How streaks work</div>
-                <ul className="text-micro text-text-secondary space-y-1">
+              <div className="text-left bg-bone-warm dark:bg-dark-surface-raised rounded-md p-4 mb-4">
+                <div className="text-body font-medium text-obsidian dark:text-dark-text-primary mb-2">How streaks work</div>
+                <ul className="text-micro text-text-secondary dark:text-dark-text-secondary space-y-1">
                   <li>• Record a catch-up each day to keep your streak</li>
                   <li>• Miss a day? You get 1 free freeze per week</li>
                   <li>• Weekend flexibility: Fri-Sun counts as one window</li>
@@ -973,8 +980,8 @@ function TodayPageContent() {
 export default function TodayPage() {
   return (
     <Suspense fallback={
-      <main className="min-h-screen bg-bone flex items-center justify-center">
-        <div className="text-text-tertiary">Loading...</div>
+      <main className="min-h-screen bg-bone dark:bg-dark-bg flex items-center justify-center">
+        <div className="text-text-tertiary dark:text-dark-text-tertiary">Loading...</div>
       </main>
     }>
       <TodayPageContent />

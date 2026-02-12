@@ -182,7 +182,7 @@ export default function AddConnectionModal({ isOpen, onClose, onSuccess }: AddCo
   return (
     <>
       <div
-        className="fixed inset-0 bg-obsidian/40 backdrop-blur-sm flex items-end sm:items-center justify-center z-50 px-4 pt-4 pb-safe overscroll-contain"
+        className="fixed inset-0 bg-obsidian/40 dark:bg-black/60 backdrop-blur-sm flex items-end sm:items-center justify-center z-50 px-4 pt-4 pb-safe overscroll-contain"
         onClick={(e) => {
           if (e.target === e.currentTarget) {
             onClose()
@@ -190,16 +190,16 @@ export default function AddConnectionModal({ isOpen, onClose, onSuccess }: AddCo
         }}
       >
         <div
-          className="bg-white rounded-lg w-full max-w-md shadow-modal max-h-[90vh] overflow-y-auto overscroll-contain"
+          className="bg-white dark:bg-dark-surface rounded-lg w-full max-w-md shadow-modal max-h-[90vh] overflow-y-auto overscroll-contain"
         >
           <div className="p-6">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-h2 font-medium text-obsidian">
+              <h2 className="text-h2 font-medium text-obsidian dark:text-dark-text-primary">
                 New connection
               </h2>
               <button
                 onClick={onClose}
-                className="text-text-tertiary hover:text-obsidian transition-all duration-calm"
+                className="text-text-tertiary dark:text-dark-text-tertiary hover:text-obsidian dark:hover:text-dark-text-primary transition-all duration-calm"
               >
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -223,19 +223,19 @@ export default function AddConnectionModal({ isOpen, onClose, onSuccess }: AddCo
                 <div className="text-center">
                   <button
                     onClick={() => setStep('form')}
-                    className="text-body text-obsidian hover:text-moss transition-all duration-calm underline"
+                    className="text-body text-obsidian dark:text-dark-text-primary hover:text-moss dark:hover:text-dark-moss transition-all duration-calm underline"
                   >
                     Or enter details manually
                   </button>
                 </div>
 
                 {error && (
-                  <p className="text-ember text-body bg-bone-warm p-3 rounded-md">{error}</p>
+                  <p className="text-ember dark:text-dark-terracotta text-body bg-bone-warm dark:bg-dark-surface-raised p-3 rounded-md">{error}</p>
                 )}
 
                 {/* Privacy notice */}
-                <div className="pt-4 border-t border-bone-warm">
-                  <ul className="space-y-2 text-micro text-text-tertiary">
+                <div className="pt-4 border-t border-bone-warm dark:border-dark-border">
+                  <ul className="space-y-2 text-micro text-text-tertiary dark:text-dark-text-tertiary">
                     <li className="flex gap-2">
                       <span className="text-moss">•</span>
                       <span>Ringur only accesses contacts you explicitly choose.</span>
@@ -265,7 +265,7 @@ export default function AddConnectionModal({ isOpen, onClose, onSuccess }: AddCo
                   <button
                     type="button"
                     onClick={() => setStep('source')}
-                    className="flex items-center gap-1 text-body text-obsidian hover:text-moss transition-all duration-calm mb-2"
+                    className="flex items-center gap-1 text-body text-obsidian dark:text-dark-text-primary hover:text-moss dark:hover:text-dark-moss transition-all duration-calm mb-2"
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -276,7 +276,7 @@ export default function AddConnectionModal({ isOpen, onClose, onSuccess }: AddCo
 
                 {/* Name */}
                 <div>
-                  <label htmlFor="name" className="block text-micro-medium text-text-tertiary mb-1">
+                  <label htmlFor="name" className="block text-micro-medium text-text-tertiary dark:text-dark-text-tertiary mb-1">
                     Their name
                   </label>
                   <input
@@ -285,45 +285,45 @@ export default function AddConnectionModal({ isOpen, onClose, onSuccess }: AddCo
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     required
-                    className="w-full bg-bone-warm border-none rounded-md px-4 py-3 text-body text-obsidian placeholder:text-text-placeholder focus:outline-none focus:ring-1 focus:ring-moss/40 transition-all duration-calm"
+                    className="w-full bg-bone-warm dark:bg-dark-surface-raised border-none rounded-md px-4 py-3 text-body text-obsidian dark:text-dark-text-primary placeholder:text-text-placeholder focus:outline-none focus:ring-1 focus:ring-moss/40 transition-all duration-calm"
                     placeholder="e.g., Sarah"
                   />
                 </div>
 
                 {/* Phone Number */}
                 <div>
-                  <label htmlFor="phone" className="block text-micro-medium text-text-tertiary mb-1">
-                    Phone number <span className="text-text-tertiary">(optional)</span>
+                  <label htmlFor="phone" className="block text-micro-medium text-text-tertiary dark:text-dark-text-tertiary mb-1">
+                    Phone number <span className="text-text-tertiary dark:text-dark-text-tertiary">(optional)</span>
                   </label>
                   <input
                     id="phone"
                     type="tel"
                     value={phoneNumber}
                     onChange={(e) => setPhoneNumber(e.target.value)}
-                    className="w-full bg-bone-warm border-none rounded-md px-4 py-3 text-body text-obsidian placeholder:text-text-placeholder focus:outline-none focus:ring-1 focus:ring-moss/40 transition-all duration-calm"
+                    className="w-full bg-bone-warm dark:bg-dark-surface-raised border-none rounded-md px-4 py-3 text-body text-obsidian dark:text-dark-text-primary placeholder:text-text-placeholder focus:outline-none focus:ring-1 focus:ring-moss/40 transition-all duration-calm"
                     placeholder="e.g., +1 555 123 4567"
                   />
                 </div>
 
                 {/* Email */}
                 <div>
-                  <label htmlFor="email" className="block text-micro-medium text-text-tertiary mb-1">
-                    Email <span className="text-text-tertiary">(optional)</span>
+                  <label htmlFor="email" className="block text-micro-medium text-text-tertiary dark:text-dark-text-tertiary mb-1">
+                    Email <span className="text-text-tertiary dark:text-dark-text-tertiary">(optional)</span>
                   </label>
                   <input
                     id="email"
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full bg-bone-warm border-none rounded-md px-4 py-3 text-body text-obsidian placeholder:text-text-placeholder focus:outline-none focus:ring-1 focus:ring-moss/40 transition-all duration-calm"
+                    className="w-full bg-bone-warm dark:bg-dark-surface-raised border-none rounded-md px-4 py-3 text-body text-obsidian dark:text-dark-text-primary placeholder:text-text-placeholder focus:outline-none focus:ring-1 focus:ring-moss/40 transition-all duration-calm"
                     placeholder="e.g., sarah@example.com"
                   />
                 </div>
 
                 {/* Preferred Messaging App */}
                 <div>
-                  <label className="block text-micro-medium text-text-tertiary mb-1">
-                    Preferred messaging app <span className="text-text-tertiary">(optional)</span>
+                  <label className="block text-micro-medium text-text-tertiary dark:text-dark-text-tertiary mb-1">
+                    Preferred messaging app <span className="text-text-tertiary dark:text-dark-text-tertiary">(optional)</span>
                   </label>
                   <div className="flex gap-2">
                     {([
@@ -338,7 +338,7 @@ export default function AddConnectionModal({ isOpen, onClose, onSuccess }: AddCo
                         className={`flex-1 py-2.5 px-2 rounded-md text-center transition-all duration-calm ${
                           preferredMethod === option.value
                             ? 'bg-moss text-bone shadow-card'
-                            : 'bg-bone-warm text-obsidian hover:shadow-card'
+                            : 'bg-bone-warm dark:bg-dark-surface-raised text-obsidian dark:text-dark-text-primary hover:shadow-card'
                         }`}
                       >
                         <div className="text-body font-medium">{option.label}</div>
@@ -349,14 +349,14 @@ export default function AddConnectionModal({ isOpen, onClose, onSuccess }: AddCo
 
                 {/* Frequency */}
                 <div>
-                  <label htmlFor="frequency" className="block text-micro-medium text-text-tertiary mb-1">
+                  <label htmlFor="frequency" className="block text-micro-medium text-text-tertiary dark:text-dark-text-tertiary mb-1">
                     How often do you want to catch-up?
                   </label>
                   <select
                     id="frequency"
                     value={frequency}
                     onChange={(e) => setFrequency(e.target.value as CatchupFrequency)}
-                    className="w-full bg-bone-warm border-none rounded-md px-4 py-3 text-body text-obsidian focus:outline-none focus:ring-1 focus:ring-moss/40 transition-all duration-calm"
+                    className="w-full bg-bone-warm dark:bg-dark-surface-raised border-none rounded-md px-4 py-3 text-body text-obsidian dark:text-dark-text-primary focus:outline-none focus:ring-1 focus:ring-moss/40 transition-all duration-calm"
                   >
                     {frequencyOptions.map((option) => (
                       <option key={option.value} value={option.value}>
@@ -367,7 +367,7 @@ export default function AddConnectionModal({ isOpen, onClose, onSuccess }: AddCo
                 </div>
 
                 {error && (
-                  <p className="text-ember text-body bg-bone-warm p-3 rounded-md">{error}</p>
+                  <p className="text-ember dark:text-dark-terracotta text-body bg-bone-warm dark:bg-dark-surface-raised p-3 rounded-md">{error}</p>
                 )}
 
                 <button

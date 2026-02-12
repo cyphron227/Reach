@@ -47,13 +47,13 @@ export default function EscalationNudge({
   if (variant === 'inline') {
     return (
       <div className={`flex items-center gap-2 text-body ${className}`}>
-        <span className="text-text-tertiary">Tip:</span>
-        <span className="text-moss">{getMessage()}</span>
+        <span className="text-text-tertiary dark:text-dark-text-tertiary">Tip:</span>
+        <span className="text-moss dark:text-dark-moss">{getMessage()}</span>
         {onAccept && (
           <button
             type="button"
             onClick={onAccept}
-            className="text-moss hover:opacity-90 underline transition-all duration-calm"
+            className="text-moss dark:text-dark-moss hover:opacity-90 underline transition-all duration-calm"
           >
             Try it
           </button>
@@ -67,15 +67,15 @@ export default function EscalationNudge({
       <div
         className={`flex items-center gap-3 bg-moss-light border-l-[2.5px] border-moss/40 rounded-md px-4 py-3 ${className}`}
       >
-        <div className="text-body font-medium text-moss">{ACTION_LABELS[suggestedActionType]}</div>
+        <div className="text-body font-medium text-moss dark:text-dark-moss">{ACTION_LABELS[suggestedActionType]}</div>
         <div className="flex-1">
-          <p className="text-body text-obsidian">{getMessage()}</p>
+          <p className="text-body text-obsidian dark:text-dark-text-primary">{getMessage()}</p>
         </div>
         {onDismiss && (
           <button
             type="button"
             onClick={onDismiss}
-            className="text-text-tertiary hover:text-obsidian transition-all duration-calm"
+            className="text-text-tertiary dark:text-dark-text-tertiary hover:text-obsidian dark:hover:text-dark-text-primary transition-all duration-calm"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -92,17 +92,17 @@ export default function EscalationNudge({
       className={`bg-moss-light border-l-[2.5px] border-moss/40 rounded-md p-4 ${className}`}
     >
       <div className="flex items-start gap-3">
-        <div className="flex-shrink-0 w-10 h-10 bg-bone-warm rounded-full flex items-center justify-center shadow-card">
-          <span className="text-body font-medium text-moss">{ACTION_LABELS[suggestedActionType]}</span>
+        <div className="flex-shrink-0 w-10 h-10 bg-bone-warm dark:bg-dark-surface-raised rounded-full flex items-center justify-center shadow-card">
+          <span className="text-body font-medium text-moss dark:text-dark-moss">{ACTION_LABELS[suggestedActionType]}</span>
         </div>
 
         <div className="flex-1 min-w-0">
-          <p className="text-body font-medium text-obsidian">
+          <p className="text-body font-medium text-obsidian dark:text-dark-text-primary">
             {getMessage()}
           </p>
 
           {connectionName && (
-            <p className="text-micro text-text-tertiary mt-1">
+            <p className="text-micro text-text-tertiary dark:text-dark-text-tertiary mt-1">
               Suggested for {connectionName}
             </p>
           )}
@@ -124,7 +124,7 @@ export default function EscalationNudge({
             <button
               type="button"
               onClick={onDismiss}
-              className="py-2 px-3 bg-bone-warm hover:bg-bone-warm text-obsidian text-body font-medium rounded-md transition-all duration-calm"
+              className="py-2 px-3 bg-bone-warm dark:bg-dark-surface-raised hover:bg-bone-warm dark:hover:bg-dark-surface-hover text-obsidian dark:text-dark-text-primary text-body font-medium rounded-md transition-all duration-calm"
             >
               Not now
             </button>
@@ -161,7 +161,7 @@ export function EscalationHint({
   if (!hint) return null
 
   return (
-    <p className={`text-micro text-text-tertiary italic ${className}`}>
+    <p className={`text-micro text-text-tertiary dark:text-dark-text-tertiary italic ${className}`}>
       {hint}
     </p>
   )

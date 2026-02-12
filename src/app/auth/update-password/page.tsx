@@ -153,20 +153,20 @@ export default function UpdatePasswordPage() {
 
   if (checking) {
     return (
-      <main className="min-h-screen bg-bone flex items-center justify-center">
-        <div className="text-text-tertiary">Loading...</div>
+      <main className="min-h-screen bg-bone dark:bg-dark-bg flex items-center justify-center">
+        <div className="text-text-tertiary dark:text-dark-text-tertiary">Loading...</div>
       </main>
     )
   }
 
   if (linkExpired) {
     return (
-      <main className="min-h-screen bg-bone flex flex-col items-center justify-center p-6">
+      <main className="min-h-screen bg-bone dark:bg-dark-bg flex flex-col items-center justify-center p-6">
         <div className="w-full max-w-sm text-center">
-          <h1 className="text-h1 font-medium text-obsidian mb-2">
+          <h1 className="text-h1 font-medium text-obsidian dark:text-dark-text-primary mb-2">
             Link Expired
           </h1>
-          <p className="text-text-secondary mb-6">
+          <p className="text-text-secondary dark:text-dark-text-secondary mb-6">
             This password reset link is invalid or has expired. Please request a new one.
           </p>
           <button
@@ -181,20 +181,20 @@ export default function UpdatePasswordPage() {
   }
 
   return (
-    <main className="min-h-screen bg-bone flex flex-col items-center justify-center p-6">
+    <main className="min-h-screen bg-bone dark:bg-dark-bg flex flex-col items-center justify-center p-6">
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
-          <h1 className="text-h1 font-medium text-obsidian mb-2">
+          <h1 className="text-h1 font-medium text-obsidian dark:text-dark-text-primary mb-2">
             Set New Password
           </h1>
-          <p className="text-text-secondary">
+          <p className="text-text-secondary dark:text-dark-text-secondary">
             Enter your new password below
           </p>
         </div>
 
         <form onSubmit={handleUpdatePassword} className="space-y-4">
           <div>
-            <label htmlFor="password" className="block text-micro-medium text-text-tertiary mb-1">
+            <label htmlFor="password" className="block text-micro-medium text-text-tertiary dark:text-dark-text-tertiary mb-1">
               New Password
             </label>
             <input
@@ -204,13 +204,13 @@ export default function UpdatePasswordPage() {
               onChange={(e) => setPassword(e.target.value)}
               required
               minLength={6}
-              className="w-full px-4 py-3 rounded-md border-none bg-bone-warm text-obsidian placeholder:text-text-placeholder focus:outline-none focus:ring-1 focus:ring-moss/40 transition-all duration-calm"
+              className="w-full px-4 py-3 rounded-md border-none bg-bone-warm dark:bg-dark-surface-raised text-obsidian dark:text-dark-text-primary placeholder:text-text-placeholder focus:outline-none focus:ring-1 focus:ring-moss/40 transition-all duration-calm"
               placeholder="••••••••"
             />
           </div>
 
           <div>
-            <label htmlFor="confirmPassword" className="block text-micro-medium text-text-tertiary mb-1">
+            <label htmlFor="confirmPassword" className="block text-micro-medium text-text-tertiary dark:text-dark-text-tertiary mb-1">
               Confirm Password
             </label>
             <input
@@ -220,17 +220,17 @@ export default function UpdatePasswordPage() {
               onChange={(e) => setConfirmPassword(e.target.value)}
               required
               minLength={6}
-              className="w-full px-4 py-3 rounded-md border-none bg-bone-warm text-obsidian placeholder:text-text-placeholder focus:outline-none focus:ring-1 focus:ring-moss/40 transition-all duration-calm"
+              className="w-full px-4 py-3 rounded-md border-none bg-bone-warm dark:bg-dark-surface-raised text-obsidian dark:text-dark-text-primary placeholder:text-text-placeholder focus:outline-none focus:ring-1 focus:ring-moss/40 transition-all duration-calm"
               placeholder="••••••••"
             />
           </div>
 
           {error && (
-            <p className="text-ember text-body bg-bone-warm p-3 rounded-md">{error}</p>
+            <p className="text-ember dark:text-dark-terracotta text-body bg-bone-warm dark:bg-dark-surface-raised p-3 rounded-md">{error}</p>
           )}
 
           {message && (
-            <p className="text-moss text-body bg-bone-warm p-3 rounded-md">{message}</p>
+            <p className="text-moss dark:text-dark-moss text-body bg-bone-warm dark:bg-dark-surface-raised p-3 rounded-md">{message}</p>
           )}
 
           <button

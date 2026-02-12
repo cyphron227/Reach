@@ -51,6 +51,7 @@ create table public.user_settings (
   notifications_enabled boolean default true not null,
   notification_time time default '18:00' not null,
   weekly_reflection_enabled boolean default true not null,
+  theme_preference text default 'system' check (theme_preference in ('light', 'dark', 'system')),
   created_at timestamp with time zone default timezone('utc'::text, now()) not null,
   updated_at timestamp with time zone default timezone('utc'::text, now()) not null
 );

@@ -32,14 +32,14 @@ export default function PendingCatchupPrompt({
   return (
     <div className="bg-terracotta-light border-l-[2.5px] border-terracotta/40 rounded-md p-4 mb-4">
       <div className="flex items-start gap-3">
-        <div className="text-body font-medium text-moss">
+        <div className="text-body font-medium text-moss dark:text-dark-moss">
           {displayLabel}
         </div>
         <div className="flex-1">
-          <div className="text-body font-medium text-obsidian">
+          <div className="text-body font-medium text-obsidian dark:text-dark-text-primary">
             Did you catch up with {pendingIntent.connection.name}?
           </div>
-          <div className="text-micro text-text-tertiary mt-0.5">
+          <div className="text-micro text-text-tertiary dark:text-dark-text-tertiary mt-0.5">
             You {methodLabel} them {timeAgo}
           </div>
         </div>
@@ -54,7 +54,7 @@ export default function PendingCatchupPrompt({
         </button>
         <button
           onClick={handleDismiss}
-          className="py-2.5 px-4 bg-bone-warm hover:bg-bone-warm text-obsidian text-body font-medium rounded-md transition-all duration-calm"
+          className="py-2.5 px-4 bg-bone-warm dark:bg-dark-surface-raised hover:bg-bone-warm dark:hover:bg-dark-surface-hover text-obsidian dark:text-dark-text-primary text-body font-medium rounded-md transition-all duration-calm"
         >
           Skip
         </button>

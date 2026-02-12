@@ -77,20 +77,20 @@ export default function ReflectionHistoryPage() {
 
   if (loading) {
     return (
-      <main className="min-h-screen bg-bone flex items-center justify-center">
-        <div className="text-text-tertiary">Loading...</div>
+      <main className="min-h-screen bg-bone dark:bg-dark-bg flex items-center justify-center">
+        <div className="text-text-tertiary dark:text-dark-text-tertiary">Loading...</div>
       </main>
     )
   }
 
   return (
-    <main className="min-h-screen bg-bone">
+    <main className="min-h-screen bg-bone dark:bg-dark-bg">
       <div className="max-w-lg mx-auto px-6 pt-8 pb-safe">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <Link
             href="/"
-            className="text-text-tertiary hover:text-obsidian text-body transition-all duration-calm flex items-center gap-1"
+            className="text-text-tertiary dark:text-dark-text-tertiary hover:text-obsidian dark:hover:text-dark-text-primary text-body transition-all duration-calm flex items-center gap-1"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -102,25 +102,25 @@ export default function ReflectionHistoryPage() {
         </div>
 
         {/* Streak Stats */}
-        <div className="bg-white rounded-lg p-6 shadow-card mb-6">
+        <div className="bg-white dark:bg-dark-surface rounded-lg p-6 shadow-card mb-6">
           <div className="grid grid-cols-3 gap-4 text-center">
             <div>
-              <div className="text-h1 font-medium text-moss">{streak.currentStreak}</div>
-              <div className="text-micro text-text-tertiary">Current streak</div>
+              <div className="text-h1 font-medium text-moss dark:text-dark-moss">{streak.currentStreak}</div>
+              <div className="text-micro text-text-tertiary dark:text-dark-text-tertiary">Current streak</div>
             </div>
             <div>
-              <div className="text-h1 font-medium text-obsidian">{streak.longestStreak}</div>
-              <div className="text-micro text-text-tertiary">Longest streak</div>
+              <div className="text-h1 font-medium text-obsidian dark:text-dark-text-primary">{streak.longestStreak}</div>
+              <div className="text-micro text-text-tertiary dark:text-dark-text-tertiary">Longest streak</div>
             </div>
             <div>
-              <div className="text-h1 font-medium text-obsidian">{streak.totalReflections}</div>
-              <div className="text-micro text-text-tertiary">Total reflections</div>
+              <div className="text-h1 font-medium text-obsidian dark:text-dark-text-primary">{streak.totalReflections}</div>
+              <div className="text-micro text-text-tertiary dark:text-dark-text-tertiary">Total reflections</div>
             </div>
           </div>
 
           {streak.currentStreak > 0 && (
-            <div className="mt-4 pt-4 border-t border-bone-warm">
-              <div className="flex items-center justify-center gap-2 text-moss">
+            <div className="mt-4 pt-4 border-t border-bone-warm dark:border-dark-border">
+              <div className="flex items-center justify-center gap-2 text-moss dark:text-dark-moss">
                 <span className="text-body font-medium">
                   {streak.currentStreak} week{streak.currentStreak > 1 ? 's' : ''} in a row
                 </span>
@@ -139,14 +139,14 @@ export default function ReflectionHistoryPage() {
               return (
                 <div
                   key={reflection.id}
-                  className="bg-white rounded-lg p-5 shadow-card"
+                  className="bg-white dark:bg-dark-surface rounded-lg p-5 shadow-card"
                 >
                   <div className="flex items-center justify-between mb-3">
-                    <div className="text-body font-medium text-obsidian">
+                    <div className="text-body font-medium text-obsidian dark:text-dark-text-primary">
                       {dateRange.start} - {dateRange.end}
                     </div>
                     {reflection.grow_closer_name && hasFollowedUp && (
-                      <div className="flex items-center gap-1 text-micro text-moss bg-bone-warm px-2 py-1 rounded-full">
+                      <div className="flex items-center gap-1 text-micro text-moss dark:text-dark-moss bg-bone-warm dark:bg-dark-surface-raised px-2 py-1 rounded-full">
                         <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
                           <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                         </svg>
@@ -158,8 +158,8 @@ export default function ReflectionHistoryPage() {
                   <div className="space-y-2">
                     {reflection.most_connected_name && (
                       <div className="flex items-center gap-2">
-                        <span className="text-micro text-text-tertiary">Most connected:</span>
-                        <span className="text-body font-medium text-obsidian">
+                        <span className="text-micro text-text-tertiary dark:text-dark-text-tertiary">Most connected:</span>
+                        <span className="text-body font-medium text-obsidian dark:text-dark-text-primary">
                           {reflection.most_connected_name}
                         </span>
                       </div>
@@ -167,12 +167,12 @@ export default function ReflectionHistoryPage() {
 
                     {reflection.grow_closer_name && (
                       <div className="flex items-center gap-2">
-                        <span className="text-micro text-text-tertiary">Grow closer:</span>
-                        <span className="text-body font-medium text-obsidian">
+                        <span className="text-micro text-text-tertiary dark:text-dark-text-tertiary">Grow closer:</span>
+                        <span className="text-body font-medium text-obsidian dark:text-dark-text-primary">
                           {reflection.grow_closer_name}
                         </span>
                         {!hasFollowedUp && (
-                          <span className="text-micro text-sun bg-bone-warm px-2 py-0.5 rounded-full">
+                          <span className="text-micro text-sun dark:text-dark-sun bg-bone-warm dark:bg-dark-surface-raised px-2 py-0.5 rounded-full">
                             Pending
                           </span>
                         )}
@@ -180,14 +180,14 @@ export default function ReflectionHistoryPage() {
                     )}
 
                     {!reflection.most_connected_name && !reflection.grow_closer_name && (
-                      <div className="text-body text-text-secondary italic">
+                      <div className="text-body text-text-secondary dark:text-dark-text-secondary italic">
                         Skipped selections
                       </div>
                     )}
 
                     {reflection.reflection_notes && (
-                      <div className="mt-2 pt-2 border-t border-bone-warm">
-                        <p className="text-body text-text-secondary italic">
+                      <div className="mt-2 pt-2 border-t border-bone-warm dark:border-dark-border">
+                        <p className="text-body text-text-secondary dark:text-dark-text-secondary italic">
                           &ldquo;{reflection.reflection_notes}&rdquo;
                         </p>
                       </div>
@@ -198,11 +198,11 @@ export default function ReflectionHistoryPage() {
             })}
           </div>
         ) : (
-          <div className="bg-white rounded-lg p-8 shadow-card text-center">
-            <h2 className="text-h3 font-medium text-obsidian mb-2">
+          <div className="bg-white dark:bg-dark-surface rounded-lg p-8 shadow-card text-center">
+            <h2 className="text-h3 font-medium text-obsidian dark:text-dark-text-primary mb-2">
               No reflections yet
             </h2>
-            <p className="text-text-secondary mb-6">
+            <p className="text-text-secondary dark:text-dark-text-secondary mb-6">
               Start your first weekly reflection to see your history here.
             </p>
             <Link

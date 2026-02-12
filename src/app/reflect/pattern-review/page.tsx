@@ -208,21 +208,21 @@ export default function PatternReviewPage() {
 
   if (loading) {
     return (
-      <main className="min-h-screen bg-bone flex items-center justify-center">
-        <div className="text-text-tertiary">Loading...</div>
+      <main className="min-h-screen bg-bone dark:bg-dark-bg flex items-center justify-center">
+        <div className="text-text-tertiary dark:text-dark-text-tertiary">Loading...</div>
       </main>
     )
   }
 
   return (
-    <main className="min-h-screen bg-bone">
+    <main className="min-h-screen bg-bone dark:bg-dark-bg">
       <div className="max-w-lg mx-auto px-6 pt-8 pb-safe">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           {step !== 'complete' && step !== 'overview' ? (
             <button
               onClick={handleBack}
-              className="text-text-tertiary hover:text-obsidian text-body transition-all duration-calm flex items-center gap-1"
+              className="text-text-tertiary dark:text-dark-text-tertiary hover:text-obsidian dark:hover:text-dark-text-primary text-body transition-all duration-calm flex items-center gap-1"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -232,7 +232,7 @@ export default function PatternReviewPage() {
           ) : (
             <Link
               href="/"
-              className="text-text-tertiary hover:text-obsidian text-body transition-all duration-calm flex items-center gap-1"
+              className="text-text-tertiary dark:text-dark-text-tertiary hover:text-obsidian dark:hover:text-dark-text-primary text-body transition-all duration-calm flex items-center gap-1"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -263,49 +263,49 @@ export default function PatternReviewPage() {
         {/* Step 1: Overview */}
         {step === 'overview' && weeklyPattern && (
           <div className="space-y-4">
-            <div className="bg-white rounded-lg p-6 shadow-card">
+            <div className="bg-white dark:bg-dark-surface rounded-lg p-6 shadow-card">
               <div className="text-center mb-6">
-                <h2 className="text-h2 font-medium text-obsidian mb-2">
+                <h2 className="text-h2 font-medium text-obsidian dark:text-dark-text-primary mb-2">
                   Your Week in Review
                 </h2>
-                <p className="text-body text-text-secondary">
+                <p className="text-body text-text-secondary dark:text-dark-text-secondary">
                   {weeklyPattern.validDays} valid days this week
                 </p>
               </div>
 
               {/* Score Cards */}
               <div className="grid grid-cols-3 gap-3 mb-6">
-                <div className="bg-bone-warm rounded-md p-3 text-center">
-                  <div className="text-h1 font-medium text-moss">
+                <div className="bg-bone-warm dark:bg-dark-surface-raised rounded-md p-3 text-center">
+                  <div className="text-h1 font-medium text-moss dark:text-dark-moss">
                     {weeklyPattern.depth_score}
                   </div>
-                  <div className="text-micro text-text-tertiary">Depth</div>
+                  <div className="text-micro text-text-tertiary dark:text-dark-text-tertiary">Depth</div>
                 </div>
-                <div className="bg-bone-warm rounded-md p-3 text-center">
-                  <div className="text-h1 font-medium text-moss">
+                <div className="bg-bone-warm dark:bg-dark-surface-raised rounded-md p-3 text-center">
+                  <div className="text-h1 font-medium text-moss dark:text-dark-moss">
                     {weeklyPattern.variety_score}
                   </div>
-                  <div className="text-micro text-text-tertiary">Variety</div>
+                  <div className="text-micro text-text-tertiary dark:text-dark-text-tertiary">Variety</div>
                 </div>
-                <div className="bg-bone-warm rounded-md p-3 text-center">
-                  <div className="text-h1 font-medium text-moss">
+                <div className="bg-bone-warm dark:bg-dark-surface-raised rounded-md p-3 text-center">
+                  <div className="text-h1 font-medium text-moss dark:text-dark-moss">
                     {weeklyPattern.consistency_score}
                   </div>
-                  <div className="text-micro text-text-tertiary">Consistency</div>
+                  <div className="text-micro text-text-tertiary dark:text-dark-text-tertiary">Consistency</div>
                 </div>
               </div>
 
               {/* Action Breakdown */}
-              <div className="bg-bone-warm rounded-md p-4 mb-6">
-                <h3 className="text-body font-medium text-obsidian mb-3">Action Breakdown</h3>
+              <div className="bg-bone-warm dark:bg-dark-surface-raised rounded-md p-4 mb-6">
+                <h3 className="text-body font-medium text-obsidian dark:text-dark-text-primary mb-3">Action Breakdown</h3>
                 <div className="space-y-2">
                   {Object.entries(weeklyPattern.actionBreakdown).map(([type, count]) => (
                     count > 0 && (
                       <div key={type} className="flex items-center justify-between text-body">
-                        <span className="text-text-secondary">
+                        <span className="text-text-secondary dark:text-dark-text-secondary">
                           {ACTION_LABELS[type as ActionTypeV2] || type.replace(/_/g, ' ')}
                         </span>
-                        <span className="font-medium text-obsidian">{count}</span>
+                        <span className="font-medium text-obsidian dark:text-dark-text-primary">{count}</span>
                       </div>
                     )
                   ))}
@@ -313,8 +313,8 @@ export default function PatternReviewPage() {
               </div>
 
               {/* Primary Insight */}
-              <div className="bg-bone-warm rounded-md p-4">
-                <p className="text-body text-obsidian">
+              <div className="bg-bone-warm dark:bg-dark-surface-raised rounded-md p-4">
+                <p className="text-body text-obsidian dark:text-dark-text-primary">
                   {weeklyPattern.primaryInsight}
                 </p>
               </div>
@@ -334,9 +334,9 @@ export default function PatternReviewPage() {
           <div className="space-y-4">
             {/* Connections Needing Attention */}
             {connectionsNeedingAttention.length > 0 && (
-              <div className="bg-white rounded-lg p-6 shadow-card">
+              <div className="bg-white dark:bg-dark-surface rounded-lg p-6 shadow-card">
                 <div className="flex items-center gap-2 mb-4">
-                  <h3 className="font-medium text-obsidian">Need Attention</h3>
+                  <h3 className="font-medium text-obsidian dark:text-dark-text-primary">Need Attention</h3>
                 </div>
                 <div className="space-y-3">
                   {connectionsNeedingAttention.map(connection => {
@@ -367,15 +367,15 @@ export default function PatternReviewPage() {
 
             {/* Flourishing Connections */}
             {flourishingConnections.length > 0 && (
-              <div className="bg-white rounded-lg p-6 shadow-card">
+              <div className="bg-white dark:bg-dark-surface rounded-lg p-6 shadow-card">
                 <div className="flex items-center gap-2 mb-4">
-                  <h3 className="font-medium text-obsidian">Flourishing</h3>
+                  <h3 className="font-medium text-obsidian dark:text-dark-text-primary">Flourishing</h3>
                 </div>
                 <div className="flex flex-wrap gap-2">
                   {flourishingConnections.map(connection => (
                     <div
                       key={connection.id}
-                      className="bg-bone-warm text-moss px-3 py-1 rounded-full text-body"
+                      className="bg-bone-warm dark:bg-dark-surface-raised text-moss dark:text-dark-moss px-3 py-1 rounded-full text-body"
                     >
                       {connection.name}
                     </div>
@@ -386,11 +386,11 @@ export default function PatternReviewPage() {
 
             {/* All other connections summary */}
             {connections.length > connectionsNeedingAttention.length + flourishingConnections.length && (
-              <div className="bg-white rounded-lg p-6 shadow-card">
+              <div className="bg-white dark:bg-dark-surface rounded-lg p-6 shadow-card">
                 <div className="flex items-center gap-2 mb-2">
-                  <h3 className="font-medium text-obsidian">Stable</h3>
+                  <h3 className="font-medium text-obsidian dark:text-dark-text-primary">Stable</h3>
                 </div>
-                <p className="text-body text-text-secondary">
+                <p className="text-body text-text-secondary dark:text-dark-text-secondary">
                   {connections.length - connectionsNeedingAttention.length - flourishingConnections.length} connections maintaining healthy balance
                 </p>
               </div>
@@ -408,32 +408,32 @@ export default function PatternReviewPage() {
         {/* Step 3: Insights */}
         {step === 'insights' && (
           <div className="space-y-4">
-            <div className="bg-white rounded-lg p-6 shadow-card">
+            <div className="bg-white dark:bg-dark-surface rounded-lg p-6 shadow-card">
               <div className="text-center mb-6">
-                <h2 className="text-h2 font-medium text-obsidian mb-2">
+                <h2 className="text-h2 font-medium text-obsidian dark:text-dark-text-primary mb-2">
                   Insights for You
                 </h2>
               </div>
 
               <div className="space-y-4">
                 {/* Identity reminder */}
-                <div className="bg-bone-warm rounded-md p-4">
-                  <p className="text-body text-obsidian font-medium">
+                <div className="bg-bone-warm dark:bg-dark-surface-raised rounded-md p-4">
+                  <p className="text-body text-obsidian dark:text-dark-text-primary font-medium">
                     {INSIGHT_MESSAGES.identity}
                   </p>
                 </div>
 
                 {/* Regret prevention */}
-                <div className="bg-bone-warm rounded-md p-4">
-                  <p className="text-body text-obsidian">
+                <div className="bg-bone-warm dark:bg-dark-surface-raised rounded-md p-4">
+                  <p className="text-body text-obsidian dark:text-dark-text-primary">
                     {INSIGHT_MESSAGES.regret_prevention}
                   </p>
                 </div>
 
                 {/* Encouragement based on week */}
                 {weeklyPattern && weeklyPattern.validDays >= 5 && (
-                  <div className="bg-bone-warm rounded-md p-4">
-                    <p className="text-body text-moss">
+                  <div className="bg-bone-warm dark:bg-dark-surface-raised rounded-md p-4">
+                    <p className="text-body text-moss dark:text-dark-moss">
                       {INSIGHT_MESSAGES.consistency_encouragement}
                     </p>
                   </div>
@@ -441,8 +441,8 @@ export default function PatternReviewPage() {
 
                 {/* Depth suggestion if low */}
                 {weeklyPattern && weeklyPattern.depth_score < 50 && (
-                  <div className="bg-bone-warm rounded-md p-4">
-                    <p className="text-body text-sun">
+                  <div className="bg-bone-warm dark:bg-dark-surface-raised rounded-md p-4">
+                    <p className="text-body text-sun dark:text-dark-sun">
                       {INSIGHT_MESSAGES.depth_suggestion}
                     </p>
                   </div>
@@ -462,20 +462,20 @@ export default function PatternReviewPage() {
 
         {/* Step 4: Complete */}
         {step === 'complete' && (
-          <div className="bg-white rounded-lg p-8 shadow-card text-center">
-            <h2 className="text-h2 font-medium text-obsidian mb-3">
+          <div className="bg-white dark:bg-dark-surface rounded-lg p-8 shadow-card text-center">
+            <h2 className="text-h2 font-medium text-obsidian dark:text-dark-text-primary mb-3">
               Pattern Review Complete
             </h2>
 
-            <p className="text-obsidian mb-6 leading-relaxed">
+            <p className="text-obsidian dark:text-dark-text-primary mb-6 leading-relaxed">
               You&apos;re building meaningful connections, one action at a time.
             </p>
 
             {weeklyPattern && (
-              <div className="bg-bone-warm rounded-md p-4 mb-6 text-left">
+              <div className="bg-bone-warm dark:bg-dark-surface-raised rounded-md p-4 mb-6 text-left">
                 <div className="flex items-center justify-between mb-3">
-                  <span className="text-body font-medium text-obsidian">This Week</span>
-                  <span className="text-body text-text-tertiary">
+                  <span className="text-body font-medium text-obsidian dark:text-dark-text-primary">This Week</span>
+                  <span className="text-body text-text-tertiary dark:text-dark-text-tertiary">
                     {weeklyPattern.validDays}/7 valid days
                   </span>
                 </div>
@@ -501,7 +501,7 @@ export default function PatternReviewPage() {
               </Link>
               <Link
                 href="/reflect/history"
-                className="inline-block w-full py-3 px-4 bg-transparent hover:bg-bone-warm text-obsidian font-medium rounded-md transition-all duration-calm text-center"
+                className="inline-block w-full py-3 px-4 bg-transparent hover:bg-bone-warm dark:hover:bg-dark-surface-hover text-obsidian dark:text-dark-text-primary font-medium rounded-md transition-all duration-calm text-center"
               >
                 View history
               </Link>

@@ -1,8 +1,11 @@
 'use client'
 
+import { useState } from 'react'
 import { Connection, CatchupFrequency, RelationshipStrength, RingTier } from '@/types/database'
+import { ActionTypeV2 } from '@/types/habitEngine'
 import { RingBadge } from './RingSelector'
 import ConnectionRing from './ConnectionRing'
+import RingStatusModal from './RingStatusModal'
 
 interface ConnectionCardProps {
   connection: Connection
@@ -16,6 +19,9 @@ interface ConnectionCardProps {
   strengthV2?: RelationshipStrength
   ringTier?: RingTier
   ringPosition?: number | null
+  daysSinceAction?: number
+  lastActionType?: ActionTypeV2 | null
+  decayStartedAt?: string | null
 }
 
 function getDaysSince(dateString: string | null): number | null {
@@ -100,22 +106,33 @@ function getConnectionStatusText(lastInteractionDate: string | null): { text: st
   return { text: `Caught-up ${days} days ago`, isUrgent: false }
 }
 
-export default function ConnectionCard({ connection, lastMemory, lastMood: _lastMood, onLogInteraction, onPlanCatchup, onCatchup, onEdit, onViewDetails, strengthV2, ringTier, ringPosition }: ConnectionCardProps) {
+export default function ConnectionCard({ connection, lastMemory, lastMood: _lastMood, onLogInteraction, onPlanCatchup, onCatchup, onEdit, onViewDetails, strengthV2, ringTier, ringPosition, daysSinceAction = 0, lastActionType = null, decayStartedAt = null }: ConnectionCardProps) {
   void _lastMood // Mood tracked in DB but not displayed on card per design system
+  const [showRingStatus, setShowRingStatus] = useState(false)
   const status = getConnectionStatusText(connection.last_interaction_date)
   const nextCatchup = getNextCatchupInfo(connection)
 
   return (
-    <div className="bg-white rounded-lg p-6 shadow-card">
+    <>
+    <div className="bg-white dark:bg-dark-surface rounded-lg p-6 shadow-card">
       <button
         onClick={onViewDetails}
         className="w-full text-left mb-4 cursor-pointer"
       >
         <div className="flex items-start gap-4">
-          <ConnectionRing name={connection.name} strength={strengthV2} size={72} />
+          <div onClick={(e) => { e.stopPropagation(); setShowRingStatus(true) }}>
+            <ConnectionRing
+              name={connection.name}
+              strength={strengthV2}
+              daysSinceAction={daysSinceAction}
+              decayStartedAt={decayStartedAt}
+              size={72}
+              onClick={() => setShowRingStatus(true)}
+            />
+          </div>
           <div className="flex-1 min-w-0 pt-1">
             <div className="flex items-center justify-between mb-1">
-              <span className="text-h3 text-obsidian">
+              <span className="text-h3 text-obsidian dark:text-dark-text-primary">
                 {connection.name}
               </span>
               <div
@@ -124,7 +141,7 @@ export default function ConnectionCard({ connection, lastMemory, lastMood: _last
               >
                 <button
                   onClick={onEdit}
-                  className="p-1.5 text-text-tertiary hover:text-obsidian hover:bg-bone-warm rounded-md transition-all duration-calm"
+                  className="p-1.5 text-text-tertiary dark:text-dark-text-tertiary hover:text-obsidian dark:hover:text-dark-text-primary hover:bg-bone-warm dark:hover:bg-dark-surface-raised rounded-md transition-all duration-calm"
                   title="Edit connection"
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -141,17 +158,17 @@ export default function ConnectionCard({ connection, lastMemory, lastMood: _last
             )}
 
             {nextCatchup.text && (
-              <div className={`text-micro-medium ${nextCatchup.isOverdue ? 'text-ember' : 'text-moss'}`}>
+              <div className={`text-micro-medium ${nextCatchup.isOverdue ? 'text-ember dark:text-dark-terracotta' : 'text-moss dark:text-dark-moss'}`}>
                 {nextCatchup.text}
               </div>
             )}
 
-            <div className="text-micro text-text-tertiary mt-1">
+            <div className="text-micro text-text-tertiary dark:text-dark-text-tertiary mt-1">
               {status.text}
             </div>
 
             {lastMemory && (
-              <div className="text-micro text-text-secondary italic mt-2 line-clamp-3">
+              <div className="text-micro text-text-secondary dark:text-dark-text-secondary italic mt-2 line-clamp-3">
                 &ldquo;{lastMemory}&rdquo;
               </div>
             )}
@@ -162,7 +179,7 @@ export default function ConnectionCard({ connection, lastMemory, lastMood: _last
       <div className="grid grid-cols-3 gap-2">
         <button
           onClick={onPlanCatchup}
-          className="py-2.5 px-3 bg-bone-warm hover:bg-bone-warm text-obsidian text-micro-medium rounded-md transition-all duration-calm"
+          className="py-2.5 px-3 bg-bone-warm dark:bg-dark-surface-raised hover:bg-bone-warm text-obsidian dark:text-dark-text-primary text-micro-medium rounded-md transition-all duration-calm"
         >
           Plan
         </button>
@@ -174,11 +191,24 @@ export default function ConnectionCard({ connection, lastMemory, lastMood: _last
         </button>
         <button
           onClick={onLogInteraction}
-          className="py-2.5 px-3 bg-bone-warm hover:bg-bone-warm text-obsidian text-micro-medium rounded-md transition-all duration-calm"
+          className="py-2.5 px-3 bg-bone-warm dark:bg-dark-surface-raised hover:bg-bone-warm text-obsidian dark:text-dark-text-primary text-micro-medium rounded-md transition-all duration-calm"
         >
           Record
         </button>
       </div>
     </div>
+
+    {showRingStatus && strengthV2 && (
+      <RingStatusModal
+        isOpen={showRingStatus}
+        onClose={() => setShowRingStatus(false)}
+        connectionName={connection.name}
+        strength={strengthV2}
+        daysSinceAction={daysSinceAction}
+        lastActionType={lastActionType}
+        decayStartedAt={decayStartedAt}
+      />
+    )}
+    </>
   )
 }

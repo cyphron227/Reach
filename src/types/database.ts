@@ -124,6 +124,7 @@ export interface Database {
           notifications_enabled: boolean
           notification_time: string
           weekly_reflection_enabled: boolean
+          theme_preference: 'light' | 'dark' | 'system'
           created_at: string
           updated_at: string
         }
@@ -133,6 +134,7 @@ export interface Database {
           notifications_enabled?: boolean
           notification_time?: string
           weekly_reflection_enabled?: boolean
+          theme_preference?: 'light' | 'dark' | 'system'
           created_at?: string
           updated_at?: string
         }
@@ -142,6 +144,7 @@ export interface Database {
           notifications_enabled?: boolean
           notification_time?: string
           weekly_reflection_enabled?: boolean
+          theme_preference?: 'light' | 'dark' | 'system'
           created_at?: string
           updated_at?: string
         }

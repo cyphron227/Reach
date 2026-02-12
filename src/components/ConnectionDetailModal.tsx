@@ -3,8 +3,10 @@
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { Connection, Interaction, CatchupFrequency, InteractionType, RelationshipStrength } from '@/types/database'
+import { ActionTypeV2 } from '@/types/habitEngine'
 import { useScrollLock } from '@/lib/useScrollLock'
 import ConnectionRing from './ConnectionRing'
+import RingStatusModal from './RingStatusModal'
 
 interface ConnectionDetailModalProps {
   connection: Connection
@@ -14,6 +16,9 @@ interface ConnectionDetailModalProps {
   onLogInteraction: () => void
   onInteractionUpdated?: () => void
   strengthV2?: RelationshipStrength
+  daysSinceAction?: number
+  lastActionType?: ActionTypeV2 | null
+  decayStartedAt?: string | null
 }
 
 const frequencyLabels: Record<CatchupFrequency, string> = {
@@ -65,7 +70,7 @@ const interactionTypes: { value: InteractionType; label: string }[] = [
   { value: 'in_person', label: 'In-person' },
 ]
 
-export default function ConnectionDetailModal({ connection, isOpen, onClose, onEdit, onLogInteraction, onInteractionUpdated, strengthV2 }: ConnectionDetailModalProps) {
+export default function ConnectionDetailModal({ connection, isOpen, onClose, onEdit, onLogInteraction, onInteractionUpdated, strengthV2, daysSinceAction = 0, lastActionType = null, decayStartedAt = null }: ConnectionDetailModalProps) {
   const [interactions, setInteractions] = useState<Interaction[]>([])
   const [loading, setLoading] = useState(true)
   const [editingInteraction, setEditingInteraction] = useState<Interaction | null>(null)
@@ -73,6 +78,7 @@ export default function ConnectionDetailModal({ connection, isOpen, onClose, onE
   const [editMemory, setEditMemory] = useState('')
   const [editDate, setEditDate] = useState('')
   const [saving, setSaving] = useState(false)
+  const [showRingStatus, setShowRingStatus] = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
 
   const supabase = createClient()
@@ -155,7 +161,7 @@ export default function ConnectionDetailModal({ connection, isOpen, onClose, onE
 
   return (
     <div
-      className="fixed inset-0 bg-obsidian/40 backdrop-blur-sm flex items-end sm:items-center justify-center z-50 px-4 pt-4 pb-safe overscroll-contain"
+      className="fixed inset-0 bg-obsidian/40 dark:bg-black/60 backdrop-blur-sm flex items-end sm:items-center justify-center z-50 px-4 pt-4 pb-safe overscroll-contain"
       onClick={(e) => {
         if (e.target === e.currentTarget) {
           onClose()
@@ -163,14 +169,14 @@ export default function ConnectionDetailModal({ connection, isOpen, onClose, onE
       }}
     >
       <div
-        className="bg-white rounded-lg w-full max-w-md max-h-[90vh] shadow-modal flex flex-col overscroll-contain"
+        className="bg-white dark:bg-dark-surface rounded-lg w-full max-w-md max-h-[90vh] shadow-modal flex flex-col overscroll-contain"
       >
         {/* Header */}
-        <div className="p-6 border-b border-bone-warm">
+        <div className="p-6 border-b border-bone-warm dark:border-dark-border">
           <div className="flex justify-end mb-2">
             <button
               onClick={onClose}
-              className="text-text-tertiary hover:text-obsidian transition-all duration-calm"
+              className="text-text-tertiary dark:text-dark-text-tertiary hover:text-obsidian dark:hover:text-dark-text-primary transition-all duration-calm"
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -180,12 +186,19 @@ export default function ConnectionDetailModal({ connection, isOpen, onClose, onE
 
           <div className="flex flex-col items-center mb-4">
             <div className="mb-4">
-              <ConnectionRing name={connection.name} strength={strengthV2} size={120} />
+              <ConnectionRing
+                name={connection.name}
+                strength={strengthV2}
+                daysSinceAction={daysSinceAction}
+                decayStartedAt={decayStartedAt}
+                size={120}
+                onClick={strengthV2 ? () => setShowRingStatus(true) : undefined}
+              />
             </div>
-            <h2 className="text-h2 font-medium text-obsidian">
+            <h2 className="text-h2 font-medium text-obsidian dark:text-dark-text-primary">
               {connection.name}
             </h2>
-            <div className="text-body text-text-secondary mt-1">
+            <div className="text-body text-text-secondary dark:text-dark-text-secondary mt-1">
               {frequencyLabels[connection.catchup_frequency]}
             </div>
           </div>
@@ -199,7 +212,7 @@ export default function ConnectionDetailModal({ connection, isOpen, onClose, onE
             </button>
             <button
               onClick={onEdit}
-              className="py-2.5 px-4 bg-bone-warm hover:shadow-card text-obsidian text-body font-medium rounded-md transition-all duration-calm"
+              className="py-2.5 px-4 bg-bone-warm dark:bg-dark-surface-raised hover:shadow-card text-obsidian dark:text-dark-text-primary text-body font-medium rounded-md transition-all duration-calm"
             >
               Edit
             </button>
@@ -208,38 +221,38 @@ export default function ConnectionDetailModal({ connection, isOpen, onClose, onE
 
         {/* Catch-up History */}
         <div className="flex-1 overflow-y-auto p-6">
-          <h3 className="text-body font-medium text-obsidian mb-4">Catch-up history</h3>
+          <h3 className="text-body font-medium text-obsidian dark:text-dark-text-primary mb-4">Catch-up history</h3>
 
           {loading ? (
-            <div className="text-center py-8 text-text-tertiary">Loading...</div>
+            <div className="text-center py-8 text-text-tertiary dark:text-dark-text-tertiary">Loading...</div>
           ) : interactions.length === 0 ? (
             <div className="text-center py-8">
-              <p className="text-text-secondary">No catch-ups yet</p>
-              <p className="text-text-tertiary text-micro mt-1">Record your first catch-up to start tracking</p>
+              <p className="text-text-secondary dark:text-dark-text-secondary">No catch-ups yet</p>
+              <p className="text-text-tertiary dark:text-dark-text-tertiary text-micro mt-1">Record your first catch-up to start tracking</p>
             </div>
           ) : (
             <div className="space-y-3">
               {interactions.map((interaction) => (
                 <div
                   key={interaction.id}
-                  className="p-4 bg-bone-warm rounded-md shadow-card"
+                  className="p-4 bg-bone-warm dark:bg-dark-surface-raised rounded-md shadow-card"
                 >
                   <div className="flex items-center justify-between mb-1">
                     <div className="flex items-center gap-2">
-                      <span className="text-body font-medium text-obsidian">
+                      <span className="text-body font-medium text-obsidian dark:text-dark-text-primary">
                         {interactionTypeLabels[interaction.interaction_type]}
                       </span>
                       {interaction.mood && moodLabels[interaction.mood] && (
-                        <span className="text-micro text-text-tertiary">({moodLabels[interaction.mood]})</span>
+                        <span className="text-micro text-text-tertiary dark:text-dark-text-tertiary">({moodLabels[interaction.mood]})</span>
                       )}
                     </div>
                     <div className="flex items-center gap-2">
-                      <span className="text-micro text-text-tertiary">
+                      <span className="text-micro text-text-tertiary dark:text-dark-text-tertiary">
                         {formatDate(interaction.interaction_date)}
                       </span>
                       <button
                         onClick={() => startEditing(interaction)}
-                        className="p-1 text-text-tertiary hover:text-obsidian hover:bg-bone rounded transition-all duration-calm"
+                        className="p-1 text-text-tertiary dark:text-dark-text-tertiary hover:text-obsidian dark:hover:text-dark-text-primary hover:bg-bone dark:hover:bg-dark-bg rounded transition-all duration-calm"
                         title="Edit interaction"
                       >
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -249,7 +262,7 @@ export default function ConnectionDetailModal({ connection, isOpen, onClose, onE
                     </div>
                   </div>
                   {interaction.memory && (
-                    <p className="text-body text-obsidian mt-2 pl-0">
+                    <p className="text-body text-obsidian dark:text-dark-text-primary mt-2 pl-0">
                       {interaction.memory}
                     </p>
                   )}
@@ -262,16 +275,16 @@ export default function ConnectionDetailModal({ connection, isOpen, onClose, onE
 
       {/* Edit Interaction Modal */}
       {editingInteraction && (
-        <div className="fixed inset-0 bg-obsidian/60 flex items-center justify-center z-[60] px-4 pt-4 pb-safe">
-          <div className="bg-white rounded-lg w-full max-w-sm shadow-modal">
+        <div className="fixed inset-0 bg-obsidian/60 dark:bg-black/70 flex items-center justify-center z-[60] px-4 pt-4 pb-safe">
+          <div className="bg-white dark:bg-dark-surface rounded-lg w-full max-w-sm shadow-modal">
             <div className="p-6">
               <div className="flex items-center justify-between mb-6">
-                <h3 className="text-h3 font-medium text-obsidian">
+                <h3 className="text-h3 font-medium text-obsidian dark:text-dark-text-primary">
                   Edit catch-up
                 </h3>
                 <button
                   onClick={cancelEditing}
-                  className="text-text-tertiary hover:text-obsidian transition-all duration-calm"
+                  className="text-text-tertiary dark:text-dark-text-tertiary hover:text-obsidian dark:hover:text-dark-text-primary transition-all duration-calm"
                 >
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -282,7 +295,7 @@ export default function ConnectionDetailModal({ connection, isOpen, onClose, onE
               <div className="space-y-4">
                 {/* Date */}
                 <div>
-                  <label className="block text-micro-medium text-text-tertiary mb-2">
+                  <label className="block text-micro-medium text-text-tertiary dark:text-dark-text-tertiary mb-2">
                     Date
                   </label>
                   <input
@@ -290,13 +303,13 @@ export default function ConnectionDetailModal({ connection, isOpen, onClose, onE
                     value={editDate}
                     onChange={(e) => setEditDate(e.target.value)}
                     max={new Date().toISOString().split('T')[0]}
-                    className="w-full bg-bone-warm border-none rounded-md px-4 py-3 text-body text-obsidian focus:outline-none focus:ring-1 focus:ring-moss/40 transition-all duration-calm"
+                    className="w-full bg-bone-warm dark:bg-dark-surface-raised border-none rounded-md px-4 py-3 text-body text-obsidian dark:text-dark-text-primary focus:outline-none focus:ring-1 focus:ring-moss/40 transition-all duration-calm"
                   />
                 </div>
 
                 {/* Type */}
                 <div>
-                  <label className="block text-micro-medium text-text-tertiary mb-2">
+                  <label className="block text-micro-medium text-text-tertiary dark:text-dark-text-tertiary mb-2">
                     Type
                   </label>
                   <div className="grid grid-cols-3 gap-2">
@@ -308,7 +321,7 @@ export default function ConnectionDetailModal({ connection, isOpen, onClose, onE
                         className={`py-2 px-2 rounded-md text-center transition-all duration-calm ${
                           editType === type.value
                             ? 'bg-moss text-bone shadow-card'
-                            : 'bg-bone-warm text-obsidian hover:shadow-card'
+                            : 'bg-bone-warm dark:bg-dark-surface-raised text-obsidian dark:text-dark-text-primary hover:shadow-card'
                         }`}
                       >
                         <div className="text-micro font-medium">{type.label}</div>
@@ -319,14 +332,14 @@ export default function ConnectionDetailModal({ connection, isOpen, onClose, onE
 
                 {/* Memory */}
                 <div>
-                  <label className="block text-micro-medium text-text-tertiary mb-2">
+                  <label className="block text-micro-medium text-text-tertiary dark:text-dark-text-tertiary mb-2">
                     Memory
                   </label>
                   <textarea
                     value={editMemory}
                     onChange={(e) => setEditMemory(e.target.value)}
                     rows={3}
-                    className="w-full bg-bone-warm border-none rounded-md px-4 py-3 text-body text-obsidian placeholder:text-text-placeholder focus:outline-none focus:ring-1 focus:ring-moss/40 transition-all duration-calm resize-none"
+                    className="w-full bg-bone-warm dark:bg-dark-surface-raised border-none rounded-md px-4 py-3 text-body text-obsidian dark:text-dark-text-primary placeholder:text-text-placeholder focus:outline-none focus:ring-1 focus:ring-moss/40 transition-all duration-calm resize-none"
                     placeholder="What did you talk about?"
                   />
                 </div>
@@ -346,19 +359,19 @@ export default function ConnectionDetailModal({ connection, isOpen, onClose, onE
                 {!showDeleteConfirm ? (
                   <button
                     onClick={() => setShowDeleteConfirm(true)}
-                    className="w-full py-2 text-body text-ember hover:text-ember/80 transition-all duration-calm"
+                    className="w-full py-2 text-body text-ember dark:text-dark-terracotta hover:text-ember/80 transition-all duration-calm"
                   >
                     Delete this catch-up
                   </button>
                 ) : (
-                  <div className="p-3 bg-bone-warm rounded-md">
-                    <p className="text-body text-ember mb-3">
+                  <div className="p-3 bg-bone-warm dark:bg-dark-surface-raised rounded-md">
+                    <p className="text-body text-ember dark:text-dark-terracotta mb-3">
                       Are you sure? This cannot be undone.
                     </p>
                     <div className="flex gap-2">
                       <button
                         onClick={() => setShowDeleteConfirm(false)}
-                        className="flex-1 py-2 px-3 bg-bone shadow-card text-obsidian text-body font-medium rounded-md hover:shadow-elevated transition-all duration-calm"
+                        className="flex-1 py-2 px-3 bg-bone dark:bg-dark-bg shadow-card text-obsidian dark:text-dark-text-primary text-body font-medium rounded-md hover:shadow-elevated transition-all duration-calm"
                       >
                         Cancel
                       </button>
@@ -376,6 +389,18 @@ export default function ConnectionDetailModal({ connection, isOpen, onClose, onE
             </div>
           </div>
         </div>
+      )}
+
+      {showRingStatus && strengthV2 && (
+        <RingStatusModal
+          isOpen={showRingStatus}
+          onClose={() => setShowRingStatus(false)}
+          connectionName={connection.name}
+          strength={strengthV2}
+          daysSinceAction={daysSinceAction}
+          lastActionType={lastActionType}
+          decayStartedAt={decayStartedAt}
+        />
       )}
     </div>
   )

@@ -31,10 +31,10 @@ export default function Greeting({ userName }: GreetingProps) {
 
   return (
     <div className="mb-8">
-      <h1 className="text-h2 text-obsidian mb-1">
+      <h1 className="text-h2 text-obsidian dark:text-dark-text-primary mb-1">
         {greeting}{firstName ? `, ${firstName}` : ''}
       </h1>
-      <p className="text-body text-text-secondary">{encouragement}</p>
+      <p className="text-body text-text-secondary dark:text-dark-text-secondary">{encouragement}</p>
     </div>
   )
 }

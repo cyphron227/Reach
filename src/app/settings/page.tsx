@@ -12,6 +12,8 @@ import {
   requestNotificationPermissions,
   cancelAllNotifications,
 } from '@/lib/capacitor'
+import { useTheme } from '@/lib/theme'
+import type { ThemePreference } from '@/lib/theme'
 
 export default function SettingsPage() {
   const [user, setUser] = useState<User | null>(null)
@@ -33,6 +35,7 @@ export default function SettingsPage() {
 
   const router = useRouter()
   const supabase = createClient()
+  const { preference: themePreference, setPreference: setThemePreference } = useTheme()
 
   const fetchData = useCallback(async () => {
     const { data: { user: authUser } } = await supabase.auth.getUser()
@@ -235,45 +238,45 @@ export default function SettingsPage() {
 
   if (loading) {
     return (
-      <main className="min-h-screen bg-bone flex items-center justify-center">
-        <div className="text-text-tertiary">Loading...</div>
+      <main className="min-h-screen bg-bone dark:bg-dark-bg flex items-center justify-center">
+        <div className="text-text-tertiary dark:text-dark-text-tertiary">Loading...</div>
       </main>
     )
   }
 
   return (
-    <main className="min-h-screen bg-bone">
+    <main className="min-h-screen bg-bone dark:bg-dark-bg">
       <div className="max-w-lg mx-auto px-6 pt-8 pb-safe">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <Link
             href="/"
-            className="text-text-tertiary hover:text-obsidian text-micro transition-colors duration-calm flex items-center gap-1"
+            className="text-text-tertiary dark:text-dark-text-tertiary hover:text-obsidian dark:hover:text-dark-text-primary text-micro transition-colors duration-calm flex items-center gap-1"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
             Back
           </Link>
-          <div className="text-body-medium text-obsidian">Settings</div>
+          <div className="text-body-medium text-obsidian dark:text-dark-text-primary">Settings</div>
           <div className="w-12" />
         </div>
 
         {/* Profile Section */}
-        <div className="bg-white rounded-lg p-6 shadow-card mb-6">
-          <h2 className="text-label text-inkblue mb-4">
+        <div className="bg-white dark:bg-dark-surface rounded-lg p-6 shadow-card mb-6">
+          <h2 className="text-label text-inkblue dark:text-dark-inkblue mb-4">
             Profile
           </h2>
           <div className="space-y-4">
             <div>
-              <div className="text-micro-medium text-text-tertiary mb-1">Name</div>
+              <div className="text-micro-medium text-text-tertiary dark:text-dark-text-tertiary mb-1">Name</div>
               {editingName ? (
                 <div className="flex gap-2">
                   <input
                     type="text"
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
-                    className="flex-1 px-3 py-2 rounded-md bg-bone-warm border-none text-obsidian focus:outline-none focus:ring-1 focus:ring-moss/40 transition-all duration-calm text-body"
+                    className="flex-1 px-3 py-2 rounded-md bg-bone-warm dark:bg-dark-surface-raised border-none text-obsidian dark:text-dark-text-primary focus:outline-none focus:ring-1 focus:ring-moss/40 transition-all duration-calm text-body"
                     placeholder="Your name"
                   />
                   <button
@@ -288,17 +291,17 @@ export default function SettingsPage() {
                       setEditingName(false)
                       setFullName(user?.full_name || '')
                     }}
-                    className="px-3 py-2 bg-bone-warm hover:bg-bone-warm text-obsidian text-micro-medium rounded-md transition-all duration-calm"
+                    className="px-3 py-2 bg-bone-warm dark:bg-dark-surface-raised hover:opacity-80 text-obsidian dark:text-dark-text-primary text-micro-medium rounded-md transition-all duration-calm"
                   >
                     Cancel
                   </button>
                 </div>
               ) : (
                 <div className="flex items-center justify-between">
-                  <div className="text-body text-obsidian">{user?.full_name || 'Not set'}</div>
+                  <div className="text-body text-obsidian dark:text-dark-text-primary">{user?.full_name || 'Not set'}</div>
                   <button
                     onClick={() => setEditingName(true)}
-                    className="text-moss hover:opacity-80 text-micro-medium transition-colors duration-calm"
+                    className="text-moss dark:text-dark-moss hover:opacity-80 text-micro-medium transition-colors duration-calm"
                   >
                     Edit
                   </button>
@@ -306,15 +309,15 @@ export default function SettingsPage() {
               )}
             </div>
             <div>
-              <div className="text-micro-medium text-text-tertiary">Email</div>
-              <div className="text-body text-obsidian">{user?.email}</div>
+              <div className="text-micro-medium text-text-tertiary dark:text-dark-text-tertiary">Email</div>
+              <div className="text-body text-obsidian dark:text-dark-text-primary">{user?.email}</div>
             </div>
           </div>
         </div>
 
         {/* Notifications Section */}
-        <div className="bg-white rounded-lg p-6 shadow-card mb-6">
-          <h2 className="text-label text-inkblue mb-4">
+        <div className="bg-white dark:bg-dark-surface rounded-lg p-6 shadow-card mb-6">
+          <h2 className="text-label text-inkblue dark:text-dark-inkblue mb-4">
             Notifications
           </h2>
 
@@ -322,17 +325,17 @@ export default function SettingsPage() {
             {/* Daily Reminder Toggle */}
             <div className="flex items-center justify-between">
               <div>
-                <div className="text-body-medium text-obsidian">Daily reminder</div>
-                <div className="text-micro text-text-secondary">Get a gentle nudge to reach out</div>
+                <div className="text-body-medium text-obsidian dark:text-dark-text-primary">Daily reminder</div>
+                <div className="text-micro text-text-secondary dark:text-dark-text-secondary">Get a gentle nudge to reach out</div>
               </div>
               <button
                 onClick={handleNotificationToggle}
                 className={`relative w-12 h-7 rounded-full transition-colors duration-calm ${
-                  notificationsEnabled ? 'bg-moss' : 'bg-bone-warm'
+                  notificationsEnabled ? 'bg-moss' : 'bg-bone-warm dark:bg-dark-surface-raised'
                 }`}
               >
                 <div
-                  className={`absolute top-1 w-5 h-5 rounded-full bg-bone shadow transition-transform duration-calm ${
+                  className={`absolute top-1 w-5 h-5 rounded-full bg-bone dark:bg-dark-text-primary shadow transition-transform duration-calm ${
                     notificationsEnabled ? 'translate-x-6' : 'translate-x-1'
                   }`}
                 />
@@ -342,11 +345,11 @@ export default function SettingsPage() {
             {/* Notification Time */}
             {notificationsEnabled && (
               <div>
-                <div className="text-body-medium text-obsidian mb-2">Reminder time</div>
+                <div className="text-body-medium text-obsidian dark:text-dark-text-primary mb-2">Reminder time</div>
                 <select
                   value={notificationTime}
                   onChange={(e) => setNotificationTime(e.target.value)}
-                  className="w-full px-4 py-3 rounded-md bg-bone-warm border-none text-obsidian focus:outline-none focus:ring-1 focus:ring-moss/40 transition-all duration-calm"
+                  className="w-full px-4 py-3 rounded-md bg-bone-warm dark:bg-dark-surface-raised border-none text-obsidian dark:text-dark-text-primary focus:outline-none focus:ring-1 focus:ring-moss/40 transition-all duration-calm"
                 >
                   <option value="08:00">8:00 AM</option>
                   <option value="09:00">9:00 AM</option>
@@ -365,28 +368,51 @@ export default function SettingsPage() {
         </div>
 
         {/* Weekly Reflection Section */}
-        <div className="bg-white rounded-lg p-6 shadow-card mb-6">
-          <h2 className="text-label text-inkblue mb-4">
+        <div className="bg-white dark:bg-dark-surface rounded-lg p-6 shadow-card mb-6">
+          <h2 className="text-label text-inkblue dark:text-dark-inkblue mb-4">
             Weekly reflection
           </h2>
 
           <div className="flex items-center justify-between">
             <div>
-              <div className="text-body-medium text-obsidian">Weekly check-in</div>
-              <div className="text-micro text-text-secondary">Reflect on your connections each week</div>
+              <div className="text-body-medium text-obsidian dark:text-dark-text-primary">Weekly check-in</div>
+              <div className="text-micro text-text-secondary dark:text-dark-text-secondary">Reflect on your connections each week</div>
             </div>
             <button
               onClick={() => setWeeklyReflectionEnabled(!weeklyReflectionEnabled)}
               className={`relative w-12 h-7 rounded-full transition-colors duration-calm ${
-                weeklyReflectionEnabled ? 'bg-moss' : 'bg-bone-warm'
+                weeklyReflectionEnabled ? 'bg-moss' : 'bg-bone-warm dark:bg-dark-surface-raised'
               }`}
             >
               <div
-                className={`absolute top-1 w-5 h-5 rounded-full bg-bone shadow transition-transform duration-calm ${
+                className={`absolute top-1 w-5 h-5 rounded-full bg-bone dark:bg-dark-text-primary shadow transition-transform duration-calm ${
                   weeklyReflectionEnabled ? 'translate-x-6' : 'translate-x-1'
                 }`}
               />
             </button>
+          </div>
+        </div>
+
+        {/* Appearance Section */}
+        <div className="bg-white dark:bg-dark-surface rounded-lg p-6 shadow-card mb-6">
+          <h2 className="text-label text-inkblue dark:text-dark-inkblue mb-4">
+            Appearance
+          </h2>
+          <div className="text-body-medium text-obsidian dark:text-dark-text-primary mb-3">Theme</div>
+          <div className="flex gap-2">
+            {(['light', 'system', 'dark'] as ThemePreference[]).map((option) => (
+              <button
+                key={option}
+                onClick={() => setThemePreference(option)}
+                className={`flex-1 py-2.5 px-3 rounded-md text-micro-medium capitalize transition-all duration-calm ${
+                  themePreference === option
+                    ? 'bg-moss text-bone'
+                    : 'bg-bone-warm dark:bg-dark-surface-raised text-obsidian dark:text-dark-text-primary hover:opacity-80'
+                }`}
+              >
+                {option === 'system' ? 'System' : option === 'light' ? 'Light' : 'Dark'}
+              </button>
+            ))}
           </div>
         </div>
 
@@ -403,18 +429,18 @@ export default function SettingsPage() {
         {message && (
           <div className={`p-3 rounded-md text-center text-micro mb-4 ${
             message.type === 'success'
-              ? 'bg-bone-warm text-moss'
-              : 'bg-bone-warm text-ember'
+              ? 'bg-bone-warm dark:bg-dark-surface-raised text-moss dark:text-dark-moss'
+              : 'bg-bone-warm dark:bg-dark-surface-raised text-ember dark:text-dark-terracotta'
           }`}>
             {message.text}
           </div>
         )}
 
         {/* Privacy Note */}
-        <div className="bg-bone-warm rounded-md p-4 mb-6">
+        <div className="bg-bone-warm dark:bg-dark-surface-raised rounded-md p-4 mb-6">
           <div>
-            <div className="text-micro-medium text-obsidian">Your data is private</div>
-            <div className="text-micro text-text-secondary">
+            <div className="text-micro-medium text-obsidian dark:text-dark-text-primary">Your data is private</div>
+            <div className="text-micro text-text-secondary dark:text-dark-text-secondary">
               All your connections and catch-ups are stored securely and only visible to you.
             </div>
           </div>
@@ -423,19 +449,19 @@ export default function SettingsPage() {
         {/* Sign Out */}
         <button
           onClick={handleSignOut}
-          className="w-full py-3 px-4 bg-bone-warm hover:bg-bone-warm text-obsidian font-medium rounded-md transition-all duration-calm mb-8"
+          className="w-full py-3 px-4 bg-bone-warm dark:bg-dark-surface-raised hover:opacity-80 text-obsidian dark:text-dark-text-primary font-medium rounded-md transition-all duration-calm mb-8"
         >
           Sign out
         </button>
 
         {/* Danger Zone */}
-        <div className="border-t border-bone-warm pt-8">
-          <h2 className="text-label text-ember mb-4">
+        <div className="border-t border-bone-warm dark:border-dark-border pt-8">
+          <h2 className="text-label text-ember dark:text-dark-terracotta mb-4">
             Danger zone
           </h2>
           <button
             onClick={() => setShowDeleteModal(true)}
-            className="w-full py-3 px-4 bg-ember hover:opacity-90 text-bone font-medium rounded-md transition-all duration-calm"
+            className="w-full py-3 px-4 bg-ember dark:bg-dark-terracotta hover:opacity-90 text-bone font-medium rounded-md transition-all duration-calm"
           >
             Delete account
           </button>
@@ -445,7 +471,7 @@ export default function SettingsPage() {
       {/* Delete Account Modal */}
       {showDeleteModal && (
         <div
-          className="fixed inset-0 bg-obsidian/40 backdrop-blur-sm flex items-center justify-center z-50 px-4 pt-4 pb-safe"
+          className="fixed inset-0 bg-obsidian/40 dark:bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 px-4 pt-4 pb-safe"
           onClick={(e) => {
             if (e.target === e.currentTarget && !deleting) {
               setShowDeleteModal(false)
@@ -453,24 +479,24 @@ export default function SettingsPage() {
             }
           }}
         >
-          <div className="bg-white rounded-lg w-full max-w-md shadow-modal p-6">
+          <div className="bg-white dark:bg-dark-surface rounded-lg w-full max-w-md shadow-modal p-6">
             <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 rounded-full bg-bone-warm flex items-center justify-center">
-                <svg className="w-5 h-5 text-ember" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="w-10 h-10 rounded-full bg-bone-warm dark:bg-dark-surface-raised flex items-center justify-center">
+                <svg className="w-5 h-5 text-ember dark:text-dark-terracotta" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                 </svg>
               </div>
-              <h2 className="text-h3 text-obsidian">Delete account</h2>
+              <h2 className="text-h3 text-obsidian dark:text-dark-text-primary">Delete account</h2>
             </div>
 
-            <div className="bg-bone-warm rounded-md p-4 mb-6">
-              <p className="text-micro-medium text-ember mb-2">
+            <div className="bg-bone-warm dark:bg-dark-surface-raised rounded-md p-4 mb-6">
+              <p className="text-micro-medium text-ember dark:text-dark-terracotta mb-2">
                 This action cannot be undone.
               </p>
-              <p className="text-micro text-obsidian">
+              <p className="text-micro text-obsidian dark:text-dark-text-primary">
                 All your data will be permanently deleted, including:
               </p>
-              <ul className="text-micro text-text-secondary mt-2 ml-4 list-disc">
+              <ul className="text-micro text-text-secondary dark:text-dark-text-secondary mt-2 ml-4 list-disc">
                 <li>Your profile and settings</li>
                 <li>All your connections</li>
                 <li>All interaction history and memories</li>
@@ -479,8 +505,8 @@ export default function SettingsPage() {
             </div>
 
             <div className="mb-6">
-              <label className="block text-micro-medium text-text-tertiary mb-2">
-                Type <span className="font-bold text-ember">delete</span> to confirm
+              <label className="block text-micro-medium text-text-tertiary dark:text-dark-text-tertiary mb-2">
+                Type <span className="font-bold text-ember dark:text-dark-terracotta">delete</span> to confirm
               </label>
               <input
                 type="text"
@@ -488,7 +514,7 @@ export default function SettingsPage() {
                 onChange={(e) => setDeleteConfirmText(e.target.value)}
                 placeholder="delete"
                 disabled={deleting}
-                className="w-full px-4 py-3 rounded-md bg-bone-warm border-none text-obsidian focus:outline-none focus:ring-1 focus:ring-ember/30 transition-all duration-calm disabled:opacity-50"
+                className="w-full px-4 py-3 rounded-md bg-bone-warm dark:bg-dark-surface-raised border-none text-obsidian dark:text-dark-text-primary focus:outline-none focus:ring-1 focus:ring-ember/30 transition-all duration-calm disabled:opacity-50"
               />
             </div>
 
@@ -499,14 +525,14 @@ export default function SettingsPage() {
                   setDeleteConfirmText('')
                 }}
                 disabled={deleting}
-                className="flex-1 py-3 px-4 bg-bone-warm hover:bg-bone-warm text-obsidian font-medium rounded-md transition-all duration-calm disabled:opacity-50"
+                className="flex-1 py-3 px-4 bg-bone-warm dark:bg-dark-surface-raised hover:opacity-80 text-obsidian dark:text-dark-text-primary font-medium rounded-md transition-all duration-calm disabled:opacity-50"
               >
                 Cancel
               </button>
               <button
                 onClick={handleDeleteAccount}
                 disabled={deleteConfirmText.toLowerCase() !== 'delete' || deleting}
-                className="flex-1 py-3 px-4 bg-ember hover:opacity-90 text-bone font-medium rounded-md transition-all duration-calm disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex-1 py-3 px-4 bg-ember dark:bg-dark-terracotta hover:opacity-90 text-bone font-medium rounded-md transition-all duration-calm disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {deleting ? 'Deleting...' : 'Delete account'}
               </button>

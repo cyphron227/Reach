@@ -106,7 +106,7 @@ export function RelationshipStrengthCard({
   const showWarning = strength === 'thinning' || strength === 'decaying'
 
   return (
-    <div className={`rounded-lg p-4 bg-bone-warm shadow-subtle ${className}`}>
+    <div className={`rounded-lg p-4 bg-bone-warm dark:bg-dark-surface-raised shadow-subtle ${className}`}>
       <div className="flex items-start gap-3">
         <span className={`inline-block w-3 h-3 rounded-full mt-1 ${config.dotColor}`} />
         <div className="flex-1 min-w-0">
@@ -115,16 +115,16 @@ export function RelationshipStrengthCard({
               {STRENGTH_LABELS[strength]}
             </span>
             {connectionName && (
-              <span className="text-micro text-text-tertiary">
+              <span className="text-micro text-text-tertiary dark:text-dark-text-tertiary">
                 with {connectionName}
               </span>
             )}
           </div>
-          <p className="text-micro text-text-secondary mt-1">
+          <p className="text-micro text-text-secondary dark:text-dark-text-secondary mt-1">
             {config.message}
           </p>
           {showWarning && decayWarning && (
-            <p className="text-micro text-text-tertiary mt-2">
+            <p className="text-micro text-text-tertiary dark:text-dark-text-tertiary mt-2">
               {decayWarning}
             </p>
           )}

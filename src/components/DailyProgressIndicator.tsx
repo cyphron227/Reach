@@ -65,14 +65,6 @@ export default function DailyProgressIndicator({
     return '#ECEAE6' // bone-warm — no progress
   }
 
-  const getStatusText = () => {
-    if (totalWeight === 0) return 'No actions yet today'
-    if (!isValidDay) return 'Almost there'
-    if (totalWeight >= 4) return 'Deep connection today'
-    if (totalWeight >= 2) return 'Showing up changes things'
-    return 'Another quiet step forward'
-  }
-
   const getActionLabel = (action: ActionTypeV2): string => {
     const labels: Record<ActionTypeV2, string> = {
       text: 'Message',
@@ -83,30 +75,48 @@ export default function DailyProgressIndicator({
   }
 
   return (
-    <div className={`bg-white rounded-lg p-6 shadow-card ${className}`}>
+    <div className={`bg-white dark:bg-dark-surface rounded-lg p-6 shadow-card ${className}`}>
       <div className="flex items-center gap-4">
         <ConnectionRing percent={progressPercent} color={getRingColor()} />
         <div className="flex-1 min-w-0">
-          <span className="text-body-medium text-obsidian">
-            Today&apos;s connection
-          </span>
-          <div className="flex items-center justify-between mt-1">
-            <span className={`text-micro ${isValidDay ? 'text-moss' : 'text-text-secondary'}`}>
-              {getStatusText()}
+          {/* Header row: title + Connected badge */}
+          <div className="flex items-center gap-2">
+            <span className="text-body-medium text-obsidian dark:text-dark-text-primary">
+              Today&apos;s connection
             </span>
-            {actionCount > 0 && (
-              <span className="text-micro text-text-tertiary">
+            {/* Connected badge - only show when valid day */}
+            {isValidDay && (
+              <div className="flex items-center gap-1 text-moss dark:text-dark-moss">
+                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                </svg>
+                <span className="text-micro-medium">Connected</span>
+              </div>
+            )}
+          </div>
+
+          {/* Details row: action count */}
+          {actionCount > 0 && (
+            <div className="flex items-center gap-2 mt-1">
+              <span className="text-micro text-text-tertiary dark:text-dark-text-tertiary">
                 {actionCount} action{actionCount !== 1 ? 's' : ''}
                 {highestAction && ` · ${getActionLabel(highestAction)}`}
               </span>
-            )}
-          </div>
+            </div>
+          )}
+
+          {/* Non-valid day message */}
+          {!isValidDay && totalWeight > 0 && (
+            <div className="text-micro text-text-secondary dark:text-dark-text-secondary mt-1">
+              Almost there
+            </div>
+          )}
         </div>
       </div>
 
       {!isValidDay && totalWeight === 0 && (
-        <div className="mt-4 pt-4 border-t border-bone-warm">
-          <p className="text-micro text-text-secondary">
+        <div className="mt-4 pt-4 border-t border-bone-warm dark:border-dark-border">
+          <p className="text-micro text-text-secondary dark:text-dark-text-secondary">
             Any action counts. Even a quick message makes today a connection day.
           </p>
         </div>

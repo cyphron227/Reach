@@ -188,21 +188,21 @@ export default function ReflectPage() {
 
   if (loading) {
     return (
-      <main className="min-h-screen bg-bone flex items-center justify-center">
-        <div className="text-text-tertiary">Loading...</div>
+      <main className="min-h-screen bg-bone dark:bg-dark-bg flex items-center justify-center">
+        <div className="text-text-tertiary dark:text-dark-text-tertiary">Loading...</div>
       </main>
     )
   }
 
   return (
-    <main className="min-h-screen bg-bone">
+    <main className="min-h-screen bg-bone dark:bg-dark-bg">
       <div className="max-w-lg mx-auto px-6 pt-8 pb-safe">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           {step !== 'complete' && step !== 'connected' ? (
             <button
               onClick={handleBack}
-              className="text-text-tertiary hover:text-obsidian text-body transition-all duration-calm flex items-center gap-1"
+              className="text-text-tertiary dark:text-dark-text-tertiary hover:text-obsidian dark:hover:text-dark-text-primary text-body transition-all duration-calm flex items-center gap-1"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -212,7 +212,7 @@ export default function ReflectPage() {
           ) : (
             <Link
               href="/"
-              className="text-text-tertiary hover:text-obsidian text-body transition-all duration-calm flex items-center gap-1"
+              className="text-text-tertiary dark:text-dark-text-tertiary hover:text-obsidian dark:hover:text-dark-text-primary text-body transition-all duration-calm flex items-center gap-1"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -242,12 +242,12 @@ export default function ReflectPage() {
 
         {/* Step 1: Most Connected */}
         {step === 'connected' && (
-          <div className="bg-white rounded-lg p-6 shadow-card">
+          <div className="bg-white dark:bg-dark-surface rounded-lg p-6 shadow-card">
             <div className="text-center mb-6">
-              <h2 className="text-h2 font-medium text-obsidian mb-2">
+              <h2 className="text-h2 font-medium text-obsidian dark:text-dark-text-primary mb-2">
                 Who did you feel most connected to this week?
               </h2>
-              <p className="text-body text-text-secondary">
+              <p className="text-body text-text-secondary dark:text-dark-text-secondary">
                 Think about conversations that felt meaningful
               </p>
             </div>
@@ -259,11 +259,11 @@ export default function ReflectPage() {
                   onClick={() => setMostConnected(connection.id)}
                   className={`w-full p-4 rounded-md text-left transition-all duration-calm ${
                     mostConnected === connection.id
-                      ? 'bg-bone-warm ring-2 ring-moss'
-                      : 'bg-bone-warm hover:bg-bone-warm/60'
+                      ? 'bg-bone-warm dark:bg-dark-surface-raised ring-2 ring-moss'
+                      : 'bg-bone-warm dark:bg-dark-surface-raised hover:bg-bone-warm/60 dark:hover:bg-dark-surface-hover'
                   }`}
                 >
-                  <div className="font-medium text-obsidian">{connection.name}</div>
+                  <div className="font-medium text-obsidian dark:text-dark-text-primary">{connection.name}</div>
                 </button>
               ))}
             </div>
@@ -271,7 +271,7 @@ export default function ReflectPage() {
             <div className="flex gap-3">
               <button
                 onClick={handleSkip}
-                className="flex-1 py-3 px-4 bg-transparent hover:bg-bone-warm text-obsidian font-medium rounded-md transition-all duration-calm"
+                className="flex-1 py-3 px-4 bg-transparent hover:bg-bone-warm dark:hover:bg-dark-surface-raised text-obsidian dark:text-dark-text-primary font-medium rounded-md transition-all duration-calm"
               >
                 Skip
               </button>
@@ -288,12 +288,12 @@ export default function ReflectPage() {
 
         {/* Step 2: Grow Closer */}
         {step === 'grow_closer' && (
-          <div className="bg-white rounded-lg p-6 shadow-card">
+          <div className="bg-white dark:bg-dark-surface rounded-lg p-6 shadow-card">
             <div className="text-center mb-6">
-              <h2 className="text-h2 font-medium text-obsidian mb-2">
+              <h2 className="text-h2 font-medium text-obsidian dark:text-dark-text-primary mb-2">
                 Is there anyone you&apos;d like to grow closer to?
               </h2>
-              <p className="text-body text-text-secondary">
+              <p className="text-body text-text-secondary dark:text-dark-text-secondary">
                 Someone you&apos;ve been meaning to reach out to
               </p>
             </div>
@@ -305,11 +305,11 @@ export default function ReflectPage() {
                   onClick={() => setGrowCloser(connection.id)}
                   className={`w-full p-4 rounded-md text-left transition-all duration-calm ${
                     growCloser === connection.id
-                      ? 'bg-bone-warm ring-2 ring-moss'
-                      : 'bg-bone-warm hover:bg-bone-warm/60'
+                      ? 'bg-bone-warm dark:bg-dark-surface-raised ring-2 ring-moss'
+                      : 'bg-bone-warm dark:bg-dark-surface-raised hover:bg-bone-warm/60 dark:hover:bg-dark-surface-hover'
                   }`}
                 >
-                  <div className="font-medium text-obsidian">{connection.name}</div>
+                  <div className="font-medium text-obsidian dark:text-dark-text-primary">{connection.name}</div>
                 </button>
               ))}
             </div>
@@ -317,7 +317,7 @@ export default function ReflectPage() {
             <div className="flex gap-3">
               <button
                 onClick={handleSkip}
-                className="flex-1 py-3 px-4 bg-transparent hover:bg-bone-warm text-obsidian font-medium rounded-md transition-all duration-calm"
+                className="flex-1 py-3 px-4 bg-transparent hover:bg-bone-warm dark:hover:bg-dark-surface-raised text-obsidian dark:text-dark-text-primary font-medium rounded-md transition-all duration-calm"
               >
                 Skip
               </button>
@@ -336,9 +336,9 @@ export default function ReflectPage() {
         {step === 'insights' && growCloserConnection && (
           <div className="space-y-4">
             {/* Header Card */}
-            <div className="bg-white rounded-lg p-6 shadow-card">
+            <div className="bg-white dark:bg-dark-surface rounded-lg p-6 shadow-card">
               <div className="text-center mb-4">
-                <h2 className="text-h3 font-medium text-obsidian">
+                <h2 className="text-h3 font-medium text-obsidian dark:text-dark-text-primary">
                   Growing closer with {growCloserConnection.name}
                 </h2>
               </div>
@@ -347,7 +347,7 @@ export default function ReflectPage() {
               {maintenanceGap && (
                 <div className="mb-4">
                   <div className="flex justify-between text-body mb-2">
-                    <span className="text-text-secondary">Connection health</span>
+                    <span className="text-text-secondary dark:text-dark-text-secondary">Connection health</span>
                     <span className={`font-medium ${
                       maintenanceGap.status === 'ahead' || maintenanceGap.status === 'on_track'
                         ? 'text-moss'
@@ -362,17 +362,17 @@ export default function ReflectPage() {
                       {maintenanceGap.status === 'never_contacted' && 'New'}
                     </span>
                   </div>
-                  <p className="text-body text-text-secondary mt-2">{maintenanceGap.message}</p>
+                  <p className="text-body text-text-secondary dark:text-dark-text-secondary mt-2">{maintenanceGap.message}</p>
                 </div>
               )}
 
               {/* Streak Display */}
               {streak.currentStreak > 0 && (
-                <div className="bg-bone-warm rounded-md p-3">
-                  <div className="text-body font-medium text-moss">
+                <div className="bg-bone-warm dark:bg-dark-surface-raised rounded-md p-3">
+                  <div className="text-body font-medium text-moss dark:text-dark-moss">
                     {streak.currentStreak} week streak
                   </div>
-                  <div className="text-micro text-text-tertiary">
+                  <div className="text-micro text-text-tertiary dark:text-dark-text-tertiary">
                     You&apos;ve reflected {streak.totalReflections} times total
                   </div>
                 </div>
@@ -381,22 +381,22 @@ export default function ReflectPage() {
 
             {/* Recent Interactions */}
             {recentInteractions.length > 0 && (
-              <div className="bg-white rounded-lg p-6 shadow-card">
-                <h3 className="text-body font-medium text-obsidian mb-3">Recent History</h3>
+              <div className="bg-white dark:bg-dark-surface rounded-lg p-6 shadow-card">
+                <h3 className="text-body font-medium text-obsidian dark:text-dark-text-primary mb-3">Recent History</h3>
                 <div className="space-y-3">
                   {recentInteractions.map((interaction) => (
                     <div key={interaction.id} className="flex gap-3">
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
-                          <span className="text-body font-medium text-obsidian">
+                          <span className="text-body font-medium text-obsidian dark:text-dark-text-primary">
                             {interactionTypeLabel[interaction.interaction_type] || interaction.interaction_type}
                           </span>
-                          <span className="text-micro text-text-tertiary">
+                          <span className="text-micro text-text-tertiary dark:text-dark-text-tertiary">
                             {formatRelativeDate(interaction.interaction_date)}
                           </span>
                         </div>
                         {interaction.memory && (
-                          <p className="text-body text-text-secondary italic truncate">
+                          <p className="text-body text-text-secondary dark:text-dark-text-secondary italic truncate">
                             &ldquo;{interaction.memory}&rdquo;
                           </p>
                         )}
@@ -409,24 +409,24 @@ export default function ReflectPage() {
 
             {/* Science-Backed Suggestions */}
             {suggestions.length > 0 && (
-              <div className="bg-white rounded-lg p-6 shadow-card">
-                <h3 className="text-body font-medium text-obsidian mb-3">Suggestions for you</h3>
+              <div className="bg-white dark:bg-dark-surface rounded-lg p-6 shadow-card">
+                <h3 className="text-body font-medium text-obsidian dark:text-dark-text-primary mb-3">Suggestions for you</h3>
                 <div className="space-y-3">
                   {suggestions.map((suggestion, index) => (
                     <div
                       key={index}
                       className={`p-3 rounded-md ${
                         suggestion.priority === 'high'
-                          ? 'bg-bone-warm ring-1 ring-moss/30'
-                          : 'bg-bone-warm'
+                          ? 'bg-bone-warm dark:bg-dark-surface-raised ring-1 ring-moss/30'
+                          : 'bg-bone-warm dark:bg-dark-surface-raised'
                       }`}
                     >
                       <div className="flex items-start gap-3">
                         <div>
-                          <div className="text-body font-medium text-obsidian">
+                          <div className="text-body font-medium text-obsidian dark:text-dark-text-primary">
                             {suggestion.message}
                           </div>
-                          <div className="text-micro text-text-secondary mt-1 italic">
+                          <div className="text-micro text-text-secondary dark:text-dark-text-secondary mt-1 italic">
                             {suggestion.scienceNote}
                           </div>
                         </div>
@@ -450,37 +450,37 @@ export default function ReflectPage() {
 
         {/* Step 4: Complete */}
         {step === 'complete' && (
-          <div className="bg-white rounded-lg p-8 shadow-card text-center">
-            <h2 className="text-h2 font-medium text-obsidian mb-3">
+          <div className="bg-white dark:bg-dark-surface rounded-lg p-8 shadow-card text-center">
+            <h2 className="text-h2 font-medium text-obsidian dark:text-dark-text-primary mb-3">
               Thank you for reflecting
             </h2>
 
-            <p className="text-obsidian mb-6 leading-relaxed">
+            <p className="text-obsidian dark:text-dark-text-primary mb-6 leading-relaxed">
               Small moments build strong roots.
             </p>
 
-            <div className="bg-bone-warm rounded-md p-4 mb-6 text-left">
-              <p className="text-body text-obsidian italic">
+            <div className="bg-bone-warm dark:bg-dark-surface-raised rounded-md p-4 mb-6 text-left">
+              <p className="text-body text-obsidian dark:text-dark-text-primary italic">
                 &ldquo;The quality of your life is the quality of your relationships.&rdquo;
               </p>
-              <p className="text-micro text-text-tertiary mt-2">— Tony Robbins</p>
+              <p className="text-micro text-text-tertiary dark:text-dark-text-tertiary mt-2">— Tony Robbins</p>
             </div>
 
             {/* Summary */}
             {(mostConnected || growCloser) && (
               <div className="text-left mb-6 space-y-3">
                 {mostConnected && (
-                  <div className="bg-bone-warm rounded-md p-4">
-                    <div className="text-micro text-text-tertiary mb-1">Felt most connected to</div>
-                    <div className="text-obsidian font-medium">
+                  <div className="bg-bone-warm dark:bg-dark-surface-raised rounded-md p-4">
+                    <div className="text-micro text-text-tertiary dark:text-dark-text-tertiary mb-1">Felt most connected to</div>
+                    <div className="text-obsidian dark:text-dark-text-primary font-medium">
                       {connections.find(c => c.id === mostConnected)?.name}
                     </div>
                   </div>
                 )}
                 {growCloser && (
-                  <div className="bg-bone-warm rounded-md p-4">
-                    <div className="text-micro text-text-tertiary mb-1">Want to grow closer to</div>
-                    <div className="text-obsidian font-medium">
+                  <div className="bg-bone-warm dark:bg-dark-surface-raised rounded-md p-4">
+                    <div className="text-micro text-text-tertiary dark:text-dark-text-tertiary mb-1">Want to grow closer to</div>
+                    <div className="text-obsidian dark:text-dark-text-primary font-medium">
                       {connections.find(c => c.id === growCloser)?.name}
                     </div>
                   </div>
@@ -490,9 +490,9 @@ export default function ReflectPage() {
 
             {/* Streak celebration */}
             {streak.currentStreak > 0 && (
-              <div className="bg-bone-warm rounded-md p-4 mb-6 text-left">
+              <div className="bg-bone-warm dark:bg-dark-surface-raised rounded-md p-4 mb-6 text-left">
                 <div className="flex items-center gap-2">
-                  <span className="text-body font-medium text-moss">
+                  <span className="text-body font-medium text-moss dark:text-dark-moss">
                     {streak.currentStreak + 1} week reflection streak
                   </span>
                 </div>
@@ -508,7 +508,7 @@ export default function ReflectPage() {
               </Link>
               <Link
                 href="/reflect/history"
-                className="inline-block w-full py-3 px-4 bg-transparent hover:bg-bone-warm text-obsidian font-medium rounded-md transition-all duration-calm text-center"
+                className="inline-block w-full py-3 px-4 bg-transparent hover:bg-bone-warm dark:hover:bg-dark-surface-raised text-obsidian dark:text-dark-text-primary font-medium rounded-md transition-all duration-calm text-center"
               >
                 View reflection history
               </Link>

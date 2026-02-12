@@ -67,22 +67,22 @@ export default function PlanCatchupModal({ connection, isOpen, onClose, onSucces
 
   return (
     <div
-      className="fixed inset-0 bg-obsidian/40 backdrop-blur-sm flex items-end sm:items-center justify-center z-50 px-4 pt-4 pb-safe overscroll-contain"
+      className="fixed inset-0 bg-obsidian/40 dark:bg-black/60 backdrop-blur-sm flex items-end sm:items-center justify-center z-50 px-4 pt-4 pb-safe overscroll-contain"
       onClick={(e) => {
         if (e.target === e.currentTarget) {
           onClose()
         }
       }}
     >
-      <div className="bg-white rounded-lg w-full max-w-md shadow-modal max-h-[90vh] overflow-y-auto overscroll-contain">
+      <div className="bg-white dark:bg-dark-surface rounded-lg w-full max-w-md shadow-modal max-h-[90vh] overflow-y-auto overscroll-contain">
         <div className="p-6">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-h2 font-medium text-obsidian">
+            <h2 className="text-h2 font-medium text-obsidian dark:text-dark-text-primary">
               Plan catch-up with {connection.name}
             </h2>
             <button
               onClick={onClose}
-              className="text-text-tertiary hover:text-obsidian transition-all duration-calm"
+              className="text-text-tertiary dark:text-dark-text-tertiary hover:text-obsidian dark:hover:text-dark-text-primary transition-all duration-calm"
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -93,7 +93,7 @@ export default function PlanCatchupModal({ connection, isOpen, onClose, onSucces
           <form onSubmit={handleSubmit} className="space-y-5">
             {/* Quick date options */}
             <div>
-              <label className="block text-micro-medium text-text-tertiary mb-2">
+              <label className="block text-micro-medium text-text-tertiary dark:text-dark-text-tertiary mb-2">
                 Quick select
               </label>
               <div className="grid grid-cols-3 gap-2">
@@ -105,7 +105,7 @@ export default function PlanCatchupModal({ connection, isOpen, onClose, onSucces
                     className={`py-3 px-2 rounded-md text-center transition-all duration-calm ${
                       selectedDate === option.date
                         ? 'bg-moss text-bone'
-                        : 'bg-bone-warm text-obsidian hover:bg-moss/10'
+                        : 'bg-bone-warm dark:bg-dark-surface-raised text-obsidian dark:text-dark-text-primary hover:bg-moss/10 dark:hover:bg-dark-moss-subtle'
                     }`}
                   >
                     <div className="text-label font-medium">{option.label}</div>
@@ -117,7 +117,7 @@ export default function PlanCatchupModal({ connection, isOpen, onClose, onSucces
 
             {/* Custom date picker */}
             <div>
-              <label htmlFor="catchupDate" className="block text-micro-medium text-text-tertiary mb-2">
+              <label htmlFor="catchupDate" className="block text-micro-medium text-text-tertiary dark:text-dark-text-tertiary mb-2">
                 Or pick a date
               </label>
               <input
@@ -126,7 +126,7 @@ export default function PlanCatchupModal({ connection, isOpen, onClose, onSucces
                 value={selectedDate}
                 onChange={(e) => setSelectedDate(e.target.value)}
                 min={formatDateForInput(today)}
-                className="w-full bg-bone-warm border-none rounded-md px-4 py-3 text-body text-obsidian placeholder:text-text-placeholder focus:outline-none focus:ring-1 focus:ring-moss/40 transition-all duration-calm"
+                className="w-full bg-bone-warm dark:bg-dark-surface-raised border-none rounded-md px-4 py-3 text-body text-obsidian dark:text-dark-text-primary placeholder:text-text-placeholder focus:outline-none focus:ring-1 focus:ring-moss/40 transition-all duration-calm"
               />
             </div>
 

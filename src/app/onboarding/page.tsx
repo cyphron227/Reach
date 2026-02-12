@@ -84,7 +84,7 @@ export default function OnboardingPage() {
   }
 
   return (
-    <main className="min-h-screen bg-bone flex flex-col pb-safe">
+    <main className="min-h-screen bg-bone dark:bg-dark-bg flex flex-col pb-safe">
       {/* Progress indicator */}
       <div className="pt-8 pb-4">
         <OnboardingProgress currentStep={step} totalSteps={TOTAL_STEPS} />
@@ -138,7 +138,7 @@ export default function OnboardingPage() {
         <OnboardingStep>
           <div className="space-y-8">
             <div>
-              <h2 className="text-h3 text-obsidian mb-3">What Ringur is:</h2>
+              <h2 className="text-h3 text-obsidian dark:text-dark-text-primary mb-3">What Ringur is:</h2>
               <OnboardingList
                 items={[
                   { text: 'A daily connection habit', positive: true },
@@ -148,7 +148,7 @@ export default function OnboardingPage() {
               />
             </div>
             <div>
-              <h2 className="text-h3 text-text-secondary mb-3">What it isn&apos;t:</h2>
+              <h2 className="text-h3 text-text-secondary dark:text-dark-text-secondary mb-3">What it isn&apos;t:</h2>
               <OnboardingList
                 items={[
                   { text: 'Social media', positive: false },
@@ -178,15 +178,15 @@ export default function OnboardingPage() {
             {dbConnections.map((conn) => (
               <div
                 key={conn.id}
-                className="flex items-center justify-between bg-bone-warm px-4 py-3 rounded-md"
+                className="flex items-center justify-between bg-bone-warm dark:bg-dark-surface-raised px-4 py-3 rounded-md"
               >
                 <div className="flex items-center gap-3">
-                  <span className="text-moss">&#10003;</span>
-                  <span className="text-body-medium text-obsidian">{conn.name}</span>
+                  <span className="text-moss dark:text-dark-moss">&#10003;</span>
+                  <span className="text-body-medium text-obsidian dark:text-dark-text-primary">{conn.name}</span>
                 </div>
                 <button
                   onClick={() => removeDbConnection(conn.id)}
-                  className="text-text-tertiary hover:text-obsidian transition-colors duration-calm"
+                  className="text-text-tertiary dark:text-dark-text-tertiary hover:text-obsidian dark:hover:text-dark-text-primary transition-colors duration-calm"
                 >
                   &times;
                 </button>
@@ -208,7 +208,7 @@ export default function OnboardingPage() {
             <p className="text-ember text-micro mb-4">{error}</p>
           )}
 
-          <p className="text-micro text-text-secondary mb-6">
+          <p className="text-micro text-text-secondary dark:text-dark-text-secondary mb-6">
             You can add more later as you build the habit.
           </p>
 
@@ -221,7 +221,7 @@ export default function OnboardingPage() {
             </OnboardingButton>
             <button
               onClick={nextStep}
-              className="text-text-tertiary hover:text-obsidian text-micro transition-colors duration-calm"
+              className="text-text-tertiary dark:text-dark-text-tertiary hover:text-obsidian dark:hover:text-dark-text-primary text-micro transition-colors duration-calm"
             >
               Skip
             </button>
@@ -244,16 +244,16 @@ export default function OnboardingPage() {
               {dbConnections.map((conn) => (
                 <div
                   key={conn.id}
-                  className="bg-white rounded-lg p-4 shadow-card"
+                  className="bg-white dark:bg-dark-surface rounded-lg p-4 shadow-card"
                 >
-                  <p className="text-body-medium text-obsidian mb-3">{conn.name}</p>
+                  <p className="text-body-medium text-obsidian dark:text-dark-text-primary mb-3">{conn.name}</p>
                   <div className="grid grid-cols-2 gap-2">
                     <button
                       onClick={() => {
                         setSelectedOnboardingConnection(conn)
                         setShowPlanModal(true)
                       }}
-                      className="py-2.5 px-3 bg-bone-warm hover:bg-bone-warm text-obsidian text-micro-medium rounded-md transition-all duration-calm flex items-center justify-center gap-2"
+                      className="py-2.5 px-3 bg-bone-warm dark:bg-dark-surface-raised hover:bg-bone-warm dark:hover:bg-dark-surface-hover text-obsidian dark:text-dark-text-primary text-micro-medium rounded-md transition-all duration-calm flex items-center justify-center gap-2"
                     >
                       Plan
                     </button>
@@ -286,7 +286,7 @@ export default function OnboardingPage() {
             <button
               onClick={completeOnboarding}
               disabled={loading}
-              className="text-text-tertiary hover:text-obsidian text-micro transition-colors duration-calm"
+              className="text-text-tertiary dark:text-dark-text-tertiary hover:text-obsidian dark:hover:text-dark-text-primary text-micro transition-colors duration-calm"
             >
               Skip for now
             </button>

@@ -198,8 +198,8 @@ function TreeStatsDisplay({ stats }: { stats: TreeStats }) {
   return (
     <div className="space-y-4">
       {/* Growth Progress */}
-      <div className="bg-lavender-50 rounded-xl p-4">
-        <div className="text-xs text-lavender-500 uppercase tracking-wide mb-2">Growth Stage</div>
+      <div className="bg-lavender-50 dark:bg-dark-surface-raised rounded-xl p-4">
+        <div className="text-xs text-lavender-500 dark:text-dark-text-secondary uppercase tracking-wide mb-2">Growth Stage</div>
         <div className="flex items-center gap-3">
           <div className="flex gap-1">
             {['seed', 'seedling', 'sapling', 'young', 'mature', 'ancient'].map((stage, i) => (
@@ -208,13 +208,13 @@ function TreeStatsDisplay({ stats }: { stats: TreeStats }) {
                 className={`w-2 h-6 rounded-full transition-all ${
                   i <= ['seed', 'seedling', 'sapling', 'young', 'mature', 'ancient'].indexOf(stats.growthStage)
                     ? 'bg-muted-teal-500'
-                    : 'bg-lavender-200'
+                    : 'bg-lavender-200 dark:bg-dark-border'
                 }`}
                 style={{ height: `${12 + i * 4}px` }}
               />
             ))}
           </div>
-          <div className="text-sm font-medium text-lavender-800 capitalize">
+          <div className="text-sm font-medium text-lavender-800 dark:text-dark-text-primary capitalize">
             {stats.growthStage === 'seed' ? 'Seed' :
              stats.growthStage === 'seedling' ? 'Seedling' :
              stats.growthStage === 'sapling' ? 'Sapling' :
@@ -342,7 +342,7 @@ function ForestHabitat({ healthScore, totalTrees }: { healthScore: number; total
 
       {/* Mist for unhealthy forests */}
       {showMist && (
-        <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-lavender-200/50 to-transparent" />
+        <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-lavender-200/50 dark:from-dark-border/30 to-transparent" />
       )}
 
       {/* Ground moss/grass */}
@@ -366,7 +366,7 @@ function TreeCard({ connection, stats, onClick, strengthV2, ringTier, ringPositi
   return (
     <button
       onClick={onClick}
-      className="flex flex-col items-center p-3 rounded-2xl hover:bg-white/70 transition-all group relative"
+      className="flex flex-col items-center p-3 rounded-2xl hover:bg-white/70 dark:hover:bg-dark-surface-hover transition-all group relative"
     >
       {/* V2: Ring badge for core connections */}
       {showV2Badge && ringTier === 'core' && (
@@ -381,7 +381,7 @@ function TreeCard({ connection, stats, onClick, strengthV2, ringTier, ringPositi
       </div>
 
       {/* Name */}
-      <div className="text-sm font-medium text-lavender-800 text-center mb-0.5 truncate w-full">
+      <div className="text-sm font-medium text-lavender-800 dark:text-dark-text-primary text-center mb-0.5 truncate w-full">
         {connection.name}
       </div>
 
@@ -398,7 +398,7 @@ function TreeCard({ connection, stats, onClick, strengthV2, ringTier, ringPositi
       ) : (
         <div className={`text-xs text-center ${
           stats.health === 'wilting' ? 'text-red-500' :
-          stats.health === 'needs_water' ? 'text-amber-600' : 'text-lavender-500'
+          stats.health === 'needs_water' ? 'text-amber-600' : 'text-lavender-500 dark:text-dark-text-secondary'
         }`}>
           {getTimeAgoText(connection.last_interaction_date)}
         </div>
@@ -570,14 +570,14 @@ export default function ForestPage() {
 
   if (loading) {
     return (
-      <main className="min-h-screen bg-lavender-50 flex items-center justify-center">
-        <div className="text-lavender-400">Loading your forest...</div>
+      <main className="min-h-screen bg-lavender-50 dark:bg-dark-bg flex items-center justify-center">
+        <div className="text-lavender-400 dark:text-dark-text-tertiary">Loading your forest...</div>
       </main>
     )
   }
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-lavender-50 via-muted-teal-50/30 to-lavender-50 relative">
+    <main className="min-h-screen bg-gradient-to-b from-lavender-50 via-muted-teal-50/30 to-lavender-50 dark:bg-dark-bg dark:from-dark-bg dark:via-dark-bg dark:to-dark-bg relative">
       <ForestHabitat healthScore={forestHealthScore} totalTrees={connections.length} />
 
       <div className="max-w-2xl mx-auto px-6 pt-8 pb-safe relative z-10">
@@ -585,7 +585,7 @@ export default function ForestPage() {
         <div className="flex items-center justify-between mb-8">
           <Link
             href="/"
-            className="text-lavender-400 hover:text-lavender-600 text-sm transition-colors flex items-center gap-1"
+            className="text-lavender-400 dark:text-dark-text-tertiary hover:text-lavender-600 dark:hover:text-dark-text-secondary text-sm transition-colors flex items-center gap-1"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -597,11 +597,11 @@ export default function ForestPage() {
         </div>
 
         {/* Forest Health Overview */}
-        <div className="bg-white/80 backdrop-blur rounded-2xl p-6 shadow-sm border border-lavender-100 mb-6">
+        <div className="bg-white/80 dark:bg-dark-surface/80 backdrop-blur rounded-2xl p-6 shadow-sm border border-lavender-100 dark:border-dark-border mb-6">
           <div className="flex items-center justify-between mb-4">
             <div>
-              <h2 className="text-lg font-semibold text-lavender-800">Forest Health</h2>
-              <p className="text-sm text-lavender-500">{connections.length} trees in your forest</p>
+              <h2 className="text-lg font-semibold text-lavender-800 dark:text-dark-text-primary">Forest Health</h2>
+              <p className="text-sm text-lavender-500 dark:text-dark-text-secondary">{connections.length} trees in your forest</p>
             </div>
             <div className="text-right">
               <div className={`text-3xl font-bold ${
@@ -610,7 +610,7 @@ export default function ForestPage() {
               }`}>
                 {forestHealthScore}%
               </div>
-              <div className="text-xs text-lavender-500">
+              <div className="text-xs text-lavender-500 dark:text-dark-text-secondary">
                 {forestHealthScore > 70 ? 'Flourishing' :
                  forestHealthScore > 40 ? 'Growing' : 'Needs care'}
               </div>
@@ -618,7 +618,7 @@ export default function ForestPage() {
           </div>
 
           {/* Health bar */}
-          <div className="h-3 bg-lavender-100 rounded-full overflow-hidden mb-4">
+          <div className="h-3 bg-lavender-100 dark:bg-dark-border rounded-full overflow-hidden mb-4">
             <div
               className={`h-full rounded-full transition-all ${
                 forestHealthScore > 70 ? 'bg-gradient-to-r from-tea-green-400 to-tea-green-600' :
@@ -651,8 +651,8 @@ export default function ForestPage() {
         </div>
 
         {/* Growth Stages Legend */}
-        <div className="bg-white/80 backdrop-blur rounded-2xl p-4 shadow-sm border border-lavender-100 mb-6">
-          <div className="text-xs text-lavender-500 uppercase tracking-wide mb-3">Growth Stages</div>
+        <div className="bg-white/80 dark:bg-dark-surface/80 backdrop-blur rounded-2xl p-4 shadow-sm border border-lavender-100 dark:border-dark-border mb-6">
+          <div className="text-xs text-lavender-500 dark:text-dark-text-secondary uppercase tracking-wide mb-3">Growth Stages</div>
           <div className="flex justify-between items-end">
             {[
               { stage: 'seed', emoji: '🫘', label: 'Seed', count: stageCounts.seed },
@@ -666,8 +666,8 @@ export default function ForestPage() {
                 <span className={`text-${16 + i * 4}px mb-1`} style={{ fontSize: `${16 + i * 4}px` }}>
                   {item.emoji}
                 </span>
-                <div className="text-xs text-lavender-600">{item.count}</div>
-                <div className="text-[10px] text-lavender-400">{item.label}</div>
+                <div className="text-xs text-lavender-600 dark:text-dark-text-secondary">{item.count}</div>
+                <div className="text-[10px] text-lavender-400 dark:text-dark-text-tertiary">{item.label}</div>
               </div>
             ))}
           </div>
@@ -675,12 +675,12 @@ export default function ForestPage() {
 
         {/* Forest Grid */}
         {connections.length === 0 ? (
-          <div className="bg-white/80 backdrop-blur rounded-2xl p-8 shadow-sm border border-lavender-100 text-center">
+          <div className="bg-white/80 dark:bg-dark-surface/80 backdrop-blur rounded-2xl p-8 shadow-sm border border-lavender-100 dark:border-dark-border text-center">
             <div className="text-4xl mb-4">🌿</div>
-            <h2 className="text-lg font-semibold text-lavender-800 mb-2">
+            <h2 className="text-lg font-semibold text-lavender-800 dark:text-dark-text-primary mb-2">
               Your forest is empty
             </h2>
-            <p className="text-lavender-500 mb-6">
+            <p className="text-lavender-500 dark:text-dark-text-secondary mb-6">
               Add connections to start growing your relationship forest.
             </p>
             <Link
@@ -691,7 +691,7 @@ export default function ForestPage() {
             </Link>
           </div>
         ) : (
-          <div className="bg-white/60 backdrop-blur rounded-2xl p-4 shadow-sm border border-lavender-100">
+          <div className="bg-white/60 dark:bg-dark-surface/80 backdrop-blur rounded-2xl p-4 shadow-sm border border-lavender-100 dark:border-dark-border">
             <div className="grid grid-cols-3 sm:grid-cols-4 gap-1">
               {connections.map((connection) => {
                 const health = connectionHealthMap[connection.id]
@@ -715,8 +715,8 @@ export default function ForestPage() {
 
       {/* Connection Detail Modal */}
       {selectedConnection && selectedStats && (
-        <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-end sm:items-center justify-center z-50 px-4 pt-4 pb-safe">
-          <div className="bg-white rounded-2xl w-full max-w-sm shadow-xl overflow-hidden">
+        <div className="fixed inset-0 bg-black/30 dark:bg-black/60 backdrop-blur-sm flex items-end sm:items-center justify-center z-50 px-4 pt-4 pb-safe">
+          <div className="bg-white dark:bg-dark-surface rounded-2xl w-full max-w-sm shadow-xl overflow-hidden">
             {/* Header with tree visualization */}
             <div className={`p-6 ${
               selectedStats.health === 'thriving' ? 'bg-gradient-to-br from-tea-green-100 to-muted-teal-100' :
@@ -728,17 +728,17 @@ export default function ForestPage() {
                 <div className="flex items-center gap-4">
                   <TreeVisualization stats={selectedStats} size="large" />
                   <div>
-                    <h2 className="text-xl font-semibold text-lavender-800">
+                    <h2 className="text-xl font-semibold text-lavender-800 dark:text-dark-text-primary">
                       {selectedConnection.name}
                     </h2>
-                    <div className="text-sm text-lavender-600">
+                    <div className="text-sm text-lavender-600 dark:text-dark-text-secondary">
                       {getTimeAgoText(selectedConnection.last_interaction_date)}
                     </div>
                   </div>
                 </div>
                 <button
                   onClick={() => setSelectedConnection(null)}
-                  className="text-lavender-400 hover:text-lavender-600 transition-colors"
+                  className="text-lavender-400 dark:text-dark-text-tertiary hover:text-lavender-600 dark:hover:text-dark-text-secondary transition-colors"
                 >
                   <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -771,10 +771,10 @@ export default function ForestPage() {
               <TreeStatsDisplay stats={selectedStats} />
 
               {/* Catch-up frequency */}
-              <div className="mt-4 p-3 bg-lavender-50 rounded-xl">
+              <div className="mt-4 p-3 bg-lavender-50 dark:bg-dark-surface-raised rounded-xl">
                 <div className="flex justify-between items-center">
-                  <span className="text-sm text-lavender-600">Catch-up frequency</span>
-                  <span className="text-sm font-medium text-lavender-800">
+                  <span className="text-sm text-lavender-600 dark:text-dark-text-secondary">Catch-up frequency</span>
+                  <span className="text-sm font-medium text-lavender-800 dark:text-dark-text-primary">
                     {selectedConnection.catchup_frequency === 'daily' && 'Daily'}
                     {selectedConnection.catchup_frequency === 'weekly' && 'Weekly'}
                     {selectedConnection.catchup_frequency === 'biweekly' && 'Every 2 weeks'}
@@ -789,23 +789,23 @@ export default function ForestPage() {
               {/* Recent Catch-ups */}
               {recentInteractions[selectedConnection.id] && recentInteractions[selectedConnection.id].length > 0 && (
                 <div className="mt-4">
-                  <div className="text-xs text-lavender-500 uppercase tracking-wide mb-2">Recent Catch-ups</div>
+                  <div className="text-xs text-lavender-500 dark:text-dark-text-secondary uppercase tracking-wide mb-2">Recent Catch-ups</div>
                   <div className="space-y-2">
                     {recentInteractions[selectedConnection.id].slice(0, 3).map((interaction) => (
-                      <div key={interaction.id} className="flex items-center gap-2 text-sm bg-white p-2 rounded-lg">
+                      <div key={interaction.id} className="flex items-center gap-2 text-sm bg-white dark:bg-dark-surface-raised p-2 rounded-lg">
                         <span>
                           {interaction.interaction_type === 'call' && '📞'}
                           {interaction.interaction_type === 'text' && '💬'}
                           {interaction.interaction_type === 'in_person' && '🤝'}
                           {interaction.interaction_type === 'other' && '✨'}
                         </span>
-                        <span className="text-lavender-600 flex-1">
+                        <span className="text-lavender-600 dark:text-dark-text-secondary flex-1">
                           {interaction.interaction_type === 'call' && 'Call'}
                           {interaction.interaction_type === 'text' && 'Text'}
                           {interaction.interaction_type === 'in_person' && 'In person'}
                           {interaction.interaction_type === 'other' && 'Other'}
                         </span>
-                        <span className="text-xs text-lavender-400">
+                        <span className="text-xs text-lavender-400 dark:text-dark-text-tertiary">
                           {new Date(interaction.interaction_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                         </span>
                       </div>

@@ -471,17 +471,123 @@ Empty states are a key moment to use terracotta as the action anchor:
 
 ---
 
-## Dark Mode (Future)
+## Dark Mode — Deep Night
 
-When implementing dark mode:
-- Background: obsidian
-- Surface: slate
-- Primary text: bone
-- Secondary text: `#B8BAC0` (lighter equivalent of text-secondary)
-- Tertiary text: `#8A8D95`
-- Accents remain the same (moss, ember, sun, inkblue, terracotta)
-- Shadows become darker, not lighter
-- Maintain the same calm, warm tone
+Ringur's dark theme is called "Deep Night." It uses a near-black foundation with cool undertones. Accents are lifted slightly in lightness to maintain equivalent contrast ratios against dark backgrounds. The emotional tone — calm, grounded, serious — stays identical to light mode.
+
+**Philosophy:** Darkness as shelter. The app recedes completely, leaving only the emotional signal.
+
+### Dark Mode Colour Tokens
+
+```js
+// tailwind.config.js — dark mode colours
+// Use with Tailwind's `dark:` prefix or a theme provider
+dark: {
+  // Surfaces (layered from darkest to lightest)
+  bg: '#0C0D10',              // Root background — near-black, cool
+  surface: '#161821',         // Cards, bottom nav, sheets
+  'surface-raised': '#1E2029', // Elevated cards, modals, dropdowns
+  'surface-hover': '#252731', // Hover/pressed states on surfaces
+
+  // Borders
+  border: 'rgba(255, 255, 255, 0.06)', // Subtle separation — replaces shadows in dark mode
+
+  // Text hierarchy
+  'text-primary': '#E8E6E2',    // Headings, names, key content (warm white, not pure white)
+  'text-secondary': '#A3A5AB',  // Body copy, descriptions, card content
+  'text-tertiary': '#6E7078',   // Timestamps, captions, supplementary info
+  'text-placeholder': '#4A4C54', // Placeholder text, disabled states
+
+  // Accents (lifted for dark background contrast)
+  moss: '#6E9A7E',              // Growth, connection, primary action
+  'moss-subtle': 'rgba(110, 154, 126, 0.12)', // Moss background tint
+  inkblue: '#4A7A96',           // Trust, reflection, informational
+  'inkblue-subtle': 'rgba(74, 122, 150, 0.12)', // Inkblue background tint
+  terracotta: '#D4694E',        // High-contrast CTA accent
+  'terracotta-subtle': 'rgba(212, 105, 78, 0.10)', // Terracotta background tint
+  sun: '#E8C07A',               // Milestones, pride
+  'sun-subtle': 'rgba(232, 192, 122, 0.10)', // Sun background tint
+  ember: '#D47A5C',             // Decay, urgency
+  
+  // Component-specific
+  'avatar-bg': '#252731',       // Avatar circle background
+}
+```
+
+### Dark Mode Surface Layering
+
+Dark mode uses layered surfaces instead of shadows for depth:
+```
+Layer 0: bg (#0C0D10)           — root canvas
+Layer 1: surface (#161821)      — cards, nav bars, sheets
+Layer 2: surface-raised (#1E2029) — elevated cards, modals
+Layer 3: surface-hover (#252731)  — interactive hover/pressed states
+```
+
+Each layer is separated by `1px solid rgba(255, 255, 255, 0.06)` borders, not shadows. Shadows don't read well on dark surfaces.
+
+### Dark Mode Component Adjustments
+
+**Cards:**
+- Background: `surface` or `surface-raised`
+- Border: `1px solid rgba(255, 255, 255, 0.06)` — NOT box-shadow
+- Internal padding remains `lg` (24px)
+- Radius unchanged at `lg` (16px)
+
+**Buttons:**
+```
+Primary:     bg-dark-moss text-dark-text-primary rounded-md
+Accent:      bg-dark-terracotta text-dark-text-primary rounded-md
+Secondary:   bg-dark-surface-hover text-dark-text-primary rounded-md
+Ghost:       bg-transparent text-dark-text-primary rounded-md
+Danger:      bg-dark-ember text-dark-text-primary rounded-md
+```
+
+**Nudge Cards:**
+- Left border: accent colour at 70% opacity (same as light)
+- Background: corresponding `-subtle` token (rgba tint, not solid)
+- Label text: accent colour directly
+- Body text: `text-secondary` (`#A3A5AB`)
+
+**Bottom Navigation:**
+- Background: `surface` with `1px solid border` top edge
+- Active icon: `moss` (`#6E9A7E`) + 4px moss dot
+- Inactive icon: `text-tertiary` (`#6E7078`)
+
+**Connection Rings:**
+- Inner ring: `moss` for healthy, `sun` for moderate, `ember` for fading
+- Outer ring: `inkblue` for healthy connections (adds depth)
+- Ring opacity logic unchanged from light mode
+- Avatar background: `avatar-bg` (`#252731`)
+
+**Input Fields:**
+- Background: `surface-raised` (`#1E2029`)
+- Text: `text-primary` (`#E8E6E2`)
+- Placeholder: `text-placeholder` (`#4A4C54`)
+- Focus ring: `moss` at 30% opacity
+- Error ring: `ember` at 40% opacity
+
+**Weekly Charts / Bar Graphs:**
+- Bar fills: `moss` (strong) / `inkblue` (moderate)
+- Empty bars: `surface-hover` (`#252731`)
+- Day labels: `text-tertiary` (`#6E7078`)
+
+### Dark Mode Text Rules
+
+- **Never use pure white (`#FFFFFF`).** Primary text is warm white (`#E8E6E2`).
+- Text-secondary (`#A3A5AB`) is the workhorse — all body copy, descriptions, nudge text.
+- Text-tertiary (`#6E7078`) minimum for any text that needs to be read (timestamps, captions).
+- Text-placeholder (`#4A4C54`) for placeholders and disabled states only.
+- Accent colours (moss, inkblue, terracotta, sun) can be used directly as text colour for labels and highlights — they're calibrated for dark backgrounds.
+
+### Dark Mode Transition
+
+When switching between light and dark:
+- Use `transition: background-color 300ms cubic-bezier(0.4, 0, 0.2, 1), color 300ms cubic-bezier(0.4, 0, 0.2, 1)`
+- No flash of white/black — crossfade smoothly
+- Respect system preference via `prefers-color-scheme: dark`
+- Allow manual override in settings
+- Persist user choice in local storage
 
 ---
 

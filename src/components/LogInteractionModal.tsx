@@ -240,22 +240,22 @@ export default function LogInteractionModal({ connection, isOpen, onClose, onSuc
 
   return (
     <div
-      className="fixed inset-0 bg-obsidian/40 backdrop-blur-sm flex items-end sm:items-center justify-center z-50 px-4 pt-4 pb-safe overscroll-contain"
+      className="fixed inset-0 bg-obsidian/40 dark:bg-black/60 backdrop-blur-sm flex items-end sm:items-center justify-center z-50 px-4 pt-4 pb-safe overscroll-contain"
       onClick={(e) => {
         if (e.target === e.currentTarget) {
           onClose()
         }
       }}
     >
-      <div className="bg-white rounded-lg w-full max-w-md max-h-[90vh] overflow-y-auto shadow-modal overscroll-contain">
+      <div className="bg-white dark:bg-dark-surface rounded-lg w-full max-w-md max-h-[90vh] overflow-y-auto shadow-modal overscroll-contain">
         <div className="p-6">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-h2 font-medium text-obsidian">
+            <h2 className="text-h2 font-medium text-obsidian dark:text-dark-text-primary">
               Record catch-up with {connection.name}
             </h2>
             <button
               onClick={onClose}
-              className="text-text-tertiary hover:text-obsidian transition-all duration-calm"
+              className="text-text-tertiary dark:text-dark-text-tertiary hover:text-obsidian dark:hover:text-dark-text-primary transition-all duration-calm"
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -265,13 +265,13 @@ export default function LogInteractionModal({ connection, isOpen, onClose, onSuc
 
           {/* Reflection Priority Badge */}
           {isReflectionPriority && (
-            <div className="mb-4 p-3 bg-bone-warm rounded-md shadow-card">
+            <div className="mb-4 p-3 bg-bone-warm dark:bg-dark-surface-raised rounded-md shadow-card">
               <div className="flex items-center gap-2">
                 <div>
-                  <div className="text-micro font-medium text-moss">
+                  <div className="text-micro font-medium text-moss dark:text-dark-moss">
                     Reflection Priority
                   </div>
-                  <div className="text-micro text-text-secondary">
+                  <div className="text-micro text-text-secondary dark:text-dark-text-secondary">
                     You wanted to grow closer to {connection.name} this week
                   </div>
                 </div>
@@ -282,7 +282,7 @@ export default function LogInteractionModal({ connection, isOpen, onClose, onSuc
           <form onSubmit={handleSubmit} className="space-y-5">
             {/* Interaction Date */}
             <div>
-              <label htmlFor="interactionDate" className="block text-micro-medium text-text-tertiary mb-2">
+              <label htmlFor="interactionDate" className="block text-micro-medium text-text-tertiary dark:text-dark-text-tertiary mb-2">
                 When did you catch-up?
               </label>
               <input
@@ -291,13 +291,13 @@ export default function LogInteractionModal({ connection, isOpen, onClose, onSuc
                 value={interactionDate}
                 onChange={(e) => setInteractionDate(e.target.value)}
                 max={new Date().toISOString().split('T')[0]}
-                className="w-full bg-bone-warm border-none rounded-md px-4 py-3 text-body text-obsidian focus:outline-none focus:ring-1 focus:ring-moss/40 transition-all duration-calm"
+                className="w-full bg-bone-warm dark:bg-dark-surface-raised border-none rounded-md px-4 py-3 text-body text-obsidian dark:text-dark-text-primary focus:outline-none focus:ring-1 focus:ring-moss/40 transition-all duration-calm"
               />
             </div>
 
             {/* Interaction Type - 3 buttons */}
             <div>
-              <label className="block text-micro-medium text-text-tertiary mb-2">
+              <label className="block text-micro-medium text-text-tertiary dark:text-dark-text-tertiary mb-2">
                 How did you catch-up?
               </label>
               <div className="grid grid-cols-3 gap-2">
@@ -309,7 +309,7 @@ export default function LogInteractionModal({ connection, isOpen, onClose, onSuc
                     className={`py-3 px-2 rounded-md text-center transition-all duration-calm ${
                       actionType === type.value
                         ? 'bg-moss text-bone shadow-card'
-                        : 'bg-bone-warm text-obsidian hover:shadow-card'
+                        : 'bg-bone-warm dark:bg-dark-surface-raised text-obsidian dark:text-dark-text-primary hover:shadow-card'
                     }`}
                   >
                     <div className="text-body font-medium">{type.label}</div>
@@ -320,7 +320,7 @@ export default function LogInteractionModal({ connection, isOpen, onClose, onSuc
 
             {/* Mood */}
             <div>
-              <label className="block text-micro-medium text-text-tertiary mb-2">
+              <label className="block text-micro-medium text-text-tertiary dark:text-dark-text-tertiary mb-2">
                 How did it feel?
               </label>
               <div className="flex gap-3 justify-center">
@@ -332,7 +332,7 @@ export default function LogInteractionModal({ connection, isOpen, onClose, onSuc
                     className={`px-4 py-2 rounded-md transition-all duration-calm ${
                       mood === option.value
                         ? 'bg-moss text-bone shadow-card'
-                        : 'bg-bone-warm text-obsidian hover:shadow-card opacity-40'
+                        : 'bg-bone-warm dark:bg-dark-surface-raised text-obsidian dark:text-dark-text-primary hover:shadow-card opacity-40'
                     }`}
                   >
                     <span className="text-body font-medium">{option.label}</span>
@@ -348,7 +348,7 @@ export default function LogInteractionModal({ connection, isOpen, onClose, onSuc
                 value={memory}
                 onChange={(e) => setMemory(e.target.value)}
                 rows={3}
-                className="w-full bg-bone-warm border-none rounded-md px-4 py-3 text-body text-obsidian placeholder:text-text-placeholder focus:outline-none focus:ring-1 focus:ring-moss/40 transition-all duration-calm resize-none"
+                className="w-full bg-bone-warm dark:bg-dark-surface-raised border-none rounded-md px-4 py-3 text-body text-obsidian dark:text-dark-text-primary placeholder:text-text-placeholder focus:outline-none focus:ring-1 focus:ring-moss/40 transition-all duration-calm resize-none"
                 placeholder="Add a note (optional)"
               />
             </div>
@@ -375,7 +375,7 @@ export default function LogInteractionModal({ connection, isOpen, onClose, onSuc
                     )}
                   </div>
                 </div>
-                <span className="text-body font-medium text-obsidian">Plan next catch-up</span>
+                <span className="text-body font-medium text-obsidian dark:text-dark-text-primary">Plan next catch-up</span>
               </label>
 
               {planNextCatchup && (
@@ -385,14 +385,14 @@ export default function LogInteractionModal({ connection, isOpen, onClose, onSuc
                     value={nextCatchupDate}
                     onChange={(e) => setNextCatchupDate(e.target.value)}
                     min={new Date().toISOString().split('T')[0]}
-                    className="w-full bg-bone-warm border-none rounded-md px-4 py-3 text-body text-obsidian focus:outline-none focus:ring-1 focus:ring-moss/40 transition-all duration-calm"
+                    className="w-full bg-bone-warm dark:bg-dark-surface-raised border-none rounded-md px-4 py-3 text-body text-obsidian dark:text-dark-text-primary focus:outline-none focus:ring-1 focus:ring-moss/40 transition-all duration-calm"
                   />
                 </div>
               )}
             </div>
 
             {error && (
-              <p className="text-ember text-body bg-bone-warm p-3 rounded-md">{error}</p>
+              <p className="text-ember dark:text-dark-terracotta text-body bg-bone-warm dark:bg-dark-surface-raised p-3 rounded-md">{error}</p>
             )}
 
             {/* Submit Button */}

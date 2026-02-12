@@ -91,3 +91,10 @@ body {
 .animate-sun-rays { animation: sun-rays 8s ease-in-out infinite; }
 .animate-leaf-fall { animation: leaf-fall 3s ease-in-out infinite; }
 .animate-ring-pulse { animation: ring-pulse 2s ease-in-out infinite; }
+
+@keyframes gentle-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.55; }
+}
+
+.animate-gentle-pulse { animation: gentle-pulse 2.5s ease-in-out infinite; }

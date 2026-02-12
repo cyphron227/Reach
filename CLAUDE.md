@@ -20,6 +20,8 @@ reach/
 │   ├── lib/              # Utilities
 │   │   ├── supabase/     # client.ts, server.ts, middleware.ts
 │   │   ├── capacitor.ts  # Mobile detection + re-exports
+│   │   ├── theme.tsx     # ThemeProvider context + useTheme hook
+│   │   ├── ringCalculations.ts  # Ring fill/opacity algorithm
 │   │   ├── notifications.ts
 │   │   ├── contacts.ts
 │   │   └── intents.ts    # Call/text/email actions
@@ -61,6 +63,7 @@ const supabase = await createClient()
 - `users` - User profiles (extends auth.users)
 - `connections` - People the user tracks (includes `preferred_contact_method`)
 - `interactions` - Logged touchpoints (includes `mood`, `action_type_v2`, `action_weight_v2`)
+- `user_settings` - Preferences (includes `theme_preference`: light/dark/system)
 - `communication_intents` - Tracked outreach attempts
 - `daily_actions` - Habit engine daily action log
 - `feature_flags` - Rollout control
@@ -79,15 +82,107 @@ import { createClient } from '@/lib/supabase/client'
 - Close on backdrop click or X button
 - Lock scroll when open (`useScrollLock` hook)
 
-### Styling Classes
+### Design System V2 (Current)
+**Complete documentation:** See `ringur-design-system-v2.md` for full specification.
+
+**Color Tokens** (defined in `tailwind.config.ts`):
+- Canvas: `bg-bone` (#F6F5F3), `bg-bone-warm` (#ECEAE6)
+- Cards/surfaces: `bg-white` on bone canvas
+- Text hierarchy: `text-obsidian` (primary), `text-text-secondary` (#4A4D55), `text-text-tertiary` (#6B6E76), `text-text-placeholder` (#9B9DA3)
+- Primary action: `bg-moss` (#5F7A6A)
+- Accent/high-contrast CTA: `bg-terracotta` (#B5543A) — use sparingly (1-2/screen)
+- Supporting colors: `inkblue` (#2F4C5F), `sun` (#E3B873), `ember` (#C46A4A), `slate` (#2A2F3A)
+- Light surfaces: `moss-light` (#EEF2EF), `inkblue-light` (#ECF0F3), `terracotta-light` (#F5EEEB) for nudge cards
+
+**Dark Mode — "Deep Night" Theme** (added Feb 2026):
+- Enabled via Tailwind `darkMode: 'class'` — `dark` class toggled on `<html>`
+- Dark tokens in `tailwind.config.ts` under `colors.dark.*`:
+  - Surfaces: `dark-bg` (#0C0D10), `dark-surface` (#161821), `dark-surface-raised` (#1E2029), `dark-surface-hover` (#252731)
+  - Text: `dark-text-primary` (#E8E6E2), `dark-text-secondary` (#A3A5AB), `dark-text-tertiary` (#6E7078)
+  - Accents: `dark-moss` (#6E9A7E), `dark-inkblue` (#4A7A96), `dark-terracotta` (#D4694E), `dark-sun` (#E8C07A)
+  - Subtle BGs: `dark-moss-subtle`, `dark-inkblue-subtle`, `dark-terracotta-subtle` (rgba with low alpha)
+  - Border: `dark-border` (rgba(255,255,255,0.06))
+- **ThemeProvider**: `src/lib/theme.tsx` — React context with `useTheme()` hook
+  - Returns `{ preference, resolvedTheme, setPreference }`
+  - Detects system preference via `matchMedia('prefers-color-scheme: dark')`
+  - Persists to `user_settings.theme_preference` column in Supabase
+  - Wrapped in `src/components/Providers.tsx` (in layout.tsx)
+- **Anti-FOUC**: Inline `<script>` in `layout.tsx` checks localStorage before first paint
+- **Settings toggle**: Appearance section in Settings (Light/System/Dark buttons)
+- **Pattern**: Every light-mode color class gets a `dark:` variant:
+  ```
+  bg-bone dark:bg-dark-bg
+  bg-white dark:bg-dark-surface
+  bg-bone-warm dark:bg-dark-surface-raised
+  text-obsidian dark:text-dark-text-primary
+  text-text-secondary dark:text-dark-text-secondary
+  text-text-tertiary dark:text-dark-text-tertiary
+  text-moss dark:text-dark-moss
+  text-ember dark:text-dark-terracotta
+  bg-obsidian/40 dark:bg-black/60  (modal backdrops)
+  border-bone-warm dark:border-dark-border
+  ```
+
+**Common Patterns:**
+```typescript
+// Primary button
+bg-moss hover:opacity-90 text-bone rounded-md
+
+// Accent button (key CTAs only)
+bg-terracotta hover:opacity-90 text-bone rounded-md
+
+// Secondary button
+bg-bone-warm dark:bg-dark-surface-raised hover:opacity-80 text-obsidian dark:text-dark-text-primary rounded-md
+
+// Cards
+bg-white dark:bg-dark-surface rounded-lg shadow-card p-6
+
+// Nudge cards (escalation/prompts)
+bg-moss-light dark:bg-dark-moss-subtle border-l-[2.5px] border-moss/40 dark:border-dark-border rounded-xl p-4
+
+// Focus rings
+focus:outline-none focus:ring-2 focus:ring-moss/40
+
+// Section headers (key sections)
+text-micro-medium text-inkblue dark:text-dark-inkblue
+
+// Input labels
+text-micro-medium text-text-tertiary dark:text-dark-text-tertiary
+
+// Input fields
+bg-bone-warm dark:bg-dark-surface-raised text-obsidian dark:text-dark-text-primary
+
+// Modal backdrops
+bg-obsidian/40 dark:bg-black/60 backdrop-blur-sm
+
+// Toggle switches (off state)
+bg-bone-warm dark:bg-dark-surface-raised
+// Toggle thumb
+bg-bone dark:bg-dark-text-primary
 ```
-Primary button: bg-muted-teal-500 hover:bg-muted-teal-600 text-white rounded-xl
-Secondary button: bg-lavender-100 text-lavender-700 rounded-xl
-Background: bg-lavender-50
-Cards: bg-white rounded-2xl shadow-sm border border-lavender-100
-Text: text-lavender-800 (primary), text-lavender-500 (secondary)
-Bottom safe area: pb-safe (custom utility — ensures min 2rem + env(safe-area-inset-bottom))
-```
+
+**Connection Ring Component:**
+- `<ConnectionRing name={string} strength={RelationshipStrength} daysSinceAction={number} decayStartedAt={string|null} size={72|120} onClick?={() => void} />`
+- Dual SVG rings: outer (depth/strength) + inner (recency/health)
+- Ring fill + opacity dynamically calculated from strength tier AND days since last contact
+- Recency boost: +10% fill and +0.2 opacity for contacts within 0-7 days
+- Pulse animation when decaying (3+ days since action)
+- Center initials on bone-warm background
+- Used in ConnectionCard (72px) and ConnectionDetailModal (120px)
+- Click opens `RingStatusModal` with status explanation
+- Ring calculation logic in `src/lib/ringCalculations.ts`
+
+**Bottom safe area:** `pb-safe` (custom utility — ensures min 2rem + env(safe-area-inset-bottom))
+
+**Migration Notes (Feb 2026):**
+- V1 → V2 migration completed Feb 2026
+- Deprecated `ash` (#A6A8AD) — failed WCAG AA on bone backgrounds
+- Replaced with semantic text hierarchy: `text-text-secondary` (#4A4D55), `text-text-tertiary` (#6B6E76), `text-text-placeholder` (#9B9DA3)
+- Card backgrounds changed from `bg-bone` → `bg-white` on bone canvas
+- Added terracotta accent color for high-contrast CTAs
+- Connection ring visualization added with dual SVG rings + recency-based dynamics
+- Dark mode ("Deep Night") added with full component coverage
+- Legacy colors (lavender, tea-green, muted-teal) retained for forest page only
 
 ### Safe Area / Android Nav Bar
 All page content containers use `pb-safe` to prevent content from being hidden behind Android
@@ -154,11 +249,17 @@ The app uses 3 unified interaction types across all surfaces:
 - Mood tracking: optional `mood` column (`happy|neutral|sad|null`) on interactions
 
 ### Key Components
+- **ConnectionRing**: Dual SVG rings around initials avatar, fill/opacity driven by strength + recency
+- **RingStatusModal**: Click-to-open explanation of ring status with "How rings work" explainer
+- **ConnectionCard**: Shows ConnectionRing (72px) on left, connection info on right
+- **ConnectionDetailModal**: Shows ConnectionRing (120px) in header, 3-button type picker in edit form
+- **DailyProgressIndicator**: Ring progress + "Connected" badge with tick when valid day
 - **LogInteractionModal**: 3-button type grid + mood emojis + optional note
-- **CatchupMethodModal**: Shows last interaction note, highlights preferred contact method
-- **ConnectionDetailModal**: 3-button type picker in edit form, mood emoji shown in history
-- **ConnectionCard**: Shows last interaction mood emoji after connection name
+- **CatchupMethodModal**: Shows last interaction note, highlights preferred contact method. **Notification taps open this directly** (not ConnectionDetailModal)
 - **Add/Edit Connection**: Preferred messaging app selector (Text/WhatsApp/Email)
+- **EscalationNudge**: Moss-light background with left border accent (nudge card pattern)
+- **PendingCatchupPrompt**: Terracotta-light background with left border accent (nudge card pattern)
+- **Providers**: Client wrapper in layout.tsx, provides ThemeProvider context to the app
 
 ## Feature Flags
 
