@@ -391,12 +391,12 @@ export default function ConnectionDetailModal({ connection, isOpen, onClose, onE
         </div>
       )}
 
-      {showRingStatus && strengthV2 && (
+      {showRingStatus && (
         <RingStatusModal
           isOpen={showRingStatus}
           onClose={() => setShowRingStatus(false)}
           connectionName={connection.name}
-          strength={strengthV2}
+          strength={strengthV2 ?? 'stable'}
           daysSinceAction={daysSinceAction}
           lastActionType={lastActionType}
           decayStartedAt={decayStartedAt}

@@ -38,7 +38,7 @@ export default function ConnectionRing({
     innerColor,
     outerColor,
     shouldPulse,
-  } = calculateRingVisualization(effectiveStrength, daysSinceAction, decayStartedAt)
+  } = calculateRingVisualization(effectiveStrength, daysSinceAction, decayStartedAt, name)
 
   // Inner ring geometry
   const innerRadius = size / 2 - 10
@@ -100,7 +100,7 @@ export default function ConnectionRing({
       </svg>
       {/* Center initials */}
       <div
-        className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-bone-warm flex items-center justify-center font-medium text-slate ${fontSize}`}
+        className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-bone-warm dark:bg-dark-surface-raised flex items-center justify-center font-medium text-slate dark:text-dark-text-primary ${fontSize}`}
         style={{ width: centerSize, height: centerSize }}
       >
         {initials}

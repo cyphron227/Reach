@@ -17,6 +17,7 @@ import CatchupMethodModal from '@/components/CatchupMethodModal'
 import AchievementUnlockModal from '@/components/AchievementUnlockModal'
 import PendingCatchupPrompt from '@/components/PendingCatchupPrompt'
 import DailyProgressIndicator, { CompactConnectionRing } from '@/components/DailyProgressIndicator'
+import { deriveStrengthFromRecency } from '@/lib/ringCalculations'
 import Link from 'next/link'
 import { getOrCreateUserStreak, getNextMilestone, getDaysToNextMilestone } from '@/lib/streakUtils'
 import { useRouter } from 'next/navigation'
@@ -715,6 +716,13 @@ function TodayPageContent() {
             <div className="space-y-4">
               {(showAllConnections || sortMode === 'alphabetical' ? filteredConnections : filteredConnections.slice(0, CONNECTIONS_TO_SHOW)).map((conn) => {
                 const health = connectionHealthMap[conn.id]
+                // Derive days since last contact from connection data
+                const daysSince = conn.last_interaction_date
+                  ? Math.floor((Date.now() - new Date(conn.last_interaction_date).getTime()) / 86400000)
+                  : 9999
+                const effectiveDaysSinceAction = health?.days_since_action ?? daysSince
+                const effectiveStrength = health?.current_strength
+                  ?? deriveStrengthFromRecency(conn.last_interaction_date ? daysSince : null, conn.catchup_frequency)
                 return (
                   <ConnectionCard
                     key={conn.id}
@@ -726,10 +734,10 @@ function TodayPageContent() {
                     onCatchup={() => handleCatchup(conn)}
                     onEdit={() => handleEdit(conn)}
                     onViewDetails={() => handleViewDetails(conn)}
-                    strengthV2={health?.current_strength}
+                    strengthV2={effectiveStrength}
                     ringTier={health?.ring_tier}
                     ringPosition={health?.ring_position}
-                    daysSinceAction={health?.days_since_action ?? 0}
+                    daysSinceAction={effectiveDaysSinceAction}
                     lastActionType={health?.last_action_type ?? null}
                     decayStartedAt={health?.decay_started_at ?? null}
                   />
@@ -862,8 +870,17 @@ function TodayPageContent() {
               setShowLogModal(true)
             }}
             onInteractionUpdated={loadData}
-            strengthV2={connectionHealthMap[selectedConnection.id]?.current_strength}
-            daysSinceAction={connectionHealthMap[selectedConnection.id]?.days_since_action ?? 0}
+            strengthV2={connectionHealthMap[selectedConnection.id]?.current_strength
+              ?? deriveStrengthFromRecency(
+                selectedConnection.last_interaction_date
+                  ? Math.floor((Date.now() - new Date(selectedConnection.last_interaction_date).getTime()) / 86400000)
+                  : null,
+                selectedConnection.catchup_frequency
+              )}
+            daysSinceAction={connectionHealthMap[selectedConnection.id]?.days_since_action
+              ?? (selectedConnection.last_interaction_date
+                ? Math.floor((Date.now() - new Date(selectedConnection.last_interaction_date).getTime()) / 86400000)
+                : 9999)}
             lastActionType={connectionHealthMap[selectedConnection.id]?.last_action_type ?? null}
             decayStartedAt={connectionHealthMap[selectedConnection.id]?.decay_started_at ?? null}
           />
