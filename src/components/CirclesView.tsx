@@ -45,13 +45,13 @@ const FREQ_BASE_RADIUS: Record<CatchupFrequency, number> = {
   annually:  165,
 }
 
-// Strength modifier on top of frequency radius
+// Strength modifier on top of frequency radius — kept small so frequency dominates
 const STRENGTH_RADIUS_MOD: Record<RelationshipStrength, number> = {
-  flourishing: -20,
-  strong:      -10,
-  stable:        0,
-  thinning:    +15,
-  decaying:    +25,
+  flourishing:  -8,
+  strong:        -4,
+  stable:         0,
+  thinning:      +6,
+  decaying:     +10,
 }
 
 const FADING_COLOR = '#C46A4A'
@@ -116,8 +116,8 @@ function runPhysics(contacts: CircleContact[], maxR: number): SettledPos[] {
       const p = nodes[i]
       const dist = Math.sqrt(p.x * p.x + p.y * p.y) || 0.001
 
-      // 1. Radial spring toward targetR
-      const springF = (p.targetR - dist) * 0.08
+      // 1. Radial spring toward targetR — stronger pull to close gaps
+      const springF = (p.targetR - dist) * 0.18
       p.vx += (p.x / dist) * springF
       p.vy += (p.y / dist) * springF
 
@@ -143,7 +143,7 @@ function runPhysics(contacts: CircleContact[], maxR: number): SettledPos[] {
         const dx = p.x - q.x
         const dy = p.y - q.y
         const dd = Math.sqrt(dx * dx + dy * dy) || 0.001
-        const minSep = p.size / 2 + q.size / 2 + 4
+        const minSep = p.size / 2 + q.size / 2 + 10
         if (dd < minSep) {
           const pushF = (minSep - dd) / dd * 0.35
           p.vx += dx * pushF
