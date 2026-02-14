@@ -4,24 +4,13 @@ export const dynamic = 'force-dynamic'
 
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { Connection, CatchupFrequency, ConnectionHealthV2, RelationshipStrength } from '@/types/database'
+import { Connection, ConnectionHealthV2, RelationshipStrength } from '@/types/database'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import CatchupMethodModal from '@/components/CatchupMethodModal'
 import { isFeatureEnabled } from '@/lib/featureFlags'
 import { deriveStrengthFromRecency, getContactPalette } from '@/lib/ringCalculations'
 import CirclesView, { CircleContact } from '@/components/CirclesView'
-import { RingTier } from '@/types/habitEngine'
-
-const frequencyToDays: Record<CatchupFrequency, number> = {
-  daily: 1,
-  weekly: 7,
-  biweekly: 14,
-  monthly: 30,
-  quarterly: 90,
-  biannually: 180,
-  annually: 365,
-}
 
 function getDaysSince(dateString: string | null | undefined): number | null {
   if (!dateString) return null
@@ -39,9 +28,6 @@ function getTimeAgoText(dateString: string | null | undefined): string {
   if (days < 30) return `${Math.floor(days / 7)} week${Math.floor(days / 7) > 1 ? 's' : ''} ago`
   return `${Math.floor(days / 30)} month${Math.floor(days / 30) > 1 ? 's' : ''} ago`
 }
-
-// Keep frequencyToDays reference to avoid unused-var warning
-void frequencyToDays
 
 export default function MyCirclesPage() {
   const [connections, setConnections] = useState<Connection[]>([])
@@ -113,8 +99,7 @@ export default function MyCirclesPage() {
       const strength: RelationshipStrength =
         health?.current_strength ??
         deriveStrengthFromRecency(daysSince, conn.catchup_frequency)
-      const ringTier: RingTier | null = health?.ring_tier ?? null
-      return { id: conn.id, name: conn.name, strength, ringTier }
+      return { id: conn.id, name: conn.name, strength, catchupFrequency: conn.catchup_frequency }
     })
   }, [connections, connectionHealthMap])
 
@@ -372,11 +357,6 @@ export default function MyCirclesPage() {
                   }}
                 />
                 {selectedCircle.strength.charAt(0).toUpperCase() + selectedCircle.strength.slice(1)}
-                {selectedCircle.ringTier && (
-                  <span style={{ opacity: 0.55 }}>
-                    · {selectedCircle.ringTier === 'core' ? 'Core' : 'Outer'}
-                  </span>
-                )}
               </div>
             )}
 

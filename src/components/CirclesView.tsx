@@ -1,14 +1,15 @@
 'use client'
 
-import { useState, useEffect, useMemo } from 'react'
-import { RelationshipStrength, RingTier } from '@/types/habitEngine'
+import { useState, useEffect, useRef, useCallback } from 'react'
+import { RelationshipStrength } from '@/types/habitEngine'
+import { CatchupFrequency } from '@/types/database'
 import { getContactPalette } from '@/lib/ringCalculations'
 
 export interface CircleContact {
   id: string
   name: string
   strength: RelationshipStrength
-  ringTier: RingTier | null
+  catchupFrequency: CatchupFrequency
 }
 
 interface CirclesViewProps {
@@ -16,6 +17,7 @@ interface CirclesViewProps {
   onTapContact: (contactId: string) => void
 }
 
+// Circle diameter by relationship strength
 const CIRCLE_SIZE: Record<RelationshipStrength, number> = {
   flourishing: 52,
   strong: 46,
@@ -32,160 +34,200 @@ const CIRCLE_OPACITY: Record<RelationshipStrength, number> = {
   decaying: 0.30,
 }
 
-const FADING_COLOR = '#C46A4A'
-const CORE_R = 110
-const OUTER_R = 195
-const ME_SIZE = 64
-
-function getInitials(name: string): string {
-  return name
-    .split(' ')
-    .filter(Boolean)
-    .slice(0, 2)
-    .map(w => w[0].toUpperCase())
-    .join('')
+// Target radius from Me centre per catch-up frequency
+const FREQ_BASE_RADIUS: Record<CatchupFrequency, number> = {
+  daily:      75,
+  weekly:     92,
+  biweekly:  107,
+  monthly:   122,
+  quarterly: 137,
+  biannually:152,
+  annually:  165,
 }
+
+// Strength modifier on top of frequency radius
+const STRENGTH_RADIUS_MOD: Record<RelationshipStrength, number> = {
+  flourishing: -20,
+  strong:      -10,
+  stable:        0,
+  thinning:    +15,
+  decaying:    +25,
+}
+
+const FADING_COLOR = '#C46A4A'
+const ME_SIZE = 64
+const ME_R = ME_SIZE / 2
 
 function strengthColor(strength: RelationshipStrength, name: string): string {
   if (strength === 'thinning' || strength === 'decaying') return FADING_COLOR
   return getContactPalette(name).inner
 }
 
-export default function CirclesView({ contacts, onTapContact }: CirclesViewProps) {
-  const [settled, setSettled] = useState(false)
-  const [orbitStarted, setOrbitStarted] = useState(false)
-  const [coreAngle, setCoreAngle] = useState(0)
-  const [outerAngle, setOuterAngle] = useState(0)
+function hashName(name: string): number {
+  let h = 0
+  for (let i = 0; i < name.length; i++) {
+    h = ((h << 5) - h) + name.charCodeAt(i)
+    h = h & h
+  }
+  return Math.abs(h)
+}
 
-  const coreContacts = useMemo(() => contacts.filter(c => c.ringTier === 'core'), [contacts])
-  const outerContacts = useMemo(() => contacts.filter(c => c.ringTier !== 'core'), [contacts])
+interface PhysicsNode {
+  id: string
+  x: number
+  y: number
+  vx: number
+  vy: number
+  targetR: number
+  size: number  // diameter
+}
 
-  // Scale outer circles down proportionally when there are many contacts
-  const outerScale = outerContacts.length > 20 ? Math.sqrt(20 / outerContacts.length) : 1
+interface SettledPos {
+  id: string
+  x: number
+  y: number
+}
 
-  // Trigger settle-in shortly after mount
-  useEffect(() => {
-    const t = setTimeout(() => setSettled(true), 150)
-    return () => clearTimeout(t)
-  }, [])
+function runPhysics(contacts: CircleContact[], maxR: number): SettledPos[] {
+  if (contacts.length === 0) return []
 
-  // Start orbit after all circles have finished settling
-  useEffect(() => {
-    if (!settled) return
-    const settleEndMs = 150 + contacts.length * 80 + 700 + 400
-    const t = setTimeout(() => setOrbitStarted(true), settleEndMs)
-    return () => clearTimeout(t)
-  }, [settled, contacts.length])
-
-  // 30fps orbit tick — very slow, ~12 min/revolution for core, ~20 min for outer
-  useEffect(() => {
-    if (!orbitStarted) return
-    const id = setInterval(() => {
-      setCoreAngle(a => a + 0.00027)
-      setOuterAngle(a => a + 0.00017)
-    }, 33)
-    return () => clearInterval(id)
-  }, [orbitStarted])
-
-  function circlePos(index: number, total: number, radius: number, angleOffset: number) {
-    const baseAngle = (index / Math.max(1, total)) * Math.PI * 2 - Math.PI / 2
-    const angle = baseAngle + angleOffset
+  // Initialise nodes spread evenly around their target radius
+  const nodes: PhysicsNode[] = contacts.map((c, i) => {
+    const baseR = FREQ_BASE_RADIUS[c.catchupFrequency]
+    const mod = STRENGTH_RADIUS_MOD[c.strength]
+    const size = CIRCLE_SIZE[c.strength]
+    const minR = ME_R + size / 2 + 6
+    const targetR = Math.max(minR, Math.min(maxR - size / 2 - 4, baseR + mod))
+    const angle = (i / contacts.length) * Math.PI * 2 + 0.3 * i  // slight offset to avoid symmetry
     return {
-      x: Math.cos(angle) * radius,
-      y: Math.sin(angle) * radius,
+      id: c.id,
+      x: Math.cos(angle) * targetR,
+      y: Math.sin(angle) * targetR,
+      vx: 0,
+      vy: 0,
+      targetR,
+      size,
+    }
+  })
+
+  // Simulation loop
+  for (let iter = 0; iter < 300; iter++) {
+    for (let i = 0; i < nodes.length; i++) {
+      const p = nodes[i]
+      const dist = Math.sqrt(p.x * p.x + p.y * p.y) || 0.001
+
+      // 1. Radial spring toward targetR
+      const springF = (p.targetR - dist) * 0.08
+      p.vx += (p.x / dist) * springF
+      p.vy += (p.y / dist) * springF
+
+      // 2. Centre exclusion — keep away from Me circle
+      const minCenterDist = ME_R + p.size / 2 + 6
+      if (dist < minCenterDist) {
+        const push = (minCenterDist - dist) / dist * 0.6
+        p.vx += p.x * push
+        p.vy += p.y * push
+      }
+
+      // 3. Boundary wall — keep within canvas
+      if (dist > maxR - p.size / 2 - 4) {
+        const over = dist - (maxR - p.size / 2 - 4)
+        const inward = over / dist * 0.18
+        p.vx -= p.x * inward
+        p.vy -= p.y * inward
+      }
+
+      // 4. Circle-circle collision
+      for (let j = i + 1; j < nodes.length; j++) {
+        const q = nodes[j]
+        const dx = p.x - q.x
+        const dy = p.y - q.y
+        const dd = Math.sqrt(dx * dx + dy * dy) || 0.001
+        const minSep = p.size / 2 + q.size / 2 + 4
+        if (dd < minSep) {
+          const pushF = (minSep - dd) / dd * 0.35
+          p.vx += dx * pushF
+          p.vy += dy * pushF
+          q.vx -= dx * pushF
+          q.vy -= dy * pushF
+        }
+      }
+
+      // 5. Damping
+      p.vx *= 0.78
+      p.vy *= 0.78
+
+      // 6. Integrate
+      p.x += p.vx
+      p.y += p.vy
     }
   }
 
-  function renderContact(
-    contact: CircleContact,
-    globalIndex: number,
-    x: number,
-    y: number,
-    isCore: boolean,
-    sizeScale: number,
-  ) {
-    const rawSize = CIRCLE_SIZE[contact.strength]
-    const size = Math.max(24, Math.round(rawSize * sizeScale))
-    const opacity = CIRCLE_OPACITY[contact.strength]
-    const color = strengthColor(contact.strength, contact.name)
-    const delay = globalIndex * 80
+  return nodes.map(n => ({ id: n.id, x: n.x, y: n.y }))
+}
 
-    return (
-      <div
-        key={contact.id}
-        onClick={() => onTapContact(contact.id)}
-        style={{
-          position: 'absolute',
-          left: '50%',
-          top: '50%',
-          width: size,
-          height: size,
-          marginLeft: -(size / 2),
-          marginTop: -(size / 2),
-          transform: settled
-            ? `translate(${x}px, ${y}px) scale(1)`
-            : 'translate(0px, 0px) scale(0)',
-          opacity: settled ? 1 : 0,
-          // Once orbit starts, remove transitions so direct angle updates are instant
-          transition: orbitStarted
-            ? 'none'
-            : `transform 700ms cubic-bezier(0.4,0,0.2,1) ${delay}ms, opacity 500ms ease ${delay}ms`,
-          cursor: 'pointer',
-          zIndex: 10,
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-        }}
-      >
-        <div
-          style={{
-            width: size,
-            height: size,
-            borderRadius: '50%',
-            background: color,
-            opacity,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            border: '1.5px solid rgba(255,255,255,0.15)',
-            boxShadow: `0 0 0 3px ${color}28`,
-            flexShrink: 0,
-          }}
-        >
-          <span
-            style={{
-              fontSize: Math.max(8, Math.round(size * 0.28)),
-              fontWeight: 600,
-              color: 'rgba(246,245,243,0.92)',
-              lineHeight: 1,
-              letterSpacing: '-0.01em',
-              userSelect: 'none',
-            }}
-          >
-            {getInitials(contact.name)}
-          </span>
-        </div>
-        <span
-          style={{
-            fontSize: 9,
-            color: isCore ? 'rgba(246,245,243,0.65)' : 'rgba(246,245,243,0.42)',
-            marginTop: 3,
-            whiteSpace: 'nowrap',
-            maxWidth: size + 14,
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-            textAlign: 'center',
-            userSelect: 'none',
-          }}
-        >
-          {contact.name.split(' ')[0]}
-        </span>
-      </div>
-    )
-  }
+export default function CirclesView({ contacts, onTapContact }: CirclesViewProps) {
+  const containerRef = useRef<HTMLDivElement>(null)
+  const [positions, setPositions] = useState<SettledPos[]>([])
+  const [settled, setSettled] = useState(false)
+  const [driftStarted, setDriftStarted] = useState(false)
+  const [driftTick, setDriftTick] = useState(0)
+
+  // Run physics simulation once container dimensions are known
+  useEffect(() => {
+    const el = containerRef.current
+    if (!el || contacts.length === 0) {
+      setPositions([])
+      return
+    }
+    const w = el.clientWidth
+    const h = el.clientHeight
+    const maxR = Math.min(w, h) / 2 - 4
+    const result = runPhysics(contacts, maxR)
+    setPositions(result)
+  }, [contacts])
+
+  // Trigger settle-in after positions are computed
+  useEffect(() => {
+    if (positions.length === 0 && contacts.length > 0) return
+    const t = setTimeout(() => setSettled(true), 150)
+    return () => clearTimeout(t)
+  }, [positions, contacts.length])
+
+  // Start drift after all circles have finished settling
+  useEffect(() => {
+    if (!settled) return
+    const settleEndMs = 150 + contacts.length * 80 + 700 + 400
+    const t = setTimeout(() => setDriftStarted(true), settleEndMs)
+    return () => clearTimeout(t)
+  }, [settled, contacts.length])
+
+  // 30fps drift tick
+  useEffect(() => {
+    if (!driftStarted) return
+    const id = setInterval(() => setDriftTick(t => t + 1), 33)
+    return () => clearInterval(id)
+  }, [driftStarted])
+
+  const getDriftOffset = useCallback((name: string) => {
+    if (!driftStarted) return { dx: 0, dy: 0 }
+    const h = hashName(name)
+    const phaseX = (h % 628) / 100
+    const phaseY = ((h * 7) % 628) / 100
+    const speedX = 0.008 + (h % 4) * 0.002
+    const speedY = 0.006 + ((h * 3) % 4) * 0.002
+    const amp = 8
+    return {
+      dx: Math.sin(driftTick * speedX + phaseX) * amp,
+      dy: Math.cos(driftTick * speedY + phaseY) * amp,
+    }
+  }, [driftStarted, driftTick])
+
+  const posMap = new Map(positions.map(p => [p.id, p]))
 
   return (
     <div
+      ref={containerRef}
       style={{
         position: 'relative',
         width: '100%',
@@ -194,89 +236,85 @@ export default function CirclesView({ contacts, onTapContact }: CirclesViewProps
         overflow: 'hidden',
       }}
     >
-      {/* Orbit track rings — faint dashed guides */}
-      <svg
-        style={{
-          position: 'absolute',
-          inset: 0,
-          width: '100%',
-          height: '100%',
-          pointerEvents: 'none',
-          zIndex: 1,
-        }}
-      >
-        {coreContacts.length > 0 && (
-          <circle
-            cx="50%" cy="50%"
-            r={CORE_R}
-            fill="none"
-            stroke="rgba(255,255,255,0.05)"
-            strokeWidth="1"
-            strokeDasharray="3 9"
-          />
-        )}
-        {outerContacts.length > 0 && (
-          <circle
-            cx="50%" cy="50%"
-            r={OUTER_R}
-            fill="none"
-            stroke="rgba(255,255,255,0.035)"
-            strokeWidth="1"
-            strokeDasharray="3 9"
-          />
-        )}
-      </svg>
+      {/* Contact circles */}
+      {contacts.map((contact, i) => {
+        const pos = posMap.get(contact.id)
+        const settled_x = pos?.x ?? 0
+        const settled_y = pos?.y ?? 0
+        const { dx, dy } = getDriftOffset(contact.name)
+        const x = settled_x + dx
+        const y = settled_y + dy
 
-      {/* Orbit labels */}
-      {coreContacts.length > 0 && (
-        <div
-          style={{
-            position: 'absolute',
-            left: '50%',
-            top: `calc(50% - ${CORE_R + 16}px)`,
-            transform: 'translateX(-50%)',
-            zIndex: 2,
-            pointerEvents: 'none',
-            fontSize: 9,
-            letterSpacing: '0.12em',
-            textTransform: 'uppercase',
-            color: 'rgba(255,255,255,0.16)',
-            userSelect: 'none',
-          }}
-        >
-          Core
-        </div>
-      )}
-      {outerContacts.length > 0 && (
-        <div
-          style={{
-            position: 'absolute',
-            left: '50%',
-            top: `calc(50% - ${OUTER_R + 16}px)`,
-            transform: 'translateX(-50%)',
-            zIndex: 2,
-            pointerEvents: 'none',
-            fontSize: 9,
-            letterSpacing: '0.12em',
-            textTransform: 'uppercase',
-            color: 'rgba(255,255,255,0.10)',
-            userSelect: 'none',
-          }}
-        >
-          Outer
-        </div>
-      )}
+        const size = CIRCLE_SIZE[contact.strength]
+        const opacity = CIRCLE_OPACITY[contact.strength]
+        const color = strengthColor(contact.strength, contact.name)
+        const firstName = contact.name.split(' ')[0]
+        const fontSize = Math.max(7, Math.min(12, Math.round(size * 0.22)))
+        const delay = i * 80
 
-      {/* Core contacts */}
-      {coreContacts.map((contact, i) => {
-        const { x, y } = circlePos(i, coreContacts.length, CORE_R, coreAngle)
-        return renderContact(contact, i, x, y, true, 1)
-      })}
-
-      {/* Outer contacts */}
-      {outerContacts.map((contact, i) => {
-        const { x, y } = circlePos(i, outerContacts.length, OUTER_R, outerAngle)
-        return renderContact(contact, coreContacts.length + i, x, y, false, outerScale)
+        return (
+          <div
+            key={contact.id}
+            onClick={() => onTapContact(contact.id)}
+            style={{
+              position: 'absolute',
+              left: '50%',
+              top: '50%',
+              width: size,
+              height: size,
+              marginLeft: -(size / 2),
+              marginTop: -(size / 2),
+              transform: settled
+                ? `translate(${x}px, ${y}px) scale(1)`
+                : 'translate(0px, 0px) scale(0)',
+              opacity: settled ? 1 : 0,
+              transition: driftStarted
+                ? 'none'
+                : `transform 700ms cubic-bezier(0.4,0,0.2,1) ${delay}ms, opacity 500ms ease ${delay}ms`,
+              cursor: 'pointer',
+              zIndex: 10,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            <div
+              style={{
+                width: size,
+                height: size,
+                borderRadius: '50%',
+                background: color,
+                opacity,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                border: '1.5px solid rgba(255,255,255,0.15)',
+                boxShadow: `0 0 0 3px ${color}28`,
+                overflow: 'hidden',
+              }}
+            >
+              <span
+                style={{
+                  fontSize,
+                  fontWeight: 600,
+                  color: 'rgba(246,245,243,0.92)',
+                  lineHeight: 1,
+                  letterSpacing: '-0.01em',
+                  userSelect: 'none',
+                  maxWidth: size - 8,
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
+                  display: 'block',
+                  textAlign: 'center',
+                  padding: '0 2px',
+                }}
+              >
+                {firstName}
+              </span>
+            </div>
+          </div>
+        )
       })}
 
       {/* Me circle — always centred, above everything */}
