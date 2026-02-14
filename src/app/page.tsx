@@ -576,7 +576,7 @@ function TodayPageContent() {
                     onClick={() => setShowMenu(false)}
                     className="w-full px-4 py-3 text-left text-obsidian dark:text-dark-text-primary hover:bg-bone-warm dark:hover:bg-dark-surface-hover transition-colors flex items-center gap-3"
                   >
-                    <span className="text-body">Forest</span>
+                    <span className="text-body">My Circles</span>
                   </Link>
                   <Link
                     href="/reflect"
@@ -808,8 +808,8 @@ function TodayPageContent() {
             >
               <div className="flex items-center gap-3">
                 <div>
-                  <div className="text-body font-medium text-obsidian dark:text-dark-text-primary">Forest</div>
-                  <div className="text-micro text-text-secondary dark:text-dark-text-secondary">View the health of all your relationships</div>
+                  <div className="text-body font-medium text-obsidian dark:text-dark-text-primary">My Circles</div>
+                  <div className="text-micro text-text-secondary dark:text-dark-text-secondary">See all your connections at a glance</div>
                 </div>
               </div>
             </Link>

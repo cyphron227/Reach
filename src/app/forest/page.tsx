@@ -4,29 +4,14 @@ export const dynamic = 'force-dynamic'
 
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { Connection, CatchupFrequency, Interaction, ConnectionHealthV2, RelationshipStrength } from '@/types/database'
+import { Connection, CatchupFrequency, ConnectionHealthV2, RelationshipStrength } from '@/types/database'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import CatchupMethodModal from '@/components/CatchupMethodModal'
-import { RelationshipStrengthCard } from '@/components/RelationshipStrengthBadge'
-import { RingBadge } from '@/components/RingSelector'
 import { isFeatureEnabled } from '@/lib/featureFlags'
-
-// Growth stages based on relationship longevity and interaction frequency
-type GrowthStage = 'seed' | 'seedling' | 'sapling' | 'young' | 'mature' | 'ancient'
-type TreeHealth = 'thriving' | 'healthy' | 'needs_water' | 'wilting'
-
-interface TreeStats {
-  growthStage: GrowthStage
-  health: TreeHealth
-  daysSinceCreated: number
-  daysSinceLastInteraction: number | null
-  totalInteractions: number
-  interactionFrequencyScore: number // 0-100, higher = more frequent
-  longevityMonths: number
-  isOverdue: boolean
-  overdueByDays: number
-}
+import { deriveStrengthFromRecency, getContactPalette } from '@/lib/ringCalculations'
+import CirclesView, { CircleContact } from '@/components/CirclesView'
+import { RingTier } from '@/types/habitEngine'
 
 const frequencyToDays: Record<CatchupFrequency, number> = {
   daily: 1,
@@ -38,391 +23,31 @@ const frequencyToDays: Record<CatchupFrequency, number> = {
   annually: 365,
 }
 
-function getDaysSince(dateString: string | null): number | null {
+function getDaysSince(dateString: string | null | undefined): number | null {
   if (!dateString) return null
   const date = new Date(dateString)
   const today = new Date()
-  const diffTime = today.getTime() - date.getTime()
-  return Math.floor(diffTime / (1000 * 60 * 60 * 24))
+  return Math.floor((today.getTime() - date.getTime()) / (1000 * 60 * 60 * 24))
 }
 
-function calculateTreeStats(
-  connection: Connection,
-  interactionCount: number
-): TreeStats {
-  const daysSinceCreated = getDaysSince(connection.created_at) || 0
-  const daysSinceLastInteraction = getDaysSince(connection.last_interaction_date)
-  const frequencyDays = frequencyToDays[connection.catchup_frequency]
-  const longevityMonths = Math.floor(daysSinceCreated / 30)
-
-  // Calculate if overdue
-  const isOverdue = daysSinceLastInteraction !== null && daysSinceLastInteraction > frequencyDays
-  const overdueByDays = isOverdue ? daysSinceLastInteraction! - frequencyDays : 0
-
-  // Calculate interaction frequency score (0-100)
-  // Based on how well they maintain the expected frequency
-  let interactionFrequencyScore = 50
-  if (daysSinceCreated > 0 && interactionCount > 0) {
-    const expectedInteractions = Math.max(1, daysSinceCreated / frequencyDays)
-    const frequencyRatio = interactionCount / expectedInteractions
-    interactionFrequencyScore = Math.min(100, Math.max(0, frequencyRatio * 50))
-  }
-
-  // Determine growth stage based on longevity and interactions
-  let growthStage: GrowthStage = 'seed'
-  if (interactionCount === 0) {
-    growthStage = 'seed'
-  } else if (longevityMonths < 1 || interactionCount < 2) {
-    growthStage = 'seedling'
-  } else if (longevityMonths < 3 || interactionCount < 5) {
-    growthStage = 'sapling'
-  } else if (longevityMonths < 6 || interactionCount < 10) {
-    growthStage = 'young'
-  } else if (longevityMonths < 12 || interactionCount < 20) {
-    growthStage = 'mature'
-  } else {
-    growthStage = 'ancient'
-  }
-
-  // Determine health based on overdue status
-  let health: TreeHealth = 'healthy'
-  if (daysSinceLastInteraction === null) {
-    health = 'needs_water' // Never interacted
-  } else if (overdueByDays > frequencyDays * 1) {
-    health = 'wilting'
-  } else if (overdueByDays > 0) {
-    health = 'needs_water'
-  } else if (daysSinceLastInteraction <= frequencyDays * 0.5) {
-    health = 'thriving'
-  }
-
-  return {
-    growthStage,
-    health,
-    daysSinceCreated,
-    daysSinceLastInteraction,
-    totalInteractions: interactionCount,
-    interactionFrequencyScore,
-    longevityMonths,
-    isOverdue,
-    overdueByDays,
-  }
-}
-
-function getTimeAgoText(lastInteractionDate: string | null): string {
-  const days = getDaysSince(lastInteractionDate)
-
-  if (days === null) return 'Never caught-up'
+function getTimeAgoText(dateString: string | null | undefined): string {
+  const days = getDaysSince(dateString)
+  if (days === null) return 'Never connected'
   if (days === 0) return 'Today'
   if (days === 1) return 'Yesterday'
   if (days < 7) return `${days} days ago`
-  if (days < 14) return '1 week ago'
-  if (days < 30) return `${Math.floor(days / 7)} weeks ago`
-  if (days < 60) return '1 month ago'
-  return `${Math.floor(days / 30)} months ago`
+  if (days < 30) return `${Math.floor(days / 7)} week${Math.floor(days / 7) > 1 ? 's' : ''} ago`
+  return `${Math.floor(days / 30)} month${Math.floor(days / 30) > 1 ? 's' : ''} ago`
 }
 
-// Tree visualization component with growth stages
-function TreeVisualization({ stats, size = 'normal' }: { stats: TreeStats; size?: 'normal' | 'large' }) {
-  const sizeClass = size === 'large' ? 'w-24 h-24' : 'w-16 h-16'
-  const animationClass = stats.health === 'thriving' ? 'animate-sway' :
-                         stats.health === 'healthy' ? 'animate-sway-slow' : ''
+// Keep frequencyToDays reference to avoid unused-var warning
+void frequencyToDays
 
-  // Generate tree rings based on longevity
-  const ringCount = Math.min(5, Math.floor(stats.longevityMonths / 2))
-
-  return (
-    <div className={`relative ${sizeClass} flex items-center justify-center`}>
-      {/* Tree rings background (for larger trees) */}
-      {stats.growthStage !== 'seed' && stats.growthStage !== 'seedling' && (
-        <div className="absolute inset-0 flex items-center justify-center">
-          {Array.from({ length: ringCount }).map((_, i) => (
-            <div
-              key={i}
-              className="absolute rounded-full border border-muted-teal-200 animate-ring-pulse"
-              style={{
-                width: `${60 + i * 15}%`,
-                height: `${60 + i * 15}%`,
-                opacity: 0.2 + (i * 0.1),
-                animationDelay: `${i * 0.3}s`,
-              }}
-            />
-          ))}
-        </div>
-      )}
-
-      {/* Main tree emoji */}
-      <div className={`relative z-10 ${animationClass}`}>
-        {stats.growthStage === 'seed' && (
-          <span className={size === 'large' ? 'text-6xl' : 'text-4xl'}>🫘</span>
-        )}
-        {stats.growthStage === 'seedling' && (
-          <span className={size === 'large' ? 'text-6xl' : 'text-4xl'}>🌱</span>
-        )}
-        {stats.growthStage === 'sapling' && (
-          <span className={size === 'large' ? 'text-6xl' : 'text-4xl'}>🌿</span>
-        )}
-        {stats.growthStage === 'young' && (
-          <span className={size === 'large' ? 'text-6xl' : 'text-4xl'}>🌲</span>
-        )}
-        {stats.growthStage === 'mature' && (
-          <span className={size === 'large' ? 'text-6xl' : 'text-4xl'}>🌳</span>
-        )}
-        {stats.growthStage === 'ancient' && (
-          <span className={size === 'large' ? 'text-6xl' : 'text-4xl'}>🌴</span>
-        )}
-      </div>
-
-      {/* Health indicator overlay */}
-      {stats.health === 'wilting' && (
-        <div className="absolute -top-1 -right-1 animate-leaf-fall">
-          <span className="text-lg">🍂</span>
-        </div>
-      )}
-      {stats.health === 'thriving' && (
-        <div className="absolute -top-1 -right-1 animate-sparkle">
-          <span className="text-sm">✨</span>
-        </div>
-      )}
-      {stats.health === 'needs_water' && (
-        <div className="absolute -top-1 -right-1">
-          <span className="text-sm">💧</span>
-        </div>
-      )}
-    </div>
-  )
-}
-
-// Tree stats display for detail modal
-function TreeStatsDisplay({ stats }: { stats: TreeStats }) {
-  return (
-    <div className="space-y-4">
-      {/* Growth Progress */}
-      <div className="bg-lavender-50 dark:bg-dark-surface-raised rounded-xl p-4">
-        <div className="text-xs text-lavender-500 dark:text-dark-text-secondary uppercase tracking-wide mb-2">Growth Stage</div>
-        <div className="flex items-center gap-3">
-          <div className="flex gap-1">
-            {['seed', 'seedling', 'sapling', 'young', 'mature', 'ancient'].map((stage, i) => (
-              <div
-                key={stage}
-                className={`w-2 h-6 rounded-full transition-all ${
-                  i <= ['seed', 'seedling', 'sapling', 'young', 'mature', 'ancient'].indexOf(stats.growthStage)
-                    ? 'bg-muted-teal-500'
-                    : 'bg-lavender-200 dark:bg-dark-border'
-                }`}
-                style={{ height: `${12 + i * 4}px` }}
-              />
-            ))}
-          </div>
-          <div className="text-sm font-medium text-lavender-800 dark:text-dark-text-primary capitalize">
-            {stats.growthStage === 'seed' ? 'Seed' :
-             stats.growthStage === 'seedling' ? 'Seedling' :
-             stats.growthStage === 'sapling' ? 'Sapling' :
-             stats.growthStage === 'young' ? 'Young Tree' :
-             stats.growthStage === 'mature' ? 'Mature Tree' : 'Ancient Tree'}
-          </div>
-        </div>
-      </div>
-
-      {/* Tree Rings / Catch-up Stats */}
-      <div className="bg-muted-teal-50 rounded-xl p-4">
-        <div className="text-xs text-muted-teal-600 uppercase tracking-wide mb-3">Tree Rings</div>
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <div className="text-2xl font-bold text-muted-teal-700">{stats.totalInteractions}</div>
-            <div className="text-xs text-muted-teal-600">Total catch-ups</div>
-          </div>
-          <div>
-            <div className="text-2xl font-bold text-muted-teal-700">{stats.longevityMonths}</div>
-            <div className="text-xs text-muted-teal-600">Months together</div>
-          </div>
-        </div>
-
-        {/* Frequency meter */}
-        <div className="mt-4">
-          <div className="flex justify-between text-xs text-muted-teal-600 mb-1">
-            <span>Catch-up frequency</span>
-            <span>{Math.round(stats.interactionFrequencyScore)}%</span>
-          </div>
-          <div className="h-2 bg-muted-teal-200 rounded-full overflow-hidden">
-            <div
-              className="h-full bg-gradient-to-r from-muted-teal-400 to-muted-teal-600 rounded-full transition-all"
-              style={{ width: `${stats.interactionFrequencyScore}%` }}
-            />
-          </div>
-        </div>
-      </div>
-
-      {/* Health Status */}
-      <div className={`rounded-xl p-4 ${
-        stats.health === 'thriving' ? 'bg-tea-green-50' :
-        stats.health === 'healthy' ? 'bg-muted-teal-50' :
-        stats.health === 'needs_water' ? 'bg-amber-50' : 'bg-red-50'
-      }`}>
-        <div className={`text-xs uppercase tracking-wide mb-2 ${
-          stats.health === 'thriving' ? 'text-tea-green-600' :
-          stats.health === 'healthy' ? 'text-muted-teal-600' :
-          stats.health === 'needs_water' ? 'text-amber-600' : 'text-red-600'
-        }`}>Health Status</div>
-        <div className="flex items-center gap-2">
-          <span className="text-xl">
-            {stats.health === 'thriving' && '🌟'}
-            {stats.health === 'healthy' && '💚'}
-            {stats.health === 'needs_water' && '💧'}
-            {stats.health === 'wilting' && '🍂'}
-          </span>
-          <div>
-            <div className={`font-medium capitalize ${
-              stats.health === 'thriving' ? 'text-tea-green-700' :
-              stats.health === 'healthy' ? 'text-muted-teal-700' :
-              stats.health === 'needs_water' ? 'text-amber-700' : 'text-red-700'
-            }`}>
-              {stats.health === 'needs_water' ? 'Needs Water' : stats.health}
-            </div>
-            <div className={`text-xs ${
-              stats.health === 'thriving' ? 'text-tea-green-600' :
-              stats.health === 'healthy' ? 'text-muted-teal-600' :
-              stats.health === 'needs_water' ? 'text-amber-600' : 'text-red-600'
-            }`}>
-              {stats.isOverdue ? `${stats.overdueByDays} days overdue` : 'On track'}
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  )
-}
-
-// Habitat elements based on forest health
-function ForestHabitat({ healthScore, totalTrees }: { healthScore: number; totalTrees: number }) {
-  // healthScore: 0-100, higher = healthier forest
-  const showSun = healthScore > 60
-  const showRain = healthScore < 40 && totalTrees > 0
-  const showButterflies = healthScore > 80
-  const showMist = healthScore < 30
-
-  return (
-    <div className="absolute inset-0 pointer-events-none overflow-hidden">
-      {/* Sun */}
-      {showSun && (
-        <div className="absolute top-4 right-8 animate-sun-rays">
-          <div className="relative">
-            <span className="text-4xl">☀️</span>
-            <div className="absolute inset-0 bg-yellow-300/20 rounded-full blur-xl" />
-          </div>
-        </div>
-      )}
-
-      {/* Rain drops */}
-      {showRain && (
-        <>
-          {Array.from({ length: 5 }).map((_, i) => (
-            <div
-              key={i}
-              className="absolute text-xl animate-rain"
-              style={{
-                left: `${15 + i * 18}%`,
-                top: '-20px',
-                animationDelay: `${i * 0.3}s`,
-              }}
-            >
-              💧
-            </div>
-          ))}
-        </>
-      )}
-
-      {/* Butterflies */}
-      {showButterflies && (
-        <>
-          <div className="absolute top-20 left-10 animate-float text-2xl">🦋</div>
-          <div className="absolute top-32 right-16 animate-float-delayed text-xl">🦋</div>
-        </>
-      )}
-
-      {/* Mist for unhealthy forests */}
-      {showMist && (
-        <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-lavender-200/50 dark:from-dark-border/30 to-transparent" />
-      )}
-
-      {/* Ground moss/grass */}
-      <div className="absolute bottom-0 left-0 right-0 h-4 bg-gradient-to-t from-muted-teal-200/30 to-transparent" />
-    </div>
-  )
-}
-
-interface TreeCardProps {
-  connection: Connection
-  stats: TreeStats
-  onClick: () => void
-  // V2 Habit Engine props (optional)
-  strengthV2?: RelationshipStrength
-  ringTier?: 'core' | 'outer'
-  ringPosition?: number | null
-  showV2Badge?: boolean
-}
-
-function TreeCard({ connection, stats, onClick, strengthV2, ringTier, ringPosition, showV2Badge }: TreeCardProps) {
-  return (
-    <button
-      onClick={onClick}
-      className="flex flex-col items-center p-3 rounded-2xl hover:bg-white/70 dark:hover:bg-dark-surface-hover transition-all group relative"
-    >
-      {/* V2: Ring badge for core connections */}
-      {showV2Badge && ringTier === 'core' && (
-        <div className="absolute top-1 right-1">
-          <span className="text-xs" title={`Core #${ringPosition || ''}`}>💎</span>
-        </div>
-      )}
-
-      {/* Tree visualization */}
-      <div className="relative mb-2 transform group-hover:scale-110 transition-transform">
-        <TreeVisualization stats={stats} />
-      </div>
-
-      {/* Name */}
-      <div className="text-sm font-medium text-lavender-800 dark:text-dark-text-primary text-center mb-0.5 truncate w-full">
-        {connection.name}
-      </div>
-
-      {/* Status - use V2 strength if available */}
-      {showV2Badge && strengthV2 ? (
-        <div className={`text-xs text-center ${
-          strengthV2 === 'decaying' ? 'text-red-500' :
-          strengthV2 === 'thinning' ? 'text-orange-500' :
-          strengthV2 === 'stable' ? 'text-yellow-600' :
-          strengthV2 === 'strong' ? 'text-lime-600' : 'text-green-600'
-        }`}>
-          {strengthV2.charAt(0).toUpperCase() + strengthV2.slice(1)}
-        </div>
-      ) : (
-        <div className={`text-xs text-center ${
-          stats.health === 'wilting' ? 'text-red-500' :
-          stats.health === 'needs_water' ? 'text-amber-600' : 'text-lavender-500 dark:text-dark-text-secondary'
-        }`}>
-          {getTimeAgoText(connection.last_interaction_date)}
-        </div>
-      )}
-
-      {/* Overdue indicator */}
-      {stats.isOverdue && (
-        <div className="mt-1 text-xs text-amber-600 italic">
-          {stats.overdueByDays} days overdue
-        </div>
-      )}
-    </button>
-  )
-}
-
-export default function ForestPage() {
+export default function MyCirclesPage() {
   const [connections, setConnections] = useState<Connection[]>([])
-  const [interactionCounts, setInteractionCounts] = useState<Record<string, number>>({})
-  const [recentInteractions, setRecentInteractions] = useState<Record<string, Interaction[]>>({})
   const [loading, setLoading] = useState(true)
   const [selectedConnection, setSelectedConnection] = useState<Connection | null>(null)
   const [showCatchupModal, setShowCatchupModal] = useState(false)
-  const [strengthV2Enabled, setStrengthV2Enabled] = useState(false)
-  const [ringStructureEnabled, setRingStructureEnabled] = useState(false)
   const [connectionHealthMap, setConnectionHealthMap] = useState<Record<string, ConnectionHealthV2>>({})
   const router = useRouter()
   const supabase = createClient()
@@ -434,60 +59,16 @@ export default function ForestPage() {
       return
     }
 
-    // Fetch connections
     const { data: connectionsData } = await supabase
       .from('connections')
       .select('*')
       .eq('user_id', authUser.id)
       .order('name', { ascending: true })
 
-    // Fetch interaction counts for each connection
-    const { data: interactionsData } = await supabase
-      .from('interactions')
-      .select('connection_id')
-      .eq('user_id', authUser.id)
-
-    // Count interactions per connection
-    const counts: Record<string, number> = {}
-    if (interactionsData) {
-      for (const interaction of interactionsData) {
-        counts[interaction.connection_id] = (counts[interaction.connection_id] || 0) + 1
-      }
-    }
-
-    // Fetch recent interactions for detail view (last 5 per connection)
-    const { data: recentInteractionsData } = await supabase
-      .from('interactions')
-      .select('*')
-      .eq('user_id', authUser.id)
-      .order('interaction_date', { ascending: false })
-      .limit(100)
-
-    // Group recent interactions by connection (max 5 each)
-    const recentByConnection: Record<string, Interaction[]> = {}
-    if (recentInteractionsData) {
-      for (const interaction of recentInteractionsData) {
-        if (!recentByConnection[interaction.connection_id]) {
-          recentByConnection[interaction.connection_id] = []
-        }
-        if (recentByConnection[interaction.connection_id].length < 5) {
-          recentByConnection[interaction.connection_id].push(interaction as Interaction)
-        }
-      }
-    }
-
     setConnections(connectionsData || [])
-    setInteractionCounts(counts)
-    setRecentInteractions(recentByConnection)
 
-    // Check feature flags and fetch V2 health data
     try {
-      const [strengthEnabled, ringEnabled] = await Promise.all([
-        isFeatureEnabled('relationship_strength_v2', authUser.id),
-        isFeatureEnabled('ring_structure', authUser.id),
-      ])
-      setStrengthV2Enabled(strengthEnabled)
-      setRingStructureEnabled(ringEnabled)
+      const strengthEnabled = await isFeatureEnabled('relationship_strength_v2', authUser.id)
 
       if (strengthEnabled && connectionsData && connectionsData.length > 0) {
         const { data: healthData } = await (supabase as ReturnType<typeof createClient>)
@@ -504,7 +85,7 @@ export default function ForestPage() {
         }
       }
     } catch (error) {
-      console.error('Failed to fetch habit engine data:', error)
+      console.error('Failed to fetch health data:', error)
     }
 
     setLoading(false)
@@ -514,7 +95,7 @@ export default function ForestPage() {
     fetchData()
   }, [fetchData])
 
-  // Lock body scroll when detail modal is open
+  // Scroll lock when modal open
   useEffect(() => {
     if (selectedConnection) {
       document.body.style.overflow = 'hidden'
@@ -524,304 +105,299 @@ export default function ForestPage() {
     }
   }, [selectedConnection])
 
-  // Calculate stats for all connections
-  const treeStats = useMemo(() => {
-    const stats: Record<string, TreeStats> = {}
-    for (const conn of connections) {
-      stats[conn.id] = calculateTreeStats(conn, interactionCounts[conn.id] || 0)
-    }
-    return stats
-  }, [connections, interactionCounts])
+  // Enrich connections into CircleContact format
+  const circleContacts = useMemo<CircleContact[]>(() => {
+    return connections.map(conn => {
+      const health = connectionHealthMap[conn.id]
+      const daysSince = getDaysSince(conn.last_interaction_date)
+      const strength: RelationshipStrength =
+        health?.current_strength ??
+        deriveStrengthFromRecency(daysSince, conn.catchup_frequency)
+      const ringTier: RingTier | null = health?.ring_tier ?? null
+      return { id: conn.id, name: conn.name, strength, ringTier }
+    })
+  }, [connections, connectionHealthMap])
 
-  // Calculate forest health score (0-100)
-  const forestHealthScore = useMemo(() => {
-    if (connections.length === 0) return 50
+  const selectedCircle = selectedConnection
+    ? circleContacts.find(c => c.id === selectedConnection.id)
+    : null
 
-    let score = 0
-    for (const conn of connections) {
-      const stats = treeStats[conn.id]
-      if (stats.health === 'thriving') score += 100
-      else if (stats.health === 'healthy') score += 75
-      else if (stats.health === 'needs_water') score += 40
-      else score += 10
-    }
-    return Math.round(score / connections.length)
-  }, [connections, treeStats])
-
-  // Count by growth stage
-  const stageCounts = useMemo(() => {
-    const counts = { seed: 0, seedling: 0, sapling: 0, young: 0, mature: 0, ancient: 0 }
-    for (const conn of connections) {
-      counts[treeStats[conn.id]?.growthStage || 'seed']++
-    }
-    return counts
-  }, [connections, treeStats])
-
-  // Count by health
-  const healthCounts = useMemo(() => {
-    const counts = { thriving: 0, healthy: 0, needs_water: 0, wilting: 0 }
-    for (const conn of connections) {
-      counts[treeStats[conn.id]?.health || 'healthy']++
-    }
-    return counts
-  }, [connections, treeStats])
-
-  const selectedStats = selectedConnection ? treeStats[selectedConnection.id] : null
+  const circleColor = selectedCircle
+    ? (selectedCircle.strength === 'thinning' || selectedCircle.strength === 'decaying'
+      ? '#C46A4A'
+      : getContactPalette(selectedCircle.name).inner)
+    : '#5F7A6A'
 
   if (loading) {
     return (
-      <main className="min-h-screen bg-lavender-50 dark:bg-dark-bg flex items-center justify-center">
-        <div className="text-lavender-400 dark:text-dark-text-tertiary">Loading your forest...</div>
+      <main
+        style={{
+          minHeight: '100vh',
+          background: '#0C0D10',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
+        <span style={{ color: 'rgba(255,255,255,0.30)', fontSize: 14 }}>
+          Loading your circles...
+        </span>
       </main>
     )
   }
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-lavender-50 via-muted-teal-50/30 to-lavender-50 dark:bg-dark-bg dark:from-dark-bg dark:via-dark-bg dark:to-dark-bg relative">
-      <ForestHabitat healthScore={forestHealthScore} totalTrees={connections.length} />
-
-      <div className="max-w-2xl mx-auto px-6 pt-8 pb-safe relative z-10">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <Link
-            href="/"
-            className="text-lavender-400 dark:text-dark-text-tertiary hover:text-lavender-600 dark:hover:text-dark-text-secondary text-sm transition-colors flex items-center gap-1"
-          >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-            </svg>
-            Today
-          </Link>
-          <div className="text-muted-teal-500 font-semibold text-lg">Your Ringur Forest</div>
-          <div className="w-12" />
-        </div>
-
-        {/* Forest Health Overview */}
-        <div className="bg-white/80 dark:bg-dark-surface/80 backdrop-blur rounded-2xl p-6 shadow-sm border border-lavender-100 dark:border-dark-border mb-6">
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <h2 className="text-lg font-semibold text-lavender-800 dark:text-dark-text-primary">Forest Health</h2>
-              <p className="text-sm text-lavender-500 dark:text-dark-text-secondary">{connections.length} trees in your forest</p>
-            </div>
-            <div className="text-right">
-              <div className={`text-3xl font-bold ${
-                forestHealthScore > 70 ? 'text-tea-green-600' :
-                forestHealthScore > 40 ? 'text-muted-teal-600' : 'text-amber-600'
-              }`}>
-                {forestHealthScore}%
-              </div>
-              <div className="text-xs text-lavender-500 dark:text-dark-text-secondary">
-                {forestHealthScore > 70 ? 'Flourishing' :
-                 forestHealthScore > 40 ? 'Growing' : 'Needs care'}
-              </div>
-            </div>
-          </div>
-
-          {/* Health bar */}
-          <div className="h-3 bg-lavender-100 dark:bg-dark-border rounded-full overflow-hidden mb-4">
-            <div
-              className={`h-full rounded-full transition-all ${
-                forestHealthScore > 70 ? 'bg-gradient-to-r from-tea-green-400 to-tea-green-600' :
-                forestHealthScore > 40 ? 'bg-gradient-to-r from-muted-teal-400 to-muted-teal-600' :
-                'bg-gradient-to-r from-amber-400 to-amber-600'
-              }`}
-              style={{ width: `${forestHealthScore}%` }}
-            />
-          </div>
-
-          {/* Stats grid */}
-          <div className="grid grid-cols-4 gap-3">
-            <div className="text-center p-2 bg-tea-green-50 rounded-lg">
-              <div className="text-lg font-semibold text-tea-green-600">{healthCounts.thriving}</div>
-              <div className="text-xs text-tea-green-600">Thriving</div>
-            </div>
-            <div className="text-center p-2 bg-muted-teal-50 rounded-lg">
-              <div className="text-lg font-semibold text-muted-teal-600">{healthCounts.healthy}</div>
-              <div className="text-xs text-muted-teal-600">Healthy</div>
-            </div>
-            <div className="text-center p-2 bg-amber-50 rounded-lg">
-              <div className="text-lg font-semibold text-amber-600">{healthCounts.needs_water}</div>
-              <div className="text-xs text-amber-600">Needs water</div>
-            </div>
-            <div className="text-center p-2 bg-red-50 rounded-lg">
-              <div className="text-lg font-semibold text-red-500">{healthCounts.wilting}</div>
-              <div className="text-xs text-red-500">Wilting</div>
-            </div>
-          </div>
-        </div>
-
-        {/* Growth Stages Legend */}
-        <div className="bg-white/80 dark:bg-dark-surface/80 backdrop-blur rounded-2xl p-4 shadow-sm border border-lavender-100 dark:border-dark-border mb-6">
-          <div className="text-xs text-lavender-500 dark:text-dark-text-secondary uppercase tracking-wide mb-3">Growth Stages</div>
-          <div className="flex justify-between items-end">
-            {[
-              { stage: 'seed', emoji: '🫘', label: 'Seed', count: stageCounts.seed },
-              { stage: 'seedling', emoji: '🌱', label: 'Seedling', count: stageCounts.seedling },
-              { stage: 'sapling', emoji: '🌿', label: 'Sapling', count: stageCounts.sapling },
-              { stage: 'young', emoji: '🌲', label: 'Young', count: stageCounts.young },
-              { stage: 'mature', emoji: '🌳', label: 'Mature', count: stageCounts.mature },
-              { stage: 'ancient', emoji: '🌴', label: 'Ancient', count: stageCounts.ancient },
-            ].map((item, i) => (
-              <div key={item.stage} className="flex flex-col items-center">
-                <span className={`text-${16 + i * 4}px mb-1`} style={{ fontSize: `${16 + i * 4}px` }}>
-                  {item.emoji}
-                </span>
-                <div className="text-xs text-lavender-600 dark:text-dark-text-secondary">{item.count}</div>
-                <div className="text-[10px] text-lavender-400 dark:text-dark-text-tertiary">{item.label}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Forest Grid */}
-        {connections.length === 0 ? (
-          <div className="bg-white/80 dark:bg-dark-surface/80 backdrop-blur rounded-2xl p-8 shadow-sm border border-lavender-100 dark:border-dark-border text-center">
-            <div className="text-4xl mb-4">🌿</div>
-            <h2 className="text-lg font-semibold text-lavender-800 dark:text-dark-text-primary mb-2">
-              Your forest is empty
-            </h2>
-            <p className="text-lavender-500 dark:text-dark-text-secondary mb-6">
-              Add connections to start growing your relationship forest.
-            </p>
-            <Link
-              href="/"
-              className="inline-block py-3 px-6 bg-muted-teal-500 hover:bg-muted-teal-600 text-white font-medium rounded-xl transition-colors"
-            >
-              Go to Today
-            </Link>
-          </div>
-        ) : (
-          <div className="bg-white/60 dark:bg-dark-surface/80 backdrop-blur rounded-2xl p-4 shadow-sm border border-lavender-100 dark:border-dark-border">
-            <div className="grid grid-cols-3 sm:grid-cols-4 gap-1">
-              {connections.map((connection) => {
-                const health = connectionHealthMap[connection.id]
-                return (
-                  <TreeCard
-                    key={connection.id}
-                    connection={connection}
-                    stats={treeStats[connection.id]}
-                    onClick={() => setSelectedConnection(connection)}
-                    strengthV2={health?.current_strength}
-                    ringTier={health?.ring_tier}
-                    ringPosition={health?.ring_position}
-                    showV2Badge={strengthV2Enabled}
-                  />
-                )
-              })}
-            </div>
-          </div>
-        )}
+    <main style={{ minHeight: '100vh', background: '#0C0D10' }}>
+      {/* Header */}
+      <div
+        style={{
+          height: 56,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          position: 'relative',
+          borderBottom: '1px solid rgba(255,255,255,0.06)',
+          background: '#0C0D10',
+        }}
+      >
+        <Link
+          href="/"
+          style={{
+            position: 'absolute',
+            left: 20,
+            display: 'flex',
+            alignItems: 'center',
+            gap: 4,
+            color: 'rgba(255,255,255,0.38)',
+            fontSize: 13,
+            textDecoration: 'none',
+          }}
+        >
+          <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+          </svg>
+          Today
+        </Link>
+        <span
+          style={{
+            fontSize: 15,
+            fontWeight: 600,
+            color: 'rgba(246,245,243,0.90)',
+            letterSpacing: '0.01em',
+          }}
+        >
+          My Circles
+        </span>
       </div>
 
-      {/* Connection Detail Modal */}
-      {selectedConnection && selectedStats && (
-        <div className="fixed inset-0 bg-black/30 dark:bg-black/60 backdrop-blur-sm flex items-end sm:items-center justify-center z-50 px-4 pt-4 pb-safe">
-          <div className="bg-white dark:bg-dark-surface rounded-2xl w-full max-w-sm shadow-xl overflow-hidden">
-            {/* Header with tree visualization */}
-            <div className={`p-6 ${
-              selectedStats.health === 'thriving' ? 'bg-gradient-to-br from-tea-green-100 to-muted-teal-100' :
-              selectedStats.health === 'healthy' ? 'bg-gradient-to-br from-muted-teal-100 to-lavender-100' :
-              selectedStats.health === 'needs_water' ? 'bg-gradient-to-br from-amber-100 to-lavender-100' :
-              'bg-gradient-to-br from-red-100 to-lavender-100'
-            }`}>
-              <div className="flex items-start justify-between">
-                <div className="flex items-center gap-4">
-                  <TreeVisualization stats={selectedStats} size="large" />
-                  <div>
-                    <h2 className="text-xl font-semibold text-lavender-800 dark:text-dark-text-primary">
-                      {selectedConnection.name}
-                    </h2>
-                    <div className="text-sm text-lavender-600 dark:text-dark-text-secondary">
-                      {getTimeAgoText(selectedConnection.last_interaction_date)}
-                    </div>
-                  </div>
-                </div>
-                <button
-                  onClick={() => setSelectedConnection(null)}
-                  className="text-lavender-400 dark:text-dark-text-tertiary hover:text-lavender-600 dark:hover:text-dark-text-secondary transition-colors"
-                >
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
-              </div>
-            </div>
+      {/* Empty state */}
+      {connections.length === 0 ? (
+        <div
+          style={{
+            height: 'calc(100vh - 56px)',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 14,
+            padding: '0 32px',
+          }}
+        >
+          <div
+            style={{
+              width: 64,
+              height: 64,
+              borderRadius: '50%',
+              background: 'rgba(95,122,106,0.12)',
+              border: '1px solid rgba(95,122,106,0.22)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            <span style={{ fontSize: 13, fontWeight: 600, color: 'rgba(95,122,106,0.70)' }}>Me</span>
+          </div>
+          <p
+            style={{
+              fontSize: 14,
+              color: 'rgba(255,255,255,0.35)',
+              textAlign: 'center',
+              maxWidth: 260,
+              lineHeight: 1.6,
+              margin: 0,
+            }}
+          >
+            Add connections to see your circles.
+          </p>
+          <Link
+            href="/"
+            style={{ fontSize: 13, color: '#5F7A6A', textDecoration: 'none', marginTop: 4 }}
+          >
+            Go back
+          </Link>
+        </div>
+      ) : (
+        <CirclesView
+          contacts={circleContacts}
+          onTapContact={(id) => {
+            const conn = connections.find(c => c.id === id)
+            if (conn) setSelectedConnection(conn)
+          }}
+        />
+      )}
 
-            {/* Stats */}
-            <div className="p-6">
-              {/* V2: Relationship Strength Card */}
-              {strengthV2Enabled && connectionHealthMap[selectedConnection.id] && (
-                <div className="mb-4">
-                  <RelationshipStrengthCard
-                    strength={connectionHealthMap[selectedConnection.id].current_strength}
-                    daysSinceAction={connectionHealthMap[selectedConnection.id].days_since_action}
-                    connectionName={selectedConnection.name}
-                  />
-                  {ringStructureEnabled && connectionHealthMap[selectedConnection.id].ring_tier && (
-                    <div className="mt-2">
-                      <RingBadge
-                        tier={connectionHealthMap[selectedConnection.id].ring_tier}
-                        position={connectionHealthMap[selectedConnection.id].ring_position}
-                      />
-                    </div>
-                  )}
-                </div>
-              )}
+      {/* Contact detail bottom sheet */}
+      {selectedConnection && (
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(0,0,0,0.55)',
+            backdropFilter: 'blur(6px)',
+            display: 'flex',
+            alignItems: 'flex-end',
+            justifyContent: 'center',
+            zIndex: 50,
+          }}
+          onClick={() => setSelectedConnection(null)}
+        >
+          <div
+            style={{
+              background: '#161821',
+              borderRadius: '20px 20px 0 0',
+              width: '100%',
+              maxWidth: 480,
+              padding: '20px 24px 40px',
+              border: '1px solid rgba(255,255,255,0.08)',
+              borderBottom: 'none',
+            }}
+            onClick={e => e.stopPropagation()}
+          >
+            {/* Handle */}
+            <div
+              style={{
+                width: 36,
+                height: 4,
+                borderRadius: 2,
+                background: 'rgba(255,255,255,0.14)',
+                margin: '0 auto 20px',
+              }}
+            />
 
-              <TreeStatsDisplay stats={selectedStats} />
-
-              {/* Catch-up frequency */}
-              <div className="mt-4 p-3 bg-lavender-50 dark:bg-dark-surface-raised rounded-xl">
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-lavender-600 dark:text-dark-text-secondary">Catch-up frequency</span>
-                  <span className="text-sm font-medium text-lavender-800 dark:text-dark-text-primary">
-                    {selectedConnection.catchup_frequency === 'daily' && 'Daily'}
-                    {selectedConnection.catchup_frequency === 'weekly' && 'Weekly'}
-                    {selectedConnection.catchup_frequency === 'biweekly' && 'Every 2 weeks'}
-                    {selectedConnection.catchup_frequency === 'monthly' && 'Monthly'}
-                    {selectedConnection.catchup_frequency === 'quarterly' && 'Every 3 months'}
-                    {selectedConnection.catchup_frequency === 'biannually' && 'Every 6 months'}
-                    {selectedConnection.catchup_frequency === 'annually' && 'Annually'}
-                  </span>
-                </div>
-              </div>
-
-              {/* Recent Catch-ups */}
-              {recentInteractions[selectedConnection.id] && recentInteractions[selectedConnection.id].length > 0 && (
-                <div className="mt-4">
-                  <div className="text-xs text-lavender-500 dark:text-dark-text-secondary uppercase tracking-wide mb-2">Recent Catch-ups</div>
-                  <div className="space-y-2">
-                    {recentInteractions[selectedConnection.id].slice(0, 3).map((interaction) => (
-                      <div key={interaction.id} className="flex items-center gap-2 text-sm bg-white dark:bg-dark-surface-raised p-2 rounded-lg">
-                        <span>
-                          {interaction.interaction_type === 'call' && '📞'}
-                          {interaction.interaction_type === 'text' && '💬'}
-                          {interaction.interaction_type === 'in_person' && '🤝'}
-                          {interaction.interaction_type === 'other' && '✨'}
-                        </span>
-                        <span className="text-lavender-600 dark:text-dark-text-secondary flex-1">
-                          {interaction.interaction_type === 'call' && 'Call'}
-                          {interaction.interaction_type === 'text' && 'Text'}
-                          {interaction.interaction_type === 'in_person' && 'In person'}
-                          {interaction.interaction_type === 'other' && 'Other'}
-                        </span>
-                        <span className="text-xs text-lavender-400 dark:text-dark-text-tertiary">
-                          {new Date(interaction.interaction_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* CTA */}
-              <button
-                onClick={() => setShowCatchupModal(true)}
-                className="mt-6 w-full py-3 px-4 bg-muted-teal-500 hover:bg-muted-teal-600 text-white font-medium rounded-xl transition-colors text-center"
+            {/* Contact header */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 16 }}>
+              <div
+                style={{
+                  width: 48,
+                  height: 48,
+                  borderRadius: '50%',
+                  background: circleColor,
+                  opacity: 0.85,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flexShrink: 0,
+                }}
               >
-                Catch-up
+                <span style={{ fontSize: 14, fontWeight: 600, color: 'rgba(246,245,243,0.95)' }}>
+                  {selectedConnection.name
+                    .split(' ')
+                    .filter(Boolean)
+                    .slice(0, 2)
+                    .map((w: string) => w[0].toUpperCase())
+                    .join('')}
+                </span>
+              </div>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div
+                  style={{
+                    fontSize: 17,
+                    fontWeight: 600,
+                    color: 'rgba(246,245,243,0.95)',
+                    whiteSpace: 'nowrap',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                  }}
+                >
+                  {selectedConnection.name}
+                </div>
+                <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.38)', marginTop: 2 }}>
+                  {getTimeAgoText(selectedConnection.last_interaction_date)}
+                </div>
+              </div>
+              <button
+                onClick={() => setSelectedConnection(null)}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  cursor: 'pointer',
+                  padding: 6,
+                  color: 'rgba(255,255,255,0.28)',
+                  flexShrink: 0,
+                }}
+              >
+                <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
               </button>
             </div>
+
+            {/* Strength + tier pill */}
+            {selectedCircle && (
+              <div
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 6,
+                  background: 'rgba(255,255,255,0.05)',
+                  border: '1px solid rgba(255,255,255,0.08)',
+                  borderRadius: 20,
+                  padding: '5px 12px',
+                  marginBottom: 20,
+                  fontSize: 12,
+                  color: 'rgba(246,245,243,0.60)',
+                }}
+              >
+                <span
+                  style={{
+                    width: 6,
+                    height: 6,
+                    borderRadius: '50%',
+                    background:
+                      selectedCircle.strength === 'flourishing' ? '#5F7A6A' :
+                      selectedCircle.strength === 'strong' ? '#4A7A96' :
+                      selectedCircle.strength === 'stable' ? '#7A7A6A' :
+                      '#C46A4A',
+                    flexShrink: 0,
+                  }}
+                />
+                {selectedCircle.strength.charAt(0).toUpperCase() + selectedCircle.strength.slice(1)}
+                {selectedCircle.ringTier && (
+                  <span style={{ opacity: 0.55 }}>
+                    · {selectedCircle.ringTier === 'core' ? 'Core' : 'Outer'}
+                  </span>
+                )}
+              </div>
+            )}
+
+            {/* CTA */}
+            <button
+              onClick={() => setShowCatchupModal(true)}
+              style={{
+                width: '100%',
+                padding: '14px',
+                background: '#5F7A6A',
+                color: 'rgba(246,245,243,0.97)',
+                border: 'none',
+                borderRadius: 12,
+                fontSize: 15,
+                fontWeight: 600,
+                cursor: 'pointer',
+                letterSpacing: '0.01em',
+              }}
+            >
+              Catch-up
+            </button>
           </div>
         </div>
       )}
@@ -834,7 +410,7 @@ export default function ForestPage() {
           onClose={() => setShowCatchupModal(false)}
           onSuccess={() => {
             setShowCatchupModal(false)
-            // Optionally close the detail modal too
+            fetchData()
           }}
         />
       )}
