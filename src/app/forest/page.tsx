@@ -115,16 +115,8 @@ export default function MyCirclesPage() {
 
   if (loading) {
     return (
-      <main
-        style={{
-          minHeight: '100vh',
-          background: '#0C0D10',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}
-      >
-        <span style={{ color: 'rgba(255,255,255,0.30)', fontSize: 14 }}>
+      <main className="bg-bone dark:bg-dark-bg min-h-screen flex items-center justify-center">
+        <span className="text-text-tertiary dark:text-dark-text-tertiary text-sm">
           Loading your circles...
         </span>
       </main>
@@ -132,28 +124,26 @@ export default function MyCirclesPage() {
   }
 
   return (
-    <main style={{ minHeight: '100vh', background: '#0C0D10' }}>
+    <main className="bg-bone dark:bg-dark-bg min-h-screen">
       {/* Header */}
-      <div
+      <div className="bg-bone dark:bg-dark-bg border-b border-bone-warm dark:border-dark-border"
         style={{
           height: 56,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           position: 'relative',
-          borderBottom: '1px solid rgba(255,255,255,0.06)',
-          background: '#0C0D10',
         }}
       >
         <Link
           href="/"
+          className="text-text-tertiary dark:text-dark-text-tertiary"
           style={{
             position: 'absolute',
             left: 20,
             display: 'flex',
             alignItems: 'center',
             gap: 4,
-            color: 'rgba(255,255,255,0.38)',
             fontSize: 13,
             textDecoration: 'none',
           }}
@@ -164,10 +154,10 @@ export default function MyCirclesPage() {
           Today
         </Link>
         <span
+          className="text-obsidian dark:text-dark-text-primary"
           style={{
             fontSize: 15,
             fontWeight: 600,
-            color: 'rgba(246,245,243,0.90)',
             letterSpacing: '0.01em',
           }}
         >
@@ -202,15 +192,8 @@ export default function MyCirclesPage() {
           >
             <span style={{ fontSize: 13, fontWeight: 600, color: 'rgba(95,122,106,0.70)' }}>Me</span>
           </div>
-          <p
-            style={{
-              fontSize: 14,
-              color: 'rgba(255,255,255,0.35)',
-              textAlign: 'center',
-              maxWidth: 260,
-              lineHeight: 1.6,
-              margin: 0,
-            }}
+          <p className="text-text-tertiary dark:text-dark-text-tertiary"
+            style={{ fontSize: 14, textAlign: 'center', maxWidth: 260, lineHeight: 1.6, margin: 0 }}
           >
             Add connections to see your circles.
           </p>
@@ -234,11 +217,10 @@ export default function MyCirclesPage() {
       {/* Contact detail bottom sheet */}
       {selectedConnection && (
         <div
+          className="bg-obsidian/40 dark:bg-black/60 backdrop-blur-sm"
           style={{
             position: 'fixed',
             inset: 0,
-            background: 'rgba(0,0,0,0.55)',
-            backdropFilter: 'blur(6px)',
             display: 'flex',
             alignItems: 'flex-end',
             justifyContent: 'center',
@@ -247,26 +229,20 @@ export default function MyCirclesPage() {
           onClick={() => setSelectedConnection(null)}
         >
           <div
+            className="bg-white dark:bg-dark-surface border border-bone-warm dark:border-dark-border"
             style={{
-              background: '#161821',
               borderRadius: '20px 20px 0 0',
               width: '100%',
               maxWidth: 480,
               padding: '20px 24px 40px',
-              border: '1px solid rgba(255,255,255,0.08)',
               borderBottom: 'none',
             }}
             onClick={e => e.stopPropagation()}
           >
             {/* Handle */}
             <div
-              style={{
-                width: 36,
-                height: 4,
-                borderRadius: 2,
-                background: 'rgba(255,255,255,0.14)',
-                margin: '0 auto 20px',
-              }}
+              className="bg-bone-warm dark:bg-dark-surface-raised"
+              style={{ width: 36, height: 4, borderRadius: 2, margin: '0 auto 20px' }}
             />
 
             {/* Contact header */}
@@ -295,10 +271,10 @@ export default function MyCirclesPage() {
               </div>
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div
+                  className="text-obsidian dark:text-dark-text-primary"
                   style={{
                     fontSize: 17,
                     fontWeight: 600,
-                    color: 'rgba(246,245,243,0.95)',
                     whiteSpace: 'nowrap',
                     overflow: 'hidden',
                     textOverflow: 'ellipsis',
@@ -306,20 +282,16 @@ export default function MyCirclesPage() {
                 >
                   {selectedConnection.name}
                 </div>
-                <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.38)', marginTop: 2 }}>
+                <div className="text-text-tertiary dark:text-dark-text-tertiary"
+                  style={{ fontSize: 12, marginTop: 2 }}
+                >
                   {getTimeAgoText(selectedConnection.last_interaction_date)}
                 </div>
               </div>
               <button
                 onClick={() => setSelectedConnection(null)}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  cursor: 'pointer',
-                  padding: 6,
-                  color: 'rgba(255,255,255,0.28)',
-                  flexShrink: 0,
-                }}
+                className="text-text-tertiary dark:text-dark-text-tertiary"
+                style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 6, flexShrink: 0 }}
               >
                 <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -327,20 +299,18 @@ export default function MyCirclesPage() {
               </button>
             </div>
 
-            {/* Strength + tier pill */}
+            {/* Strength pill */}
             {selectedCircle && (
               <div
+                className="bg-bone-warm dark:bg-dark-surface-raised border border-bone-warm dark:border-dark-border text-text-secondary dark:text-dark-text-secondary"
                 style={{
                   display: 'inline-flex',
                   alignItems: 'center',
                   gap: 6,
-                  background: 'rgba(255,255,255,0.05)',
-                  border: '1px solid rgba(255,255,255,0.08)',
                   borderRadius: 20,
                   padding: '5px 12px',
                   marginBottom: 20,
                   fontSize: 12,
-                  color: 'rgba(246,245,243,0.60)',
                 }}
               >
                 <span

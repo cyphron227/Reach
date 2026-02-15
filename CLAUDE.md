@@ -182,7 +182,7 @@ bg-bone dark:bg-dark-text-primary
 - Added terracotta accent color for high-contrast CTAs
 - Connection ring visualization added with dual SVG rings + recency-based dynamics
 - Dark mode ("Deep Night") added with full component coverage
-- Legacy colors (lavender, tea-green, muted-teal) retained for forest page only
+- Legacy colors (lavender, tea-green, muted-teal) are now **fully unused** — the `/forest` page was replaced by "My Circles" which uses pure dark inline styles (#0C0D10)
 
 ### Safe Area / Android Nav Bar
 All page content containers use `pb-safe` to prevent content from being hidden behind Android
@@ -259,7 +259,49 @@ The app uses 3 unified interaction types across all surfaces:
 - **Add/Edit Connection**: Preferred messaging app selector (Text/WhatsApp/Email)
 - **EscalationNudge**: Moss-light background with left border accent (nudge card pattern)
 - **PendingCatchupPrompt**: Terracotta-light background with left border accent (nudge card pattern)
+- **CirclesView**: Physics-based "My Circles" orbital visualization (see below)
 - **Providers**: Client wrapper in layout.tsx, provides ThemeProvider context to the app
+
+## My Circles (`/forest` route)
+
+The "My Circles" page (`src/app/forest/page.tsx`) replaced the old Forest page. URL stays `/forest`.
+
+### What it does
+Renders all connections as circles floating around a central "Me" circle. Contacts gravitate
+toward Me based on contact frequency — daily contacts cluster closest, annual contacts sit furthest out.
+Tap a circle → dark bottom sheet with strength pill + Catch-up CTA.
+
+### CirclesView component (`src/components/CirclesView.tsx`)
+
+**Interface:**
+```typescript
+export interface CircleContact {
+  id: string
+  name: string
+  strength: RelationshipStrength         // flourishing | strong | stable | thinning | decaying
+  catchupFrequency: CatchupFrequency     // daily | weekly | biweekly | monthly | quarterly | biannually | annually
+}
+```
+
+**Physics layout** (`runPhysics` — runs synchronously in `useEffect` after mount):
+- 300 iterations of force-directed simulation (O(N²) per iter, <10ms for ≤50 contacts)
+- Each contact has a `targetR` = `FREQ_BASE_RADIUS[freq] + STRENGTH_RADIUS_MOD[strength]`
+  - Frequency radii (px): daily=75, weekly=92, biweekly=107, monthly=122, quarterly=137, biannually=152, annually=165
+  - Strength modifier (px): flourishing=−8, strong=−4, stable=0, thinning=+6, decaying=+10
+- Forces per iteration: radial spring (0.18), centre exclusion (ME_R+size/2+6), boundary wall, circle-circle collision (gap = r_i + r_j + 10px), damping (0.78)
+
+**Circle sizes (diameter by strength):** flourishing=52, strong=46, stable=40, thinning=34, decaying=28
+
+**Names inside circles:** first name only, `fontSize = clamp(size×0.22, 7, 12)`, ellipsis on overflow
+
+**Thinning/decaying** contacts use flat warning colour (#C46A4A); others use `getContactPalette(name)`
+
+**Settle animation:** circles start at scale(0)/opacity:0, transition to computed position at 150ms with 80ms stagger per circle, `700ms cubic-bezier(0.4,0,0.2,1)`
+
+**Independent drift:** after settling, each contact oscillates in a ~8px radius using sine waves with unique phase/speed derived from name hash. 33ms interval, `transition: 'none'` during drift so updates are instantaneous.
+
+### Android splash screen
+`android/app/src/main/res/values/colors.xml` was added (Feb 2026) to define `@color/colorPrimary` (#0F2A1D) referenced by `splash_screen.xml`. Matches `backgroundColor` in `capacitor.config.ts`.
 
 ## Feature Flags
 

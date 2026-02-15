@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef, useCallback } from 'react'
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { RelationshipStrength } from '@/types/habitEngine'
 import { CatchupFrequency } from '@/types/database'
 import { getContactPalette } from '@/lib/ringCalculations'
@@ -166,12 +166,31 @@ function runPhysics(contacts: CircleContact[], maxR: number): SettledPos[] {
   return nodes.map(n => ({ id: n.id, x: n.x, y: n.y }))
 }
 
+// Pre-compute per-contact drift params from name hash so the origin offset can be subtracted
+function getDriftParams(name: string) {
+  const h = hashName(name)
+  const phaseX = (h % 628) / 100
+  const phaseY = ((h * 7) % 628) / 100
+  const speedX = 0.008 + (h % 4) * 0.002
+  const speedY = 0.006 + ((h * 3) % 4) * 0.002
+  // origin offset — the value of the sine at tick=0, subtracted each frame so drift always starts at 0
+  const originDx = Math.sin(phaseX) * 8
+  const originDy = Math.cos(phaseY) * 8
+  return { phaseX, phaseY, speedX, speedY, originDx, originDy }
+}
+
 export default function CirclesView({ contacts, onTapContact }: CirclesViewProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const [positions, setPositions] = useState<SettledPos[]>([])
   const [settled, setSettled] = useState(false)
   const [driftStarted, setDriftStarted] = useState(false)
   const [driftTick, setDriftTick] = useState(0)
+
+  // Pre-compute drift params per contact (stable across ticks)
+  const driftParams = useMemo(
+    () => Object.fromEntries(contacts.map(c => [c.id, getDriftParams(c.name)])),
+    [contacts]
+  )
 
   // Run physics simulation once container dimensions are known
   useEffect(() => {
@@ -209,30 +228,28 @@ export default function CirclesView({ contacts, onTapContact }: CirclesViewProps
     return () => clearInterval(id)
   }, [driftStarted])
 
-  const getDriftOffset = useCallback((name: string) => {
+  const getDriftOffset = useCallback((contactId: string) => {
     if (!driftStarted) return { dx: 0, dy: 0 }
-    const h = hashName(name)
-    const phaseX = (h % 628) / 100
-    const phaseY = ((h * 7) % 628) / 100
-    const speedX = 0.008 + (h % 4) * 0.002
-    const speedY = 0.006 + ((h * 3) % 4) * 0.002
+    const p = driftParams[contactId]
+    if (!p) return { dx: 0, dy: 0 }
     const amp = 8
     return {
-      dx: Math.sin(driftTick * speedX + phaseX) * amp,
-      dy: Math.cos(driftTick * speedY + phaseY) * amp,
+      // Subtract origin so drift starts exactly at settled position (no jump)
+      dx: Math.sin(driftTick * p.speedX + p.phaseX) * amp - p.originDx,
+      dy: Math.cos(driftTick * p.speedY + p.phaseY) * amp - p.originDy,
     }
-  }, [driftStarted, driftTick])
+  }, [driftStarted, driftTick, driftParams])
 
   const posMap = new Map(positions.map(p => [p.id, p]))
 
   return (
     <div
       ref={containerRef}
+      className="bg-bone dark:bg-dark-bg"
       style={{
         position: 'relative',
         width: '100%',
         height: 'calc(100dvh - 56px)',
-        background: '#0C0D10',
         overflow: 'hidden',
       }}
     >
@@ -241,7 +258,7 @@ export default function CirclesView({ contacts, onTapContact }: CirclesViewProps
         const pos = posMap.get(contact.id)
         const settled_x = pos?.x ?? 0
         const settled_y = pos?.y ?? 0
-        const { dx, dy } = getDriftOffset(contact.name)
+        const { dx, dy } = getDriftOffset(contact.id)
         const x = settled_x + dx
         const y = settled_y + dy
 
@@ -288,7 +305,7 @@ export default function CirclesView({ contacts, onTapContact }: CirclesViewProps
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                border: '1.5px solid rgba(255,255,255,0.15)',
+                border: '1.5px solid rgba(0,0,0,0.10)',
                 boxShadow: `0 0 0 3px ${color}28`,
                 overflow: 'hidden',
               }}
